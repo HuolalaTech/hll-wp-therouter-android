@@ -201,7 +201,7 @@ TheRouter
 <img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png" width="40%" alt="HUOLALA mobile technology team" />
 
 加入 【TheRouter】 官方微信群：  
-<img src="https://kymjs.com/therouter/wx/therouter.jpg" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
+<img src="https://kymjs.com/therouter/wx/therouter_wx.jpg" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
 
 ### 七、开源协议
 
