@@ -22,7 +22,7 @@ TheRouter 核心功能具备四大能力：
 
 **更多详细使用文档请查看项目 wiki**：[Wiki](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
 
-**框架介绍，可查看货拉拉移动技术分享的博客文章**：[https://juejin.cn/post/7139378777268125726](https://juejin.cn/post/7139378777268125726)
+**框架介绍，可查看货拉拉移动技术分享的博客文章**：[https://juejin.cn/post/7139718803637665822](https://juejin.cn/post/7139718803637665822)
 
 #### 2.1 Gradle 引入
 
