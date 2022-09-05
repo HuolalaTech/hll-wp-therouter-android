@@ -9,24 +9,26 @@ Android 动态路由框架：TheRouter
 
 TheRouter 核心功能具备四大能力：  
 
-*  页面导航跳转能力（[Navigator](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator.md)） 页面跳转能力介绍 
-*  跨模块依赖注入能力（[ServiceProvider](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ServiceProvider.md)）跨模块依赖注入 
-*  单模块自动初始化能力 （[FlowTaskExecutor](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor.md)）单模块自动初始化能力介绍 
-*  动态化能力 ([ActionManager](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ActionManager.md)) 动态化能力支持 
+* 页面导航跳转能力（[Navigator](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)） 页面跳转能力介绍 
+* 跨模块依赖注入能力（[ServiceProvider](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ServiceProvider)）跨模块依赖注入 
+* 单模块自动初始化能力 （[FlowTaskExecutor](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor)）单模块自动初始化能力介绍 
+* 动态化能力 ([ActionManager](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ActionManager)) 动态化能力支持 
 
-*  Demo: [Demo gif](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/demo.gif)  
+* Demo:
+
+<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/demo.gif" width="50%" alt="demo gif" />
 
 ### 二、使用介绍
 
 **更多详细使用文档请查看项目 wiki**：[Wiki](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
 
-**框架介绍，可查看货拉拉移动技术分享的博客文章**：
+**框架介绍，可查看货拉拉移动技术分享的博客文章**：[https://juejin.cn/post/7139378777268125726](https://juejin.cn/post/7139378777268125726)
 
 #### 2.1 Gradle 引入
 
 |module|apt|router|plugin|
 |---|---|---|---|
-|version|[![apt](https://img.shields.io/badge/apt-1.1.0-green)]()|[![router](https://img.shields.io/badge/router-1.1.0-green)]()|[![plugin](https://img.shields.io/badge/plugin-1.1.0-green)]()|
+|version|[![apt](https://img.shields.io/badge/apt-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/apt)|[![router](https://img.shields.io/badge/router-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/router)|[![plugin](https://img.shields.io/badge/plugin-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/plugin)|
 
 ```
 // 项目根目录 build.gradle 引入
@@ -42,7 +44,7 @@ implementation "cn.therouter:router:1.1.0"
 
 #### 2.2 初始化
 
-框架内部包含自动初始化功能，详见[单模块自动初始化能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor.md)
+框架内部包含自动初始化功能，详见[单模块自动初始化能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor)
 无需任何初始化代码。但推荐你根据业务设置否为`Debug`环境，用以查看日志信息。
 `Application.attachBaseContext()` 方法中尽可能早设置当前是否为`Debug`环境。
 
@@ -68,7 +70,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 #### 2.4 页面跳转
 
-关于注解`@Route`的参数含义，请查看文档：[页面导航跳转能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator.md)
+关于注解`@Route`的参数含义，请查看文档：[页面导航跳转能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)
 
 ```
 @Route(path = "http://therouter.com/home", action = "action://scheme.com",
@@ -117,16 +119,16 @@ public class HomeActivity extends BaseActivity {
 
 #### 3.1 迁移工具一键迁移
 
-可使用迁移工具一键迁移：
+可使用迁移工具一键迁移（GitHub下载比较慢）：
 
-* Mac OS 迁移工具：[uploads/file/TheRouterTransfer-Mac.zip](uploads/file/TheRouterTransfer-Mac.zip)
-* Windows 迁移工具：[uploads/file/TheRouterTransfer-Windows.zip](uploads/file/TheRouterTransfer-Windows.zip)
+* Mac OS 迁移工具：[uploads/file/TheRouterTransfer-Mac.zip](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/file/TheRouterTransfer-Mac.zip)
+* Windows 迁移工具：[uploads/file/TheRouterTransfer-Windows.zip](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/file/TheRouterTransfer-Windows.zip)
 
 如果项目中使用了`ARouter`的`IProvider.init()`方法，可能需要手动处理初始化逻辑。
 
 如下图：  
 
-<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/TheRouterTransfer.png" width="640px" height="692px" />
+<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/TheRouterTransfer.png" width="40%" />
 
 #### 3.2 其他路由框架
 
@@ -192,11 +194,15 @@ TheRouter
 
 ### 五、Change Log  
 
-详见 Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/CHANGELOG)
+详见 Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
 
-### 六、Author 
-[HUOLALA mobile technology team](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png).
+### 六、Author
+
+<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png" width="40%" alt="HUOLALA mobile technology team" />
+
+加入 【TheRouter】 官方微信群：  
+<img src="https://kymjs.com/therouter/wx/therouter.jpg" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
 
 ### 七、开源协议
 
-TheRouter is licensed under the Apache License 2.0: [LICENSE](https://github.com/HuolalaTech/hll-wp-therouter-android/blob/master/LICENSE).
+TheRouter is licensed under the Apache License 2.0: [LICENSE](https://github.com/HuolalaTech/hll-wp-therouter-android/blob/master/LICENSE).  

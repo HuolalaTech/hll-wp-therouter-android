@@ -3,18 +3,22 @@ TheRouter: *Android componentization solution*
 
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
-[![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)
+[![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
+
+中文文档请见：[README_CN.md](https://github.com/HuolalaTech/hll-wp-therouter-android/blob/main/README_CN.md)  
 
 ### A. Features
 
 TheRouter core functions have four functionalities:  
 
-*  Page Navigation（[Navigator](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator.md)）
-*  Cross-module dependency injection（[ServiceProvider](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ServiceProvider.md)） 
-*  Single module automatic initialization （[FlowTaskExecutor](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor.md)） 
-*  Enable client apps to remotely load method dynamically ([ActionManager](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ActionManager.md))
+* Page Navigation（[Navigator](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)）
+* Cross-module dependency injection（[ServiceProvider](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ServiceProvider)） 
+* Single module automatic initialization （[FlowTaskExecutor](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor)） 
+* Enable client apps to remotely load method dynamically ([ActionManager](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ActionManager))
 
-*  Demo: [Demo gif](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/demo.gif)
+* Demo:
+
+<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/demo.gif" width="50%" alt="demo gif" />
 
 ### B. Introduction
 
@@ -40,7 +44,7 @@ implementation "cn.therouter:router:1.1.0"
 
 #### B2. initialization library
 
-The library contains the automatic initialization function inside，link to: [Single module automatic initialization](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor.md); therefore, there's no need for any initialization code. However, it is recommended that you set the `Debug` environment according to your business settings to view log information.  
+The library contains the automatic initialization function inside，link to: [Single module automatic initialization](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor); therefore, there's no need for any initialization code. However, it is recommended that you set the `Debug` environment according to your business settings to view log information.  
 
 ```
 @Override
@@ -65,7 +69,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 #### B4. page navigation
 
-For the meaning of the annotation `@Route`, please check the documentation: [Page Navigation](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator.md)
+For the meaning of the annotation `@Route`, please check the documentation: [Page Navigation](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)
 
 ```
 @Route(path = "http://therouter.com/home", action = "action://scheme.com",
@@ -150,10 +154,10 @@ TheRouter
 
 ### E. Change Log  
 
-link to Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/CHANGELOG)
+link to Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
 
 ### F. Author 
-[HUOLALA mobile technology team](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png).
+<img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png" width="40%" alt="HUOLALA mobile technology team" />
 
 ### G. LICENSE
 
