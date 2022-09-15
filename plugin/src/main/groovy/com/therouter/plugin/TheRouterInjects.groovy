@@ -75,16 +75,10 @@ class TheRouterInjects {
                         serviceProvideMap.put(className, aptVersion)
                     }
                 } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
-                    int index = jarEntry.name.indexOf("classes")
-                    if (index < 0) {
-                        index = 0
-                    }
                     String className = jarEntry.name
-                            .substring(index)
                             .replace(DOT_CLASS, "")
                             .replace('\\', '.')
                             .replace('/', '.')
-                            .replace("classes.", "")
                     autowiredSet.add(className)
                 } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter")) {
                     jarInfo.isTheRouterJar = true
@@ -141,16 +135,15 @@ class TheRouterInjects {
                         serviceProvideMap.put(className, aptVersion)
                     }
                 } else if (it.absolutePath.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
-                    int index = it.absolutePath.indexOf("classes")
-                    if (index < 0) {
-                        index = 0
-                    }
                     String className = it.absolutePath
-                            .substring(index)
+                            .replace(path, "")
                             .replace(DOT_CLASS, "")
                             .replace('\\', '.')
                             .replace('/', '.')
                             .replace("classes.", "")
+                    if (className.startsWith(".")) {
+                        className = className.substring(1)
+                    }
                     autowiredSet.add(className)
                 } else if (it.absolutePath.contains(PREFIX_ROUTER_MAP)) {
                     int start = it.absolutePath.indexOf(PREFIX_ROUTER_MAP)
