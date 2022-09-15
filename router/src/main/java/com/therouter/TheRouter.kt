@@ -61,11 +61,13 @@ object TheRouter {
     fun init(context: Context?) {
         if (!inited) {
             debug("init", "TheRouter init start!")
+            addFlowTask(context, digraph)
+            debug("init", "TheRouter.init() method do @FlowTask before task")
+            digraph.beforeSchedule()
             execute {
-                debug("init", "TheRouter.init() make @FlowTask Digraph")
-                addFlowTask(context, digraph)
+                debug("init", "TheRouter.init() method do @FlowTask init")
                 digraph.initSchedule()
-                debug("init", "TheRouter.init() method do @FlowTask")
+                debug("init", "TheRouter.init() method do @FlowTask schedule")
                 digraph.schedule()
                 applicationCreate()
             }

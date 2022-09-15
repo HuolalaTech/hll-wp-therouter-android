@@ -30,6 +30,23 @@ class Digraph {
         }
     }
 
+    /**
+     * 由于initSchedule执行比较耗时需要放到异步，而Before需要在路由表初始化之前执行，需要同步
+     * 所以单独列出一个方法，检测dependsOn只有beforTheRouterInit的任务，提前执行
+     */
+    fun beforeSchedule() {
+        virtualTasks[TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION] =
+            VirtualFlowTask(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)
+        tasks.values.forEach {
+            if (!it.async && it.dependencies.size == 1
+                && it.dependencies.contains(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)
+            ) {
+                // 此时一定在主线程，所以直接调用
+                it.run()
+            }
+        }
+    }
+
     fun addPendingRunnable(r: Runnable) = pendingTaskRunnableList.add(r)
 
     fun initSchedule() {
