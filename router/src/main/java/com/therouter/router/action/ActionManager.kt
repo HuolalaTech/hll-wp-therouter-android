@@ -20,7 +20,7 @@ internal object ActionManager {
 
     internal fun handleAction(navigator: Navigator, context: Context?) {
         if (TextUtils.isEmpty(navigator.simpleUrl)) return
-        debug("ActionManager", "handleAction->${navigator.urlWithParams}") {
+        debug("ActionManager", "handleAction->${navigator.getUrlWithParams()}") {
             for (traceElement in Thread.currentThread().stackTrace) {
                 debug("ActionManager", "$traceElement")
             }
@@ -31,7 +31,7 @@ internal object ActionManager {
         if (interceptorList != null) {
             for (item in interceptorList) {
                 if (item == null) continue
-                pushHistory(ActionNavigatorHistory(navigator.urlWithParams))
+                pushHistory(ActionNavigatorHistory(navigator.getUrlWithParams()))
                 val bool = item.handle(context ?: getApplicationContext()!!, navigator.extras)
                 list.add(item)
                 if (bool) {
