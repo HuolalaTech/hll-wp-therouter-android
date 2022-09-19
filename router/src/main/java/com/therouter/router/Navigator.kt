@@ -34,6 +34,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
     private val uri: Uri
     val normalUrl = url
     val extras = Bundle()
+    private var optionsCompat: Bundle? = null
     private var pending = false
     private var intentIdentifier: String? = null
     private var intentData: Uri? = null
@@ -164,6 +165,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     fun withFlags(flags: Int): Navigator {
         extras.putInt(KEY_INTENT_FLAGS, flags)
+        return this
+    }
+
+    fun withOptionsCompat(options: Bundle?): Navigator {
+        this.optionsCompat = options
         return this
     }
 
@@ -430,10 +436,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 if (requestCode == DEFAULT_REQUEST_CODE) {
                     if (fragment != null) {
                         debug("Navigator::navigation", "fragment.startActivity ${routeItem.className}")
-                        fragment.startActivity(intent)
+                        fragment.startActivity(intent, optionsCompat)
                     } else {
                         debug("Navigator::navigation", "startActivity ${routeItem.className}")
-                        context.startActivity(intent)
+                        context.startActivity(intent, optionsCompat)
                     }
                     val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
                     val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
@@ -453,15 +459,15 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 } else {
                     if (fragment != null) {
                         debug("Navigator::navigation", "fragment.startActivityForResult ${routeItem.className}")
-                        fragment.startActivityForResult(intent, requestCode)
+                        fragment.startActivityForResult(intent, requestCode, optionsCompat)
                     } else if (context is Activity) {
                         debug("Navigator::navigation", "startActivityForResult ${routeItem.className}")
-                        context.startActivityForResult(intent, requestCode)
+                        context.startActivityForResult(intent, requestCode, optionsCompat)
                     } else {
                         if (TheRouter.isDebug) {
                             throw RuntimeException("TheRouter::Navigator context is not Activity or Fragment")
                         } else {
-                            context.startActivity(intent)
+                            context.startActivity(intent, optionsCompat)
                         }
                     }
                 }
