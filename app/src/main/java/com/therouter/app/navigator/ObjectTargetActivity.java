@@ -1,7 +1,6 @@
 package com.therouter.app.navigator;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.view.View;
@@ -10,16 +9,16 @@ import android.widget.TextView;
 
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
+import com.therouter.demo.base.BaseActivity;
 import com.therouter.router.OnRouteMapChangedListener;
 import com.therouter.router.Route;
-import com.therouter.TheRouter;
 import com.therouter.router.RouteItem;
 import com.therouter.router.RouteMapKt;
 import com.therouter.router.Autowired;
 
 @Route(path = HomePathIndex.OBJECT_TEST)
 @Route(path = HomePathIndex.OBJECT_TEST2)
-public class ObjectTargetActivity extends AppCompatActivity {
+public class ObjectTargetActivity extends BaseActivity {
 
     @Autowired
     Runnable callback;
@@ -28,7 +27,6 @@ public class ObjectTargetActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.callback);
-        TheRouter.inject(this);
 
         final TextView textView = findViewById(R.id.textview);
         RouteMapKt.setOnRouteMapChangedListener(new OnRouteMapChangedListener() {
