@@ -153,6 +153,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     fun with(value: Bundle?): Navigator = withBundle(KEY_BUNDLE, value)
 
+    fun fillParams(action: (Bundle) -> Unit): Navigator {
+        action(extras)
+        return this
+    }
+
     fun withBundle(key: String?, value: Bundle?): Navigator {
         extras.putBundle(key, value)
         return this
