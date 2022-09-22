@@ -21,9 +21,7 @@ import com.therouter.history.pushHistory
 import com.therouter.router.action.ActionManager
 import com.therouter.router.interceptor.*
 import java.io.Serializable
-import java.io.UnsupportedEncodingException
 import java.lang.ref.SoftReference
-import java.net.URLEncoder
 import com.therouter.require
 import java.util.*
 
@@ -31,7 +29,6 @@ private val disposableQueue = LinkedList<PendingNavigator>()
 internal val arguments = HashMap<String, SoftReference<Any>>()
 
 open class Navigator(var url: String?, val intent: Intent?) {
-    private val uri: Uri
     val normalUrl = url
     val extras = Bundle()
     private var optionsCompat: Bundle? = null
@@ -42,10 +39,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     val simpleUrl: String
         get() {
-            val url = uri.toString()
-            return if (url.contains("?")) {
-                url.substring(0, url.indexOf('?'))
-            } else url
+            return if (normalUrl?.contains("?") == true) {
+                normalUrl.substring(0, normalUrl.indexOf('?'))
+            } else normalUrl ?: ""
         }
 
     constructor(url: String?) : this(url, null)
@@ -57,18 +53,26 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 url = it.fix(url)
             }
         }
-        uri = Uri.parse(url ?: "")
+//        uri = Uri.parse(url ?: "")
 //        for (key in uri.queryParameterNames) {
 //            // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
 //            extras.putString(key, uri.getQueryParameter(key))
 //        }
         // queryParameterNames() 会自动decode，造成外部逻辑错误，所以这里需要根据&手动截取k=v
-        uri.encodedQuery?.split("&")?.forEach {
-            val idx = it.indexOf("=")
-            val key = if (idx > 0) it.substring(0, idx) else it
-            val value: String? = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else null
-            // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-            extras.putString(key, value)
+        // encodedQuery() 无法解析带#的url，例如 https://kymjs.com/#/index?k=v，会造成k=v丢失
+        url?.let { noNullUrl ->
+            val index = noNullUrl.indexOf('?')
+            if (index >= 0 && noNullUrl.length > index) {
+                noNullUrl.substring(index + 1)
+            } else {
+                noNullUrl
+            }.split("&").forEach {
+                val idx = it.indexOf("=")
+                val key = if (idx > 0) it.substring(0, idx) else it
+                val value: String? = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else null
+                // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+                extras.putString(key, value)
+            }
         }
     }
 
