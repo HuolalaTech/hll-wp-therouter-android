@@ -41,9 +41,9 @@ public class AddCodeVisitor extends ClassVisitor {
                 super.onMethodEnter();
                 //不代理构造函数
                 if (!"<init>".equals(methodName)) {
-                    for (String serviceProviderClassName : serviceProvideList) {
-                        serviceProviderClassName = "a/" + serviceProviderClassName;
-                        if ("trojan".equals(methodName)) {
+                    if ("trojan".equals(methodName)) {
+                        for (String serviceProviderClassName : serviceProvideList) {
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
@@ -68,9 +68,9 @@ public class AddCodeVisitor extends ClassVisitor {
                             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                         }
                     }
-                    for (String serviceProviderClassName : serviceProvideList) {
-                        serviceProviderClassName = "a/" + serviceProviderClassName;
-                        if ("addFlowTask".equals(methodName)) {
+                    if ("addFlowTask".equals(methodName)) {
+                        for (String serviceProviderClassName : serviceProvideList) {
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
                             // FlowTask 功能是从1.0.13开始引入的，
                             // 没有版本号的都是老版本，不能插入字节码，但源码引用的例外，需要插入字节码
@@ -94,8 +94,8 @@ public class AddCodeVisitor extends ClassVisitor {
                             }
                         }
                     }
-                    for (String autowiredClassName : autowiredList) {
-                        if ("autowiredInject".equals(methodName)) {
+                    if ("autowiredInject".equals(methodName)) {
+                        for (String autowiredClassName : autowiredList) {
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
@@ -125,8 +125,8 @@ public class AddCodeVisitor extends ClassVisitor {
                             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                         }
                     }
-                    for (String route : routeList) {
-                        if ("initDefaultRouteMap".equals(methodName)) {
+                    if ("initDefaultRouteMap".equals(methodName)) {
+                        for (String route : routeList) {
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
