@@ -106,13 +106,12 @@ class TheRouterInjects {
         File dir = new File(path)
         if (dir.isDirectory()) {
             dir.eachFileRecurse {
-                sourceInfo.allSourceClass.add(it.absolutePath.replaceAll("/", "."))
+                sourceInfo.allSourceClass.add(it.absolutePath.replace(File.separator, "."))
                 if (it.absolutePath.contains(PREFIX_SERVICE_PROVIDER)) {
                     int start = it.absolutePath.indexOf(PREFIX_SERVICE_PROVIDER)
                     int end = it.absolutePath.length() - DOT_CLASS.length()
                     String className = it.absolutePath.substring(start, end)
-                            .replace('\\', '.')
-                            .replace('/', '.')
+                            .replace(File.separator, ".")
                     if (className.indexOf('$') > 0) {
                         className = className.substring(0, className.indexOf('$'))
                     }
@@ -138,8 +137,7 @@ class TheRouterInjects {
                     String className = it.absolutePath
                             .replace(path, "")
                             .replace(DOT_CLASS, "")
-                            .replace('\\', '.')
-                            .replace('/', '.')
+                            .replace(File.separator, ".")
                             .replace("classes.", "")
                     if (className.startsWith(".")) {
                         className = className.substring(1)
@@ -149,8 +147,7 @@ class TheRouterInjects {
                     int start = it.absolutePath.indexOf(PREFIX_ROUTER_MAP)
                     int end = it.absolutePath.length() - DOT_CLASS.length()
                     String className = it.absolutePath.substring(start, end)
-                            .replace('\\', '.')
-                            .replace('/', '.')
+                            .replace(File.separator, ".")
                     // 因为absolutePath过滤的时候是直接以类名过滤，就把包名去掉了
                     // 包名一定是a，所以这里补回来
                     routeSet.add("a/" + className)
