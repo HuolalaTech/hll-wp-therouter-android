@@ -3,16 +3,16 @@ Android 动态路由框架：TheRouter
 
 [![Hex.pm](https://img.shields.io/hexpm/l/plug.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
-[![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)
+[![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://therouter.cn/doc)
 
 ### 一、功能介绍
 
 TheRouter 核心功能具备四大能力：  
 
-* 页面导航跳转能力（[Navigator](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)） 页面跳转能力介绍 
-* 跨模块依赖注入能力（[ServiceProvider](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ServiceProvider)）跨模块依赖注入 
-* 单模块自动初始化能力 （[FlowTaskExecutor](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor)）单模块自动初始化能力介绍 
-* 动态化能力 ([ActionManager](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/ActionManager)) 动态化能力支持 
+* 页面导航跳转能力（[Navigator](https://therouter.cn/docs/2022/08/28/01)） 页面跳转能力介绍 
+* 跨模块依赖注入能力（[ServiceProvider](https://therouter.cn/docs/2022/08/27/01)）跨模块依赖注入 
+* 单模块自动初始化能力 （[FlowTaskExecutor](https://therouter.cn/docs/2022/08/26/01)）单模块自动初始化能力介绍 
+* 动态化能力 ([ActionManager](https://therouter.cn/docs/2022/08/25/01)) 动态化能力支持 
 
 * Demo:
 
@@ -20,31 +20,29 @@ TheRouter 核心功能具备四大能力：
 
 ### 二、使用介绍
 
-**更多详细使用文档请查看项目 wiki**：[Wiki](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
-
-**框架介绍，可查看货拉拉移动技术分享的博客文章**：[https://juejin.cn/post/7139718803637665822](https://juejin.cn/post/7139718803637665822)
+**更多详细使用文档请查看项目 [Wiki](https://therouter.cn/doc)**
 
 #### 2.1 Gradle 引入
 
 |module|apt|router|plugin|
 |---|---|---|---|
-|version|[![apt](https://img.shields.io/badge/apt-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/apt)|[![router](https://img.shields.io/badge/router-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/router)|[![plugin](https://img.shields.io/badge/plugin-1.1.0-green)](https://repo1.maven.org/maven2/cn/therouter/plugin)|
+|version|[![apt](https://img.shields.io/badge/apt-1.1.1-green)](https://repo1.maven.org/maven2/cn/therouter/apt)|[![router](https://img.shields.io/badge/router-1.1.1-green)](https://repo1.maven.org/maven2/cn/therouter/router)|[![plugin](https://img.shields.io/badge/plugin-1.1.1-green)](https://repo1.maven.org/maven2/cn/therouter/plugin)|
 
 ```
 // 项目根目录 build.gradle 引入
-classpath 'cn.therouter:plugin:1.1.0'
+classpath 'cn.therouter:plugin:1.1.1'
 
 // app module 中引入
 apply plugin: 'therouter'
 
-// 依赖
-kapt "cn.therouter:apt:1.1.0"
-implementation "cn.therouter:router:1.1.0"
+// 依赖，所有使用了注解的模块都要添加
+kapt "cn.therouter:apt:1.1.1"
+implementation "cn.therouter:router:1.1.1"
 ```
 
 #### 2.2 初始化
 
-框架内部包含自动初始化功能，详见[单模块自动初始化能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/FlowTaskExecutor)
+框架内部包含自动初始化功能，详见[单模块自动初始化能力](https://therouter.cn/docs/2022/08/26/01)
 无需任何初始化代码。但推荐你根据业务设置否为`Debug`环境，用以查看日志信息。
 `Application.attachBaseContext()` 方法中尽可能早设置当前是否为`Debug`环境。
 
@@ -70,7 +68,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 #### 2.4 页面跳转
 
-关于注解`@Route`的参数含义，请查看文档：[页面导航跳转能力](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/Navigator)
+关于注解`@Route`的参数含义，请查看文档：[页面导航跳转能力](https://therouter.cn/docs/2022/08/28/01)
 
 ```
 @Route(path = "http://therouter.com/home", action = "action://scheme.com",
@@ -119,7 +117,8 @@ public class HomeActivity extends BaseActivity {
 
 #### 3.1 迁移工具一键迁移
 
-可使用迁移工具一键迁移（GitHub下载比较慢）：
+可使用迁移工具一键迁移（GitHub下载比较慢）：  
+迁移工具使用说明请见官网文档：[https://therouter.cn/docs/2022/09/05/01](https://therouter.cn/docs/2022/09/05/01)  
 
 * Mac OS 迁移工具：[uploads/file/TheRouterTransfer-Mac.zip](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/file/TheRouterTransfer-Mac.zip)
 * Windows 迁移工具：[uploads/file/TheRouterTransfer-Windows.zip](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/file/TheRouterTransfer-Windows.zip)
@@ -201,6 +200,8 @@ TheRouter
 <img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png" width="40%" alt="HUOLALA mobile technology team" />
 
 加入 【TheRouter】 官方微信群：  
+*如过期，请加微信：kymjs123，拉你进群*   
+
 <img src="https://kymjs.com/therouter/wx/therouter_wx.jpg" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
 
 ### 七、开源协议
