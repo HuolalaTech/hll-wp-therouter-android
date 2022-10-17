@@ -2,6 +2,8 @@ package com.therouter.router
 
 import android.os.Bundle
 import androidx.annotation.Keep
+import androidx.core.app.NotificationCompat.getExtras
+import com.therouter.router.interceptor.NavigatorParamsFixHandle
 import java.io.Serializable
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
@@ -63,7 +65,11 @@ class RouteItem : Serializable {
 
 fun RouteItem.toNavigator() = Navigator(getUrlWithParams(), null)
 
-fun RouteItem.getUrlWithParams(): String {
+fun RouteItem.getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
+
+fun RouteItem.getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
+
+fun RouteItem.getUrlWithParams(handle: (String, String) -> String): String {
     val stringBuilder = StringBuilder(path)
     var isFirst = true
     val extras = getExtras()
@@ -74,11 +80,7 @@ fun RouteItem.getUrlWithParams(): String {
         } else {
             stringBuilder.append("&")
         }
-        try {
-            stringBuilder.append(URLEncoder.encode(key, "UTF-8")).append("=").append(extras[key])
-        } catch (e: UnsupportedEncodingException) {
-            stringBuilder.deleteCharAt(stringBuilder.length)
-        }
+        stringBuilder.append(handle(key, extras.get(key)?.toString() ?: ""))
     }
     return stringBuilder.toString()
 }

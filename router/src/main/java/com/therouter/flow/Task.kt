@@ -20,7 +20,7 @@ open class Task(
 ) {
     @Volatile
     protected var state = NONE
-    val dependencies: MutableSet<String> = HashSet()
+    val dependencies = HashSet<String>()
 
     init {
         dependsOn.split(",").forEach {

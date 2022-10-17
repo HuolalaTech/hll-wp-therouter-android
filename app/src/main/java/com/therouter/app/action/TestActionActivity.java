@@ -6,23 +6,22 @@ import android.view.View;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
+import com.therouter.demo.base.BaseActivity;
 import com.therouter.router.Route;
 import com.therouter.router.action.interceptor.ActionInterceptor;
 
 @Route(path = HomePathIndex.DEMO_ACTION_MANAGER)
-public class TestActionActivity extends AppCompatActivity {
+public class TestActionActivity extends BaseActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.action);
         setTitle("ActionManager 演示");
-        TheRouter.inject(this);
 
         TheRouter.addActionInterceptor(HomePathIndex.ACTION, new ActionInterceptor() {
             @Override

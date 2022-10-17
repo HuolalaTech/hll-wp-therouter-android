@@ -55,6 +55,8 @@ public class TheRouterTransform extends Transform {
     private void theRouterTransform(boolean isIncremental, Collection<TransformInput> inputs, outputProvider) {
         println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
         println "本次是增量编译::" + isIncremental
+        println "CHECK_ROUTE_MAP::" + getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP)
+        println "CHECK_FLOW_UNKNOW_DEPEND::" + getLocalProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND)
         long startFirst = System.currentTimeMillis()
         long start = System.currentTimeMillis()
         def theRouterClassOutputFile

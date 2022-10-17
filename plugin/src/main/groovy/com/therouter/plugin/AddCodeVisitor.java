@@ -41,13 +41,13 @@ public class AddCodeVisitor extends ClassVisitor {
                 super.onMethodEnter();
                 //不代理构造函数
                 if (!"<init>".equals(methodName)) {
-                    for (String serviceProviderClassName : serviceProvideList) {
-                        serviceProviderClassName = "a/" + serviceProviderClassName;
-                        if ("trojan".equals(methodName)) {
+                    if ("trojan".equals(methodName)) {
+                        for (String serviceProviderClassName : serviceProvideList) {
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
-                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Exception");
+                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
                             mv.visitLabel(tryStart);
 
                             mv.visitMethodInsn(INVOKESTATIC, "com/therouter/TheRouter", "getRouterInject", "()Lcom/therouter/inject/RouterInject;", false);
@@ -60,17 +60,17 @@ public class AddCodeVisitor extends ClassVisitor {
                             Label tryCatchBlockEnd = new Label();
                             mv.visitJumpInsn(GOTO, tryCatchBlockEnd);
                             mv.visitLabel(labelCatch);
-                            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"});
+                            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Throwable"});
                             mv.visitVarInsn(ASTORE, 0);
                             mv.visitVarInsn(ALOAD, 0);
-                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Exception", "printStackTrace", "()V", false);
+                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Throwable", "printStackTrace", "()V", false);
                             mv.visitLabel(tryCatchBlockEnd);
                             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                         }
                     }
-                    for (String serviceProviderClassName : serviceProvideList) {
-                        serviceProviderClassName = "a/" + serviceProviderClassName;
-                        if ("addFlowTask".equals(methodName)) {
+                    if ("addFlowTask".equals(methodName)) {
+                        for (String serviceProviderClassName : serviceProvideList) {
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
                             // FlowTask 功能是从1.0.13开始引入的，
                             // 没有版本号的都是老版本，不能插入字节码，但源码引用的例外，需要插入字节码
@@ -78,7 +78,7 @@ public class AddCodeVisitor extends ClassVisitor {
                                 Label label0 = new Label();
                                 Label label1 = new Label();
                                 Label label2 = new Label();
-                                mv.visitTryCatchBlock(label0, label1, label2, "java/lang/Exception");
+                                mv.visitTryCatchBlock(label0, label1, label2, "java/lang/Throwable");
                                 mv.visitLabel(label0);
                                 mv.visitVarInsn(ALOAD, 0);
                                 mv.visitVarInsn(ALOAD, 1);
@@ -87,19 +87,19 @@ public class AddCodeVisitor extends ClassVisitor {
                                 Label tryCatchBlockEnd = new Label();
                                 mv.visitJumpInsn(GOTO, tryCatchBlockEnd);
                                 mv.visitLabel(label2);
-                                mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"});
+                                mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Throwable"});
                                 mv.visitVarInsn(ASTORE, 2);
                                 mv.visitLabel(tryCatchBlockEnd);
                                 mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                             }
                         }
                     }
-                    for (String autowiredClassName : autowiredList) {
-                        if ("autowiredInject".equals(methodName)) {
+                    if ("autowiredInject".equals(methodName)) {
+                        for (String autowiredClassName : autowiredList) {
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
-                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Exception");
+                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
 
                             Label labelIf = new Label();
                             mv.visitLabel(labelIf);
@@ -125,13 +125,13 @@ public class AddCodeVisitor extends ClassVisitor {
                             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                         }
                     }
-                    for (String route : routeList) {
-                        if ("initDefaultRouteMap".equals(methodName)) {
+                    if ("initDefaultRouteMap".equals(methodName)) {
+                        for (String route : routeList) {
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
                             Label tryCatchBlockEnd = new Label();
-                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Exception");
+                            mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
                             mv.visitLabel(tryStart);
 
                             String className = route.replace(".class", "").replace('.', '/');
@@ -140,10 +140,10 @@ public class AddCodeVisitor extends ClassVisitor {
                             mv.visitLabel(tryEnd);
                             mv.visitJumpInsn(GOTO, tryCatchBlockEnd);
                             mv.visitLabel(labelCatch);
-                            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Exception"});
+                            mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{"java/lang/Throwable"});
                             mv.visitVarInsn(ASTORE, 0);
                             mv.visitVarInsn(ALOAD, 0);
-                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Exception", "printStackTrace", "()V", false);
+                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Throwable", "printStackTrace", "()V", false);
                             mv.visitLabel(tryCatchBlockEnd);
                             mv.visitFrame(Opcodes.F_SAME, 0, null, 0, null);
                         }

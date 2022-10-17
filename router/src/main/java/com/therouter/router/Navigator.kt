@@ -21,9 +21,7 @@ import com.therouter.history.pushHistory
 import com.therouter.router.action.ActionManager
 import com.therouter.router.interceptor.*
 import java.io.Serializable
-import java.io.UnsupportedEncodingException
 import java.lang.ref.SoftReference
-import java.net.URLEncoder
 import com.therouter.require
 import java.util.*
 
@@ -31,9 +29,9 @@ private val disposableQueue = LinkedList<PendingNavigator>()
 internal val arguments = HashMap<String, SoftReference<Any>>()
 
 open class Navigator(var url: String?, val intent: Intent?) {
-    private val uri: Uri
     val normalUrl = url
     val extras = Bundle()
+    private var optionsCompat: Bundle? = null
     private var pending = false
     private var intentIdentifier: String? = null
     private var intentData: Uri? = null
@@ -41,29 +39,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     val simpleUrl: String
         get() {
-            val url = uri.toString()
-            return if (url.contains("?")) {
-                url.substring(0, url.indexOf('?'))
-            } else url
-        }
-    val urlWithParams: String
-        get() {
-            val stringBuilder = StringBuilder(simpleUrl)
-            var isFirst = true
-            for (key in extras.keySet()) {
-                if (isFirst) {
-                    stringBuilder.append("?")
-                    isFirst = false
-                } else {
-                    stringBuilder.append("&")
-                }
-                try {
-                    stringBuilder.append(URLEncoder.encode(key, "UTF-8")).append("=").append(extras[key])
-                } catch (e: UnsupportedEncodingException) {
-                    stringBuilder.deleteCharAt(stringBuilder.length)
-                }
-            }
-            return stringBuilder.toString()
+            return if (normalUrl?.contains("?") == true) {
+                normalUrl.substring(0, normalUrl.indexOf('?'))
+            } else normalUrl ?: ""
         }
 
     constructor(url: String?) : this(url, null)
@@ -75,11 +53,46 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 url = it.fix(url)
             }
         }
-        uri = Uri.parse(url ?: "")
-        for (key in uri.queryParameterNames) {
-            // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-            extras.putString(key, uri.getQueryParameter(key))
+//        uri = Uri.parse(url ?: "")
+//        for (key in uri.queryParameterNames) {
+//            // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+//            extras.putString(key, uri.getQueryParameter(key))
+//        }
+        // queryParameterNames() 会自动decode，造成外部逻辑错误，所以这里需要根据&手动截取k=v
+        // encodedQuery() 无法解析带#的url，例如 https://kymjs.com/#/index?k=v，会造成k=v丢失
+        url?.let { noNullUrl ->
+            val index = noNullUrl.indexOf('?')
+            if (index >= 0 && noNullUrl.length > index) {
+                noNullUrl.substring(index + 1)
+            } else {
+                noNullUrl
+            }.split("&").forEach {
+                val idx = it.indexOf("=")
+                val key = if (idx > 0) it.substring(0, idx) else it
+                val value: String? = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else null
+                // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+                extras.putString(key, value)
+            }
         }
+    }
+
+    fun getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
+
+    fun getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
+
+    fun getUrlWithParams(handle: (String, String) -> String): String {
+        val stringBuilder = StringBuilder(simpleUrl)
+        var isFirst = true
+        for (key in extras.keySet()) {
+            if (isFirst) {
+                stringBuilder.append("?")
+                isFirst = false
+            } else {
+                stringBuilder.append("&")
+            }
+            stringBuilder.append(handle(key, extras.get(key)?.toString() ?: ""))
+        }
+        return stringBuilder.toString()
     }
 
     fun pending(): Navigator {
@@ -144,6 +157,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     fun with(value: Bundle?): Navigator = withBundle(KEY_BUNDLE, value)
 
+    fun fillParams(action: (Bundle) -> Unit): Navigator {
+        action(extras)
+        return this
+    }
+
     fun withBundle(key: String?, value: Bundle?): Navigator {
         extras.putBundle(key, value)
         return this
@@ -156,6 +174,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     fun withFlags(flags: Int): Navigator {
         extras.putInt(KEY_INTENT_FLAGS, flags)
+        return this
+    }
+
+    fun withOptionsCompat(options: Bundle?): Navigator {
+        this.optionsCompat = options
         return this
     }
 
@@ -236,7 +259,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                     }
                 }
                 navigationIntent.putExtra(KEY_ACTION, routeItem.action)
-                navigationIntent.putExtra(KEY_PATH, urlWithParams)
+                navigationIntent.putExtra(KEY_PATH, getUrlWithParams())
                 navigationIntent.putExtra(KEY_DESCRIPTION, routeItem.description)
                 with(routeItem.getExtras()) {
                     val bundle: Bundle? = getBundle(KEY_BUNDLE)
@@ -296,7 +319,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                         val bundle = routeItem.getExtras()
                         intent?.extras?.let { bundle.putAll(it) }
                         bundle.putString(KEY_ACTION, routeItem.action)
-                        bundle.putString(KEY_PATH, urlWithParams)
+                        bundle.putString(KEY_PATH, getUrlWithParams())
                         bundle.putString(KEY_DESCRIPTION, routeItem.description)
                         fragment?.arguments = bundle
                         debug("Navigator::navigation", "create fragment ${routeItem.className}")
@@ -305,7 +328,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                             e.printStackTrace()
                         }
                     }
-                    pushHistory(FragmentNavigatorHistory(urlWithParams))
+                    pushHistory(FragmentNavigatorHistory(getUrlWithParams()))
                 } else {
                     if (TheRouter.isDebug) {
                         throw RuntimeException("TheRouter::Navigator ${routeItem.className} is not Fragment")
@@ -408,7 +431,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                     }
                 }
                 intent.putExtra(KEY_ACTION, routeItem.action)
-                intent.putExtra(KEY_PATH, urlWithParams)
+                intent.putExtra(KEY_PATH, getUrlWithParams())
                 intent.putExtra(KEY_DESCRIPTION, routeItem.description)
                 with(routeItem.getExtras()) {
                     val bundle: Bundle? = getBundle(KEY_BUNDLE)
@@ -422,10 +445,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 if (requestCode == DEFAULT_REQUEST_CODE) {
                     if (fragment != null) {
                         debug("Navigator::navigation", "fragment.startActivity ${routeItem.className}")
-                        fragment.startActivity(intent)
+                        fragment.startActivity(intent, optionsCompat)
                     } else {
                         debug("Navigator::navigation", "startActivity ${routeItem.className}")
-                        context.startActivity(intent)
+                        context.startActivity(intent, optionsCompat)
                     }
                     val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
                     val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
@@ -445,19 +468,19 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 } else {
                     if (fragment != null) {
                         debug("Navigator::navigation", "fragment.startActivityForResult ${routeItem.className}")
-                        fragment.startActivityForResult(intent, requestCode)
+                        fragment.startActivityForResult(intent, requestCode, optionsCompat)
                     } else if (context is Activity) {
                         debug("Navigator::navigation", "startActivityForResult ${routeItem.className}")
-                        context.startActivityForResult(intent, requestCode)
+                        context.startActivityForResult(intent, requestCode, optionsCompat)
                     } else {
                         if (TheRouter.isDebug) {
                             throw RuntimeException("TheRouter::Navigator context is not Activity or Fragment")
                         } else {
-                            context.startActivity(intent)
+                            context.startActivity(intent, optionsCompat)
                         }
                     }
                 }
-                pushHistory(ActivityNavigatorHistory(urlWithParams))
+                pushHistory(ActivityNavigatorHistory(getUrlWithParams()))
             }
             callback.onArrival(this)
         } else {
