@@ -3,6 +3,7 @@ package com.therouter.router.action.interceptor
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
+import androidx.annotation.CallSuper
 import com.therouter.router.KEY_OBJECT_ACTIVITY
 import com.therouter.router.Navigator
 import com.therouter.router.arguments
@@ -11,6 +12,7 @@ abstract class ActionInterceptor {
 
     fun optActivity(): Activity? = arguments[KEY_OBJECT_ACTIVITY]?.get() as? Activity?
 
+    @CallSuper
     open fun handle(context: Context, navigator: Navigator): Boolean = handle(context, navigator.extras)
 
     abstract fun handle(context: Context, args: Bundle): Boolean
