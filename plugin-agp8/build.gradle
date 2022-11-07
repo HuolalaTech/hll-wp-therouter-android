@@ -5,12 +5,12 @@ group = "cn.therouter"
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
-    implementation 'com.android.tools.build:transform-api:2.0.0-deprecated-use-gradle-api'
-    implementation 'org.ow2.asm:asm:7.1'
-    implementation 'org.ow2.asm:asm-commons:7.1'
-    implementation 'com.android.tools.build:gradle:3.6.3'
-    implementation 'commons-io:commons-io:2.6'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'org.ow2.asm:asm:9.3'
+    implementation 'org.ow2.asm:asm-commons:9.3'
+    implementation 'com.android.tools.build:gradle-api:8.0.0-alpha06'
+    implementation 'commons-io:commons-io:2.10.0'
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation 'commons-codec:commons-codec:1.15'
 }
 
 repositories {

@@ -12,11 +12,7 @@ import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
 import com.therouter.router.Autowired;
-import com.therouter.router.Navigator;
 import com.therouter.router.Route;
-import com.therouter.router.interceptor.NavigationCallback;
-
-import org.jetbrains.annotations.NotNull;
 
 @Route(path = HomePathIndex.HOME2, params = {"strFromAnnotation", "来自注解设置的默认值，允许路由动态修改"})
 @Route(path = HomePathIndex.HOME, action = "action://scheme.com",

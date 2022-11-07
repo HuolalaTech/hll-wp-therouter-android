@@ -5,12 +5,12 @@ apply plugin: 'kotlin-kapt'
 group = "cn.therouter.demo"
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion "30.0.2"
+    namespace = "com.therouter.businessa"
+    compileSdk 32
 
     defaultConfig {
-        minSdkVersion 19
-        targetSdkVersion 30
+        minSdk 19
+        targetSdk 32
         versionCode 1
         versionName "1.0"
 
