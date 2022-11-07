@@ -44,31 +44,29 @@ class DefaultUrlParser : AutowiredParser {
     }
 }
 
-private fun javaTypeEqualsKotlinType(type1: String, type2: String) = when (transformNumber(type1)) {
-    "java.lang.Short" -> type2 == "kotlin.Short"
-    "java.lang.Byte" -> type2 == "kotlin.Byte"
-    "java.lang.Integer" -> type2 == "kotlin.Int"
-    "java.lang.Long" -> type2 == "kotlin.Long"
-    "java.lang.Float" -> type2 == "kotlin.Float"
-    "java.lang.Double" -> type2 == "kotlin.Double"
-    "java.lang.Boolean" -> type2 == "kotlin.Boolean"
-    "java.lang.Character" -> type2 == "kotlin.Char"
-    "java.lang.String" -> type2 == "kotlin.String"
-    else -> type1 == type2
+private fun javaTypeEqualsKotlinType(type1: String, type2: String): Boolean {
+    return primitive2Kotlin(type1) == primitive2Kotlin(type2)
 }
 
-private fun transformNumber(type: String): String {
-    return when (type) {
-        "byte" -> "java.lang.Byte"
-        "short" -> "java.lang.Short"
-        "int" -> "java.lang.Integer"
-        "long" -> "java.lang.Long"
-        "float" -> "java.lang.Float"
-        "double" -> "java.lang.Double"
-        "boolean" -> "java.lang.Boolean"
-        "char" -> "java.lang.Character"
-        else -> type
-    }
+private fun primitive2Kotlin(type: String) = when (type) {
+    "byte" -> "kotlin.Byte"
+    "short" -> "kotlin.Short"
+    "int" -> "kotlin.Int"
+    "long" -> "kotlin.Long"
+    "float" -> "kotlin.Float"
+    "double" -> "kotlin.Double"
+    "boolean" -> "kotlin.Boolean"
+    "char" -> "kotlin.Char"
+    "java.lang.Byte" -> "kotlin.Byte"
+    "java.lang.Short" -> "kotlin.Short"
+    "java.lang.Integer" -> "kotlin.Int"
+    "java.lang.Long" -> "kotlin.Long"
+    "java.lang.Float" -> "kotlin.Float"
+    "java.lang.Double" -> "kotlin.Double"
+    "java.lang.Boolean" -> "kotlin.Boolean"
+    "java.lang.Character" -> "kotlin.Char"
+    "java.lang.String" -> "kotlin.String"
+    else -> type
 }
 
 private fun transform(type: String, value: String) = when (type) {
