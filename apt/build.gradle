@@ -1,12 +1,18 @@
-apply plugin: 'java'
-apply plugin: 'kotlin'
+plugins {
+    id 'java'
+    id 'kotlin'
+    id "com.google.devtools.ksp"
+}
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 dependencies {
-    implementation 'com.google.code.gson:gson:2.8.9'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.10"
+    implementation 'com.google.code.gson:gson:2.9.0'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20"
+    implementation "com.google.devtools.ksp:symbol-processing-api:1.7.20-1.0.7"
+    implementation "com.google.auto.service:auto-service-annotations:1.0"
+    ksp "dev.zacsweers.autoservice:auto-service-ksp:0.5.2"
 }
 
 task sourcesJar(type: Jar) {
