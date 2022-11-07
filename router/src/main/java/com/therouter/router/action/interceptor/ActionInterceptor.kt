@@ -11,6 +11,8 @@ abstract class ActionInterceptor {
 
     fun optActivity(): Activity? = arguments[KEY_OBJECT_ACTIVITY]?.get() as? Activity?
 
+    open fun handle(context: Context, navigator: Navigator): Boolean = handle(context, navigator.extras)
+
     abstract fun handle(context: Context, args: Bundle): Boolean
 
     fun onFinish() {}

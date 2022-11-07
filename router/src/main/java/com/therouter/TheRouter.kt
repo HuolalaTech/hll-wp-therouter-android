@@ -99,17 +99,29 @@ object TheRouter {
      * 新增 Action 拦截器
      */
     @JvmStatic
-    fun addActionInterceptor(action: String?, interceptor: ActionInterceptor?) {
+    fun addActionInterceptor(action: String?, interceptor: ActionInterceptor?) =
         ActionManager.addActionInterceptor(action, interceptor)
-    }
+
+    /**
+     * 移除所有action对应的拦截器，如果action有多个拦截器，则都会被移除
+     */
+    @JvmStatic
+    fun removeAllInterceptorForKey(action: String?) =
+        ActionManager.removeAllInterceptorForKey(action)
+
+    /**
+     * 移除所有指定拦截器，如果有多个action共用同一个拦截器，则都会被移除
+     */
+    @JvmStatic
+    fun removeAllInterceptorForValue(interceptor: ActionInterceptor?) =
+        ActionManager.removeAllInterceptorForValue(interceptor)
 
     /**
      * 删除 Action 拦截器
      */
     @JvmStatic
-    fun removeActionInterceptor(action: String?, interceptor: ActionInterceptor?) {
+    fun removeActionInterceptor(action: String?, interceptor: ActionInterceptor?) =
         ActionManager.removeActionInterceptor(action, interceptor)
-    }
 
     /**
      * 执行业务自定义的 FlowTask
