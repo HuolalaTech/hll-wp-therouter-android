@@ -6,7 +6,7 @@ import android.os.Bundle
 import com.therouter.flow.splashInit
 
 internal object TheRouterLifecycleCallback : ActivityLifecycleCallbacks {
-    private var observer: (Activity) -> Unit = {}
+    private var observer: ((Activity) -> Unit)? = {}
 
     private var appInited = false
     override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
@@ -14,10 +14,10 @@ internal object TheRouterLifecycleCallback : ActivityLifecycleCallbacks {
             appInited = true
             splashInit()
         }
-        observer(activity)
+        observer?.invoke(activity)
     }
 
-    fun setActivityCreatedObserver(o: (activity: Activity) -> Unit) {
+    fun setActivityCreatedObserver(o: ((Activity) -> Unit)?) {
         observer = o
     }
 

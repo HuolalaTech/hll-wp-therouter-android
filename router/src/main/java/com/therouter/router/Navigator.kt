@@ -231,7 +231,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         // reset callback
-        TheRouterLifecycleCallback.setActivityCreatedObserver {}
+        TheRouterLifecycleCallback.setActivityCreatedObserver(null)
         val navigationIntent = intent ?: Intent()
         if (match != null) {
             routerInterceptor.invoke(match!!) { routeItem ->
@@ -256,6 +256,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
                                 .withObject(KEY_OBJECT_ACTIVITY, it)
                                 .action(it)
                         }
+                    } else {
+                        TheRouterLifecycleCallback.setActivityCreatedObserver(null)
                     }
                 }
                 navigationIntent.putExtra(KEY_ACTION, routeItem.action)
@@ -400,7 +402,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         // reset callback
-        TheRouterLifecycleCallback.setActivityCreatedObserver {}
+        TheRouterLifecycleCallback.setActivityCreatedObserver(null)
         if (match != null) {
             debug("Navigator::navigation", "NavigationCallback on found")
             callback.onFound(this)
@@ -428,6 +430,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
                                 .withObject(KEY_OBJECT_ACTIVITY, it)
                                 .action(it)
                         }
+                    } else {
+                        TheRouterLifecycleCallback.setActivityCreatedObserver(null)
                     }
                 }
                 intent.putExtra(KEY_ACTION, routeItem.action)
