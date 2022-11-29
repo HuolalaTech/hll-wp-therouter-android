@@ -9,6 +9,17 @@ import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
 import java.util.*
 
+/**
+ * 独立的一条路由记录
+ *
+ * @param path 路由Path
+ * @param className 落地页类名
+ * @param action 跳转到落地页以后，需要执行的动作
+ * @param description 当前路由的注释
+ * @param params 仅用于RouteMap.json文件被gson转换时存储，外部不可访问，会被合并到extras中
+ * @param path extras存储运行期的路由表参数
+ *
+ */
 @Keep
 class RouteItem : Serializable {
     var path = ""
@@ -63,12 +74,24 @@ class RouteItem : Serializable {
     }
 }
 
+/**
+ * 将当前路由转换为导航器
+ */
 fun RouteItem.toNavigator() = Navigator(getUrlWithParams(), null)
 
+/**
+ * 获取当前路由的完整url记录
+ */
 fun RouteItem.getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
 
+/**
+ * 获取当前路由的完整url记录
+ */
 fun RouteItem.getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
 
+/**
+ * 获取当前路由的完整url记录
+ */
 fun RouteItem.getUrlWithParams(handle: (String, String) -> String): String {
     val stringBuilder = StringBuilder(path)
     var isFirst = true

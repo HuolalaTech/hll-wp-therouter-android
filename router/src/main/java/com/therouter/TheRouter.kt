@@ -26,7 +26,7 @@ import java.util.*
 private var inited = false
 
 /**
- * 是否初始化完成
+ * TheRouter 是否初始化完成
  */
 fun theRouterInited() = inited
 
@@ -50,13 +50,24 @@ object TheRouter {
     val routerInject = RouterInject()
 
     /**
-     * 自定义log输出方式
+     * 自定义log输出方式，例如可将某些指定Tag上报到服务端，仅Release包有效，Debug包永远输出在控制台
      */
     @JvmStatic
     var logCat: (tag: String, msg: String) -> Unit? = { _, _ -> }
 
     val digraph = Digraph()
 
+    /**
+     * TheRouter初始化方法。内部流程：<br>
+     * 同步流程：<br>
+     *     1. 首先初始化FlowTask的内置事件，BEFORE_THEROUTER_INITIALIZATION，以及依赖这个Task的全部任务。
+     *         这个事件的目的是在TheRouter的路由初始化前做某些操作，例如修改路由表、添加路由拦截器等……
+     *     2. 初始化跨模块依赖表
+     *     3. 初始化路由表
+     * 异步流程：<br>
+     *     1. 调用FlowTask的外部事件
+     *     2. 添加 @Autowired 路由解析器
+     */
     @JvmStatic
     fun init(context: Context?) {
         if (!inited) {
@@ -124,7 +135,7 @@ object TheRouter {
         ActionManager.removeActionInterceptor(action, interceptor)
 
     /**
-     * 执行业务自定义的 FlowTask
+     * 执行业务自定义的 FlowTask，仅支持自定义业务节点的 Task
      */
     @JvmStatic
     fun runTask(taskName: String) {
@@ -137,34 +148,56 @@ object TheRouter {
         }
     }
 
+    /**
+     * 判断 url 是否为 TheRouter 的 Action
+     * Path 会被记录到路由表内，Action不会被记录，Action更像是一个消息事件，参考Android的广播
+     */
     @JvmStatic
     fun isRouterAction(url: String?) = ActionManager.isAction(build(url))
 
+    /**
+     * 判断 url 是否为 TheRouter 的路由 Path
+     * Path 会被记录到路由表内，Action不会被记录，Action更像是一个消息事件，参考Android的广播
+     */
     @JvmStatic
     fun isRouterPath(url: String?) = matchRouteMap(url) != null
 
-    /*********************************** hack ARouter  */
+    /**
+     * 获取跨模块依赖的服务
+     */
     @JvmStatic
     fun <T> get(clazz: Class<T>, vararg params: Any?): T? {
         return routerInject.get(clazz, *params)
     }
 
+    /**
+     * 通过Path构建路由导航器
+     */
     @JvmStatic
     fun build(url: String?): Navigator {
         return Navigator(url)
     }
 
+    /**
+     * 通过Intent构建路由导航器
+     */
     @JvmStatic
     fun build(it: Intent): Navigator {
         return Navigator(foundPathFromIntent(it), it)
     }
 
+    /**
+     * 为 @Autowired 注解的变量赋值
+     */
     @JvmStatic
     fun inject(any: Any?) {
         autowiredInject(any)
     }
 }
 
+/**
+ * 打印日志，允许通过 TheRouter.logCat 自定义日志输出
+ */
 internal fun debug(tag: String, msg: String, block: () -> Unit = {}) {
     if (TheRouter.isDebug) {
         Log.d("TheRouter::$tag", msg)
