@@ -29,8 +29,8 @@ internal object ActionManager {
 
         val list = ArrayList<ActionInterceptor>()
         val interceptorList = actionHandleMap[navigator.simpleUrl]
+        var bundle = Bundle()
         if (interceptorList != null) {
-            var bundle = Bundle()
             for (item in interceptorList) {
                 if (item == null) continue
                 item.setArguments(bundle)
@@ -45,6 +45,7 @@ internal object ActionManager {
         }
 
         list.forEach {
+            it.setArguments(bundle)
             it.onFinish()
         }
     }
