@@ -17,7 +17,7 @@ import java.util.*
  * @param action 跳转到落地页以后，需要执行的动作
  * @param description 当前路由的注释
  * @param params 仅用于RouteMap.json文件被gson转换时存储，外部不可访问，会被合并到extras中
- * @param path extras存储运行期的路由表参数
+ * @param extras extras存储运行期的路由表参数
  *
  */
 @Keep
