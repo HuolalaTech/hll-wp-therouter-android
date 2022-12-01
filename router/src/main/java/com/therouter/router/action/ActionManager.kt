@@ -1,6 +1,7 @@
 package com.therouter.router.action
 
 import android.content.Context
+import android.os.Bundle
 import android.text.TextUtils
 import com.therouter.debug
 import com.therouter.router.action.interceptor.ActionInterceptor
@@ -29,10 +30,13 @@ internal object ActionManager {
         val list = ArrayList<ActionInterceptor>()
         val interceptorList = actionHandleMap[navigator.simpleUrl]
         if (interceptorList != null) {
+            var bundle = Bundle()
             for (item in interceptorList) {
                 if (item == null) continue
+                item.setArguments(bundle)
                 pushHistory(ActionNavigatorHistory(navigator.getUrlWithParams()))
                 val bool = item.handle(context ?: getApplicationContext()!!, navigator)
+                bundle = item.getArguments()
                 list.add(item)
                 if (bool) {
                     break

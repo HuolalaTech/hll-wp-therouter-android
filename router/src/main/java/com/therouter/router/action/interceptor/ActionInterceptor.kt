@@ -10,7 +10,14 @@ import com.therouter.router.arguments
 
 abstract class ActionInterceptor {
 
+    private var args: Bundle = Bundle()
+
     fun optActivity(): Activity? = arguments[KEY_OBJECT_ACTIVITY]?.get() as? Activity?
+    fun getArguments() = args
+
+    fun setArguments(b: Bundle) {
+        args = b
+    }
 
     @CallSuper
     open fun handle(context: Context, navigator: Navigator): Boolean = handle(context, navigator.extras)
