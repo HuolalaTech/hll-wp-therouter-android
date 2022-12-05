@@ -56,6 +56,9 @@ fun splashInit() = TheRouter.runTask(TheRouterFlowTask.APP_ONSPLASH)
 @Deprecated
 fun applicationCreate() = TheRouter.runTask(TheRouterFlowTask.APP_ONCREATE)
 
+/**
+ * 当TheRouter初始化时，执行的FlowTask
+ */
 fun runInitFlowTask() {
     TheRouter.runTask(TheRouterFlowTask.THEROUTER_INITIALIZATION)
     applicationCreate()
