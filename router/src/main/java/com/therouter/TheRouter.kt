@@ -7,7 +7,7 @@ import android.content.Intent
 import android.util.Log
 import com.therouter.TheRouter.logCat
 import com.therouter.flow.Digraph
-import com.therouter.flow.applicationCreate
+import com.therouter.flow.runInitFlowTask
 import com.therouter.inject.RouterInject
 import com.therouter.router.*
 import com.therouter.router.action.ActionManager
@@ -79,8 +79,7 @@ object TheRouter {
                 debug("init", "TheRouter.init() method do @FlowTask init")
                 digraph.initSchedule()
                 debug("init", "TheRouter.init() method do @FlowTask schedule")
-                digraph.schedule()
-                applicationCreate()
+                runInitFlowTask()
             }
             routerInject.asyncInitRouterInject(context)
             asyncInitRouteMap()
@@ -140,10 +139,10 @@ object TheRouter {
     @JvmStatic
     fun runTask(taskName: String) {
         if (digraph.inited) {
-            digraph.getVirtualTask(taskName)?.run()
+            digraph.getVirtualTask(taskName).run()
         } else {
             digraph.addPendingRunnable {
-                digraph.getVirtualTask(taskName)?.run()
+                digraph.getVirtualTask(taskName).run()
             }
         }
     }

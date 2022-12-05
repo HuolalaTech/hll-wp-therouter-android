@@ -31,6 +31,13 @@ open class Task(
         if (dependencies.contains(taskName)) {
             throw IllegalArgumentException("TheRouter::Task::The task cannot depend on himself : $taskName")
         }
+        // 所有Task都有一个共同的父依赖：THEROUTER_INITIALIZATION
+        if (dependencies.isEmpty()
+            && taskName != TheRouterFlowTask.THEROUTER_INITIALIZATION
+            && taskName != TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION
+        ) {
+            dependencies.add(TheRouterFlowTask.THEROUTER_INITIALIZATION)
+        }
     }
 
     internal open fun run() {
