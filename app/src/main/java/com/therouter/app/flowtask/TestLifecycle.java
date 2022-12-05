@@ -11,7 +11,7 @@ public class TestLifecycle {
      *
      * @param context application
      */
-    @FlowTask(taskName = AppFlowTask.TEST_APP1, dependsOn = AppFlowTask.APP_ONCREATE)
+    @FlowTask(taskName = AppFlowTask.TEST_APP1, dependsOn = AppFlowTask.THEROUTER_INITIALIZATION)
     public static void test1(Context context) {
         System.out.println("===主应用内=====onApplicationCreate");
     }
@@ -19,7 +19,7 @@ public class TestLifecycle {
     /**
      * 将会在异步执行
      */
-    @FlowTask(taskName = AppFlowTask.TEST_APP2, dependsOn = AppFlowTask.APP_ONCREATE, async = true)
+    @FlowTask(taskName = AppFlowTask.TEST_APP2, dependsOn = AppFlowTask.THEROUTER_INITIALIZATION, async = true)
     public static void test2(Context context) {
         System.out.println("异步===主应用内======Application onCreate后执行");
     }

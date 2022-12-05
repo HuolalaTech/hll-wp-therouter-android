@@ -50,16 +50,13 @@ class VirtualFlowTask(taskName: String, dependsOn: String = "") : Task(true, tas
 fun splashInit() = TheRouter.runTask(TheRouterFlowTask.APP_ONSPLASH)
 
 /**
- * 替换为 TheRouterFlowTask.THEROUTER_INITIALIZATION<br>
- * 将在 1.1.4 版本移除本方法
- */
-@Deprecated
-fun applicationCreate() = TheRouter.runTask(TheRouterFlowTask.APP_ONCREATE)
-
-/**
  * 当TheRouter初始化时，执行的FlowTask
  */
 fun runInitFlowTask() {
     TheRouter.runTask(TheRouterFlowTask.THEROUTER_INITIALIZATION)
-    applicationCreate()
+    /**
+     * 替换为 TheRouterFlowTask.THEROUTER_INITIALIZATION<br>
+     * 将在 1.1.4 版本移除本方法
+     */
+    TheRouter.runTask(TheRouterFlowTask.APP_ONCREATE)
 }
