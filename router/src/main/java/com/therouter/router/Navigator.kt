@@ -212,6 +212,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
         return this
     }
 
+    fun optObject(key: String) = arguments[key]?.get()
+
     /**
      * 通过导航器创建Intent，会自动将Navigator中的参数传入Intent
      * intent.putExtra(KEY_ACTION, routeItem.action)
