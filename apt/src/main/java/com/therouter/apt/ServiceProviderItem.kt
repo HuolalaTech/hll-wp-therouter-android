@@ -2,7 +2,7 @@ package com.therouter.apt
 
 import javax.lang.model.element.Element
 
-class ServiceProviderItem : Comparable<ServiceProviderItem> {
+class ServiceProviderItem(val isMethod: Boolean) : Comparable<ServiceProviderItem> {
 
     var element: Element? = null
 

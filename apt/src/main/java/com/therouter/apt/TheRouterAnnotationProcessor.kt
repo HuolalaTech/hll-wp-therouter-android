@@ -16,11 +16,8 @@ import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
-import javax.lang.model.element.ElementKind
+import javax.lang.model.element.*
 import javax.lang.model.element.ElementKind.*
-import javax.lang.model.element.ExecutableElement
-import javax.lang.model.element.Modifier
-import javax.lang.model.element.TypeElement
 import kotlin.collections.ArrayList
 import kotlin.math.abs
 
@@ -226,56 +223,77 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         val list: ArrayList<ServiceProviderItem> = ArrayList()
         val set = roundEnv.getElementsAnnotatedWith(ServiceProvider::class.java)
         for (element in set) {
-            require(element.kind == METHOD) { element.simpleName.toString() + " is not method" }
-            var isStatic = false
-            for (m in element.modifiers) {
-                if (m == Modifier.STATIC) {
-                    isStatic = true
-                    break
-                }
-            }
-            require(isStatic) {
-                (element.enclosingElement.toString()
-                        + "." + element.simpleName + "() is not static method")
-            }
-            val serviceProviderItem = ServiceProviderItem()
-            serviceProviderItem.element = element
-            serviceProviderItem.methodName = element.simpleName.toString()
-            serviceProviderItem.className = element.enclosingElement.toString()
-            if (element is ExecutableElement) {
-                serviceProviderItem.returnType = element.returnType.toString()
-                val parameters = element.parameters
-                if (parameters.size > 0) {
-                    val params: ArrayList<String> = ArrayList<String>()
-                    repeat(parameters.size) { i ->
-                        params.add(transformNumber(parameters[i].asType().toString()))
-                    }
-                    serviceProviderItem.params = params
-                }
-            }
-            var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString()
-            //过滤最后一个字符')'
-            toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-            toStringStr.split(",").forEach { temp ->
-                if (temp.contains(KEY_RETURNTYPE)) {
-                    val value = handleReturnType(temp.trim())
-                    if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
-                        serviceProviderItem.returnType = value
-                    }
-                } else if (temp.contains(KEY_PARAMS)) {
-                    val value = handleParams(temp.trim())
-                    if (value.size > 1) {
-                        serviceProviderItem.params = transform(value)
-                    } else if (value.size == 1) {
-                        if (value[0].trim().isNotEmpty()) {
-                            serviceProviderItem.params = transform(value)
-                        }
-                    }
-                }
+            val serviceProviderItem = if (element.kind == METHOD) {
+                handleMethodServiceProviderItem(element)
+            } else {
+                handleClassServiceProviderItem(element)
             }
             list.add(serviceProviderItem)
         }
         return list
+    }
+
+    private fun handleClassServiceProviderItem(element: Element): ServiceProviderItem {
+        val serviceProviderItem = ServiceProviderItem(false)
+        serviceProviderItem.element = element
+        val annotation = element.getAnnotation(ServiceProvider::class.java)
+        serviceProviderItem.className = element.toString()
+        serviceProviderItem.returnType = annotation.returnType.toString()
+        serviceProviderItem.methodName = ""
+        annotation.params.forEach {
+            serviceProviderItem.params.add(it.java.name)
+        }
+        return serviceProviderItem
+    }
+
+    private fun handleMethodServiceProviderItem(element: Element): ServiceProviderItem {
+        var isStatic = false
+        for (m in element.modifiers) {
+            if (m == Modifier.STATIC) {
+                isStatic = true
+                break
+            }
+        }
+        require(isStatic) {
+            (element.enclosingElement.toString()
+                    + "." + element.simpleName + "() is not static method")
+        }
+        val serviceProviderItem = ServiceProviderItem(true)
+        serviceProviderItem.element = element
+        serviceProviderItem.methodName = element.simpleName.toString()
+        serviceProviderItem.className = element.enclosingElement.toString()
+        if (element is ExecutableElement) {
+            serviceProviderItem.returnType = element.returnType.toString()
+            val parameters = element.parameters
+            if (parameters.size > 0) {
+                val params: ArrayList<String> = ArrayList<String>()
+                repeat(parameters.size) { i ->
+                    params.add(transformNumber(parameters[i].asType().toString()))
+                }
+                serviceProviderItem.params = params
+            }
+        }
+        var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString()
+        //过滤最后一个字符')'
+        toStringStr = toStringStr.substring(0, toStringStr.length - 1)
+        toStringStr.split(",").forEach { temp ->
+            if (temp.contains(KEY_RETURNTYPE)) {
+                val value = handleReturnType(temp.trim())
+                if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
+                    serviceProviderItem.returnType = value
+                }
+            } else if (temp.contains(KEY_PARAMS)) {
+                val value = handleParams(temp.trim())
+                if (value.size > 1) {
+                    serviceProviderItem.params = transform(value)
+                } else if (value.size == 1) {
+                    if (value[0].trim().isNotEmpty()) {
+                        serviceProviderItem.params = transform(value)
+                    }
+                }
+            }
+        }
+        return serviceProviderItem
     }
 
     private fun handleReturnType(str: String): String {
@@ -498,14 +516,26 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 }
                 ps.println(") {")
                 ps.println("\t\t\t// 加上编译期的类型校验，防止方法实际返回类型与注解声明返回类型不匹配")
-                ps.print(
-                    String.format(
-                        "\t\t\t%s retyrnType = %s.%s(",
-                        serviceProviderItem.returnType,
-                        serviceProviderItem.className,
-                        serviceProviderItem.methodName
+
+                if (serviceProviderItem.isMethod) {
+                    ps.print(
+                        String.format(
+                            "\t\t\t%s retyrnType = %s.%s(",
+                            serviceProviderItem.returnType,
+                            serviceProviderItem.className,
+                            serviceProviderItem.methodName
+                        )
                     )
-                )
+                } else {
+                    ps.print(
+                        String.format(
+                            "\t\t\t%s retyrnType = new %s(",
+                            serviceProviderItem.returnType,
+                            serviceProviderItem.className
+                        )
+                    )
+                }
+
                 for (count in serviceProviderItem.params.indices) {
                     if (!serviceProviderItem.params[count].trim { it <= ' ' }.isEmpty()) {
                         //参数强转
