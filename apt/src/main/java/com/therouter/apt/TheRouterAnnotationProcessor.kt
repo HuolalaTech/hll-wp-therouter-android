@@ -263,7 +263,11 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
 
         if (serviceProviderItem.returnType.isEmpty()) {
             if (element is TypeElement) {
-                if (element.interfaces.size != 1) {
+                if (element.interfaces.size == 0) {
+                    serviceProviderItem.returnType = serviceProviderItem.className
+                } else if (element.interfaces.size == 1) {
+                    serviceProviderItem.returnType = element.interfaces[0].toString()
+                } else {
                     val prop = Properties()
                     try {
                         val gradleProperties = FileInputStream(PROPERTY_FILE)
@@ -280,8 +284,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     } else {
                         serviceProviderItem.returnType = serviceProviderItem.className
                     }
-                } else {
-                    serviceProviderItem.returnType = element.interfaces[0].toString()
                 }
             }
         }
