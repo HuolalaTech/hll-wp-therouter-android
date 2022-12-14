@@ -1,5 +1,5 @@
 @file:JvmMultifileClass
-@file:JvmName("TheRouterTrojan")
+@file:JvmName("TheRouteContentProvider")
 
 package com.therouter
 
@@ -17,7 +17,7 @@ fun setContext(c: Context?) = c?.let {
     applicationContext = it
 }
 
-class InnerTheRouterTrojan : ContentProvider() {
+class InnerTheRouterContentProvider : ContentProvider() {
     override fun onCreate(): Boolean {
         applicationContext ?: let {
             applicationContext = context
