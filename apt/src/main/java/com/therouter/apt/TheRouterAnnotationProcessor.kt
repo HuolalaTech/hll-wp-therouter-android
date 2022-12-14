@@ -239,28 +239,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         val annotation = element.getAnnotation(ServiceProvider::class.java)
         serviceProviderItem.className = element.toString()
         serviceProviderItem.methodName = ""
-        if (element is TypeElement) {
-            if (element.interfaces.size != 1) {
-                val prop = Properties()
-                try {
-                    val gradleProperties = FileInputStream(PROPERTY_FILE)
-                    prop.load(gradleProperties)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-                if (!STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
-                    throw IllegalArgumentException(
-                        element.enclosingElement.toString() + "." + element.simpleName +
-                                " has multiple interfaces. Must to be specified returnType=XXX," +
-                                " or configuration KEY_USE_EXTEND=true in gradle.properties"
-                    )
-                } else {
-                    serviceProviderItem.returnType = serviceProviderItem.className
-                }
-            } else {
-                serviceProviderItem.returnType = element.interfaces[0].toString()
-            }
-        }
 
         var toStringStr = annotation.toString()
         //过滤最后一个字符')'
@@ -279,6 +257,31 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     if (value[0].trim().isNotEmpty()) {
                         serviceProviderItem.params = transform(value)
                     }
+                }
+            }
+        }
+
+        if (serviceProviderItem.returnType.isEmpty()) {
+            if (element is TypeElement) {
+                if (element.interfaces.size != 1) {
+                    val prop = Properties()
+                    try {
+                        val gradleProperties = FileInputStream(PROPERTY_FILE)
+                        prop.load(gradleProperties)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                    if (!STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                        throw IllegalArgumentException(
+                            element.enclosingElement.toString() + "." + element.simpleName +
+                                    " has multiple interfaces. Must to be specified returnType=XXX," +
+                                    " or configuration KEY_USE_EXTEND=true in gradle.properties"
+                        )
+                    } else {
+                        serviceProviderItem.returnType = serviceProviderItem.className
+                    }
+                } else {
+                    serviceProviderItem.returnType = element.interfaces[0].toString()
                 }
             }
         }
