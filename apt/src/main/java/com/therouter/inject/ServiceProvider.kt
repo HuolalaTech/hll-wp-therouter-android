@@ -8,5 +8,10 @@ import kotlin.reflect.KClass
  * Created by ZhangTao on 17/8/11.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target(AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY_GETTER, AnnotationTarget.PROPERTY_SETTER)
+@Target(
+    AnnotationTarget.FUNCTION,
+    AnnotationTarget.CLASS,
+    AnnotationTarget.PROPERTY_GETTER,
+    AnnotationTarget.PROPERTY_SETTER
+)
 annotation class ServiceProvider(val returnType: KClass<*> = ServiceProvider::class, val params: Array<KClass<*>> = [])
