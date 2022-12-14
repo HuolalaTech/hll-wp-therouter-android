@@ -238,11 +238,51 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         serviceProviderItem.element = element
         val annotation = element.getAnnotation(ServiceProvider::class.java)
         serviceProviderItem.className = element.toString()
-        serviceProviderItem.returnType = annotation.returnType.toString()
         serviceProviderItem.methodName = ""
-        annotation.params.forEach {
-            serviceProviderItem.params.add(it.java.name)
+        if (element is TypeElement) {
+            if (element.interfaces.size != 1) {
+                val prop = Properties()
+                try {
+                    val gradleProperties = FileInputStream(PROPERTY_FILE)
+                    prop.load(gradleProperties)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                if (!STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                    throw IllegalArgumentException(
+                        element.enclosingElement.toString() + "." + element.simpleName +
+                                " has multiple interfaces. Must to be specified returnType=XXX," +
+                                " or configuration KEY_USE_EXTEND=true in gradle.properties"
+                    )
+                } else {
+                    serviceProviderItem.returnType = serviceProviderItem.className
+                }
+            } else {
+                serviceProviderItem.returnType = element.interfaces[0].toString()
+            }
         }
+
+        var toStringStr = annotation.toString()
+        //过滤最后一个字符')'
+        toStringStr = toStringStr.substring(0, toStringStr.length - 1)
+        toStringStr.split(",").forEach { temp ->
+            if (temp.contains(KEY_RETURNTYPE)) {
+                val value = handleReturnType(temp.trim())
+                if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
+                    serviceProviderItem.returnType = value
+                }
+            } else if (temp.contains(KEY_PARAMS)) {
+                val value = handleParams(temp.trim())
+                if (value.size > 1) {
+                    serviceProviderItem.params = transform(value)
+                } else if (value.size == 1) {
+                    if (value[0].trim().isNotEmpty()) {
+                        serviceProviderItem.params = transform(value)
+                    }
+                }
+            }
+        }
+        println("==========" + serviceProviderItem)
         return serviceProviderItem
     }
 
@@ -520,7 +560,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 if (serviceProviderItem.isMethod) {
                     ps.print(
                         String.format(
-                            "\t\t\t%s retyrnType = %s.%s(",
+                            "\t\t\t%s returnType = %s.%s(",
                             serviceProviderItem.returnType,
                             serviceProviderItem.className,
                             serviceProviderItem.methodName
@@ -529,7 +569,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 } else {
                     ps.print(
                         String.format(
-                            "\t\t\t%s retyrnType = new %s(",
+                            "\t\t\t%s returnType = new %s(",
                             serviceProviderItem.returnType,
                             serviceProviderItem.className
                         )
@@ -553,7 +593,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     }
                 }
                 ps.println(");")
-                ps.println("\t\t\tobj = (T) retyrnType;")
+                ps.println("\t\t\tobj = (T) returnType;")
                 ps.print("\t\t} else ")
             }
             ps.println("{\n")

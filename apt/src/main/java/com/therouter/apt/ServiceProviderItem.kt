@@ -15,7 +15,7 @@ class ServiceProviderItem(val isMethod: Boolean) : Comparable<ServiceProviderIte
     var params = ArrayList<String>()
 
     override fun toString(): String {
-        return "ServiceProviderItem(element=$element, className='$className', returnType='$returnType', methodName='$methodName', params=$params)"
+        return "ServiceProviderItem(isMethod=$isMethod, element=$element, className='$className', returnType='$returnType', methodName='$methodName', params=$params)"
     }
 
     override fun compareTo(other: ServiceProviderItem): Int {
