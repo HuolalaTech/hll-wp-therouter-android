@@ -282,7 +282,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 }
             }
         }
-        println("==========" + serviceProviderItem)
         return serviceProviderItem
     }
 
