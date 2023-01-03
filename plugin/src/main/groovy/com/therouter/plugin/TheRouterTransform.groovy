@@ -328,6 +328,22 @@ public class TheRouterTransform extends Transform {
             fillTodoList(flowTaskDependMap, it)
         }
 
+        if (Boolean.valueOf(getLocalProperty(TheRouterPlugin.SHOW_FLOW_DEPEND))) {
+            flowTaskDependMap.keySet().each {
+                fillNode(createNode(flowTaskDependMap, it), null)
+            }
+
+            println()
+            println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::dependency   " + "${LogUI.E_NORMAL.value}")
+            println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
+            dependStack.sort().each {
+                println("${LogUI.C_WARN.value}" + "[Root --> $it]" + "${LogUI.E_NORMAL.value}")
+            }
+            println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
+            println()
+
+        }
+
         time = System.currentTimeMillis() - start
         println("---------TheRouter check flow task map, spend:${time}ms--------------")
 
@@ -338,7 +354,7 @@ public class TheRouterTransform extends Transform {
     private final List<String> loopDependStack = new ArrayList<>()
 
     private void fillTodoList(Map<String, Set<String>> map, String root) {
-        Set<String> dependsSet = map.get(root)
+        Set<String> dependsSet = map[root]
         if (dependsSet != null && !dependsSet.isEmpty()) {
             if (loopDependStack.contains(root)) {
                 throw new RuntimeException("\n\n==========================================" +
@@ -352,6 +368,39 @@ public class TheRouterTransform extends Transform {
             }
             loopDependStack.remove(root)
         }
+    }
+
+    Set<String> dependStack = new HashSet<>()
+
+    private void fillNode(Node node, String root) {
+        if (node.children == null || node.children.isEmpty()) {
+            if (root == null) {
+                dependStack.add(node.name)
+            } else {
+                dependStack.add(node.name + " --> " + root)
+            }
+        } else {
+            node.children.each {
+                if (root == null) {
+                    fillNode(it, node.name)
+                } else {
+                    fillNode(it, node.name + " --> " + root)
+                }
+            }
+        }
+    }
+
+    private Node createNode(Map<String, Set<String>> map, String root) {
+        Node node = new Node(root)
+        Set<Node> childrenNode = new HashSet<>()
+        Set<String> dependsSet = map[root]
+        if (dependsSet != null && !dependsSet.isEmpty()) {
+            for (depend in dependsSet) {
+                childrenNode.add(createNode(map, depend))
+            }
+        }
+        node.children = childrenNode
+        return node
     }
 
     private String getLog(List<String> list, String root) {

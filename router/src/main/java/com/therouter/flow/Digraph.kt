@@ -9,9 +9,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
 
 class Digraph {
-    private val tasks: MutableMap<String, Task> = HashMap()
-    private val virtualTasks: MutableMap<String, Task> = HashMap()
-    private val todoList: MutableList<Task> = CopyOnWriteArrayList()
+    private val tasks = HashMap<String, Task>()
+
+    // virtualTask 不能由有向图调度，需要外部主动调度
+    private val virtualTasks = HashMap<String, VirtualFlowTask>()
+    private val todoList = CopyOnWriteArrayList<Task>()
 
     private val pendingTaskRunnableList = CopyOnWriteArrayList<Runnable>()
 
@@ -35,8 +37,10 @@ class Digraph {
      * 所以单独列出一个方法，检测dependsOn只有beforTheRouterInit的任务，提前执行
      */
     fun beforeSchedule() {
-        virtualTasks[TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION] =
-            VirtualFlowTask(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)
+        val virtualFlowTask = getVirtualTask(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)
+        virtualTasks[TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION] = virtualFlowTask
+        virtualFlowTask.run()
+
         tasks.values.forEach {
             if (!it.async && it.dependencies.size == 1
                 && it.dependencies.contains(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)
@@ -113,7 +117,19 @@ class Digraph {
         }
     }
 
-    fun getVirtualTask(name: String) = virtualTasks[name]
+    fun onVirtualTaskDoneListener(name: String) {
+        virtualTasks.values.forEach {
+            if (it.dependencies.contains(name)) {
+                it.dependTaskStatusChanged()
+            }
+        }
+    }
+
+    fun getVirtualTask(name: String) = virtualTasks[name] ?: let {
+        val vtask = makeVirtualFlowTask(name)
+        virtualTasks[name] = vtask
+        vtask
+    }
 
     fun getDepends(root: Task): Set<Task> {
         val set: MutableSet<Task> = HashSet()
@@ -122,12 +138,29 @@ class Digraph {
             val task = tasks[key]
             // 不存在的Task，有可能是手误写错的，也可能是业务节点Task，全部构建为 VirtualFlowTask，等待手动触发
             if (task == null) {
-                virtualTasks[key] = VirtualFlowTask(key)
+                virtualTasks[key] = makeVirtualFlowTask(key)
             } else {
                 set.add(task)
             }
         }
         return set
+    }
+
+    private fun makeVirtualFlowTask(name: String) = when (name) {
+        TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION -> VirtualFlowTask(name)
+        TheRouterFlowTask.APP_ONCREATE -> VirtualFlowTask(
+            TheRouterFlowTask.APP_ONCREATE,
+            TheRouterFlowTask.THEROUTER_INITIALIZATION
+        )
+        TheRouterFlowTask.THEROUTER_INITIALIZATION -> VirtualFlowTask(
+            TheRouterFlowTask.THEROUTER_INITIALIZATION,
+            TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION
+        )
+        TheRouterFlowTask.APP_ONSPLASH -> VirtualFlowTask(
+            TheRouterFlowTask.APP_ONSPLASH,
+            TheRouterFlowTask.THEROUTER_INITIALIZATION
+        )
+        else -> VirtualFlowTask(name, TheRouterFlowTask.THEROUTER_INITIALIZATION)
     }
 }
 

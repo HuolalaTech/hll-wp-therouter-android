@@ -28,6 +28,11 @@ import java.util.*
 private val disposableQueue = LinkedList<PendingNavigator>()
 internal val arguments = HashMap<String, SoftReference<Any>>()
 
+/**
+ * 路由导航器。与RouterItem作用类似，允许互转。
+ * RouterItem 用于描述一个静态的路由项
+ * Navigator 用于描述一个路由项的跳转动作
+ */
 open class Navigator(var url: String?, val intent: Intent?) {
     val normalUrl = url
     val extras = Bundle()
@@ -207,6 +212,14 @@ open class Navigator(var url: String?, val intent: Intent?) {
         return this
     }
 
+    fun optObject(key: String) = arguments[key]?.get()
+
+    /**
+     * 通过导航器创建Intent，会自动将Navigator中的参数传入Intent
+     * intent.putExtra(KEY_ACTION, routeItem.action)
+     * intent.putExtra(KEY_PATH, getUrlWithParams())
+     * intent.putExtra(KEY_DESCRIPTION, routeItem.description)
+     */
     fun createIntent(ctx: Context?): Intent {
         debug("Navigator::createIntent", "begin navigate $simpleUrl")
         val context = ctx ?: getApplicationContext()
@@ -230,8 +243,6 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 }
             }
         }
-        // reset callback
-        TheRouterLifecycleCallback.setActivityCreatedObserver {}
         val navigationIntent = intent ?: Intent()
         if (match != null) {
             routerInterceptor.invoke(match!!) { routeItem ->
@@ -248,7 +259,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 if (context !is Activity) {
                     navigationIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                TheRouterLifecycleCallback.setActivityCreatedObserver {
+                TheRouterLifecycleCallback.addActivityCreatedObserver(routeItem.className) {
                     if (it.javaClass.name == routeItem.className) {
                         if (!TextUtils.isEmpty(routeItem.action)) {
                             TheRouter.build(routeItem.action)
@@ -290,6 +301,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
         return navigationIntent
     }
 
+    /**
+     * 通过导航器创建Fragment
+     * 接收方可通过argus或@Autowired获取参数
+     */
     fun <T : Fragment?> createFragment(): T? {
         var fragment: Fragment? = null
         debug("Navigator::navigationFragment", "begin navigate $simpleUrl")
@@ -359,6 +374,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
         navigation(ctx, null, requestCode, ncb)
     }
 
+    /**
+     * 跳转到对应Activity落地页
+     */
     @JvmOverloads
     fun navigation(ctx: Context?, fragment: Fragment?, requestCode: Int, ncb: NavigationCallback? = null) {
         if (!initedRouteMap || pending) {
@@ -399,8 +417,6 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 }
             }
         }
-        // reset callback
-        TheRouterLifecycleCallback.setActivityCreatedObserver {}
         if (match != null) {
             debug("Navigator::navigation", "NavigationCallback on found")
             callback.onFound(this)
@@ -419,7 +435,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 if (context !is Activity && fragment == null) {
                     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
-                TheRouterLifecycleCallback.setActivityCreatedObserver {
+                TheRouterLifecycleCallback.addActivityCreatedObserver(routeItem.className) {
                     if (it.javaClass.name == routeItem.className) {
                         callback.onActivityCreated(this, it)
                         if (!TextUtils.isEmpty(routeItem.action)) {
@@ -488,10 +504,16 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
     }
 
+    /**
+     * 执行导航器Action
+     */
     fun action() {
         action(null)
     }
 
+    /**
+     * 执行导航器Action
+     */
     fun action(ctx: Context? = null) {
         if (ActionManager.isAction(this)) {
             navigation(ctx)
@@ -517,12 +539,24 @@ private var routerInterceptor = { route: RouteItem, callback: (RouteItem) -> Uni
     callback.invoke(route)
 }
 
+/**
+ * 自定义全局路由跳转结果回调
+ *
+ * 如果使用TheRouter跳转，传入了一个不识别的的path，则不会有任何处理。你也可以定义一个默认的全局回调，来处理跳转情况，如果落地页是 Fragment 则不会回调。
+ * 当然，跳转结果的回调不止这一个用途，可以根据业务有自己的处理。
+ * 回调也可以单独为某一次跳转设置，navigation()方法有重载可以传入设置。
+ */
 fun defaultNavigationCallback(callback: NavigationCallback?) {
     callback?.let {
         defaultCallback = it
     }
 }
 
+/**
+ * 应用场景：用于修复客户端上路由 path 错误问题。
+ * 例如：相对路径转绝对路径，或由于服务端下发的链接无法固定https或http，但客户端代码写死了 https 的 path，就可以用这种方式统一。
+ * 注：必须在 TheRouter.build() 方法调用前添加处理器，否则处理器前的所有path不会被修改。
+ */
 fun addNavigatorPathFixHandle(handle: NavigatorPathFixHandle) {
     fixHandles.add(handle)
     Collections.sort(fixHandles, Comparator { o1, o2 ->
@@ -534,10 +568,20 @@ fun addNavigatorPathFixHandle(handle: NavigatorPathFixHandle) {
     })
 }
 
+/**
+ * 移除Path修改器
+ */
 fun removeNavigatorPathFixHandle(interceptor: NavigatorPathFixHandle): Boolean {
     return fixHandles.remove(interceptor)
 }
 
+/**
+ * 页面替换器
+ * 应用场景：需要将某些path指定为新链接的时候使用。 也可以用在修复链接的场景，但是与 path 修改器不同的是，修改器通常是为了解决通用性的问题，替换器只在页面跳转时才会生效，更多是用来解决特性问题。
+ *
+ * 例如模块化的时候，首页壳模板组件中开发了一个SplashActivity广告组件作为应用的MainActivity，在闪屏广告结束的时候自动跳转业务首页页面。 但是每个业务不同，首页页面的 Path 也不相同，而不希望让每个业务线自己去改这个首页壳模板组件，此时就可以组件中先写占位符https://kymjs.com/splash/to/home，让接入方通过 Path 替换器解决。
+ * 注：必须在 TheRouter.build().navigation() 方法调用前添加处理器，否则处理器前的所有跳转不会被替换。
+ */
 fun addPathReplaceInterceptor(interceptor: PathReplaceInterceptor) {
     pathReplaceInterceptors.add(interceptor)
     Collections.sort(pathReplaceInterceptors, Comparator { o1, o2 ->
@@ -553,6 +597,15 @@ fun removePathReplaceInterceptor(interceptor: PathReplaceInterceptor): Boolean {
     return pathReplaceInterceptors.remove(interceptor)
 }
 
+/**
+ * 路由替换器
+ * 应用场景：常用在未登录不能使用的页面上。例如访问用户钱包页面，在钱包页声明的时候，可以在路由表上声明本页面是需要登录的，在路由跳转过程中，如果落地页是需要登录的，则先替换路由到登录页，同时将原落地页信息作为参数传给登录页，登录流程处理完成后可以继续执行之前的路由操作。
+ *
+ * 路由替换器的拦截点更靠后，主要用于框架已经从路由表中根据 path 找到路由以后，对找到的路由做操作。
+ *
+ * 这种逻辑在所有页面跳转前写不太合适，以前的做法通常是在落地页写逻辑判断用户是否具有权限，但其实在路由层完成更合适。
+ * 注：必须在 TheRouter.build().navigation() 方法调用前添加处理器，否则处理器前的所有跳转不会被替换。
+ */
 fun addRouterReplaceInterceptor(interceptor: RouterReplaceInterceptor) {
     routerReplaceInterceptors.add(interceptor)
     Collections.sort(routerReplaceInterceptors, Comparator { o1, o2 ->
@@ -568,6 +621,12 @@ fun removeRouterReplaceInterceptor(interceptor: RouterReplaceInterceptor): Boole
     return routerReplaceInterceptors.remove(interceptor)
 }
 
+/**
+ * 路由AOP拦截器
+ * 与前三个处理器不同的点在于，路由的AOP拦截器全局只能有一个。用于实现AOP的能力，在整个TheRouter跳转的过程中，跳转前，目标页是否找到的回调，跳转时，跳转后，都可以做一些自定义的逻辑处理。
+ *
+ * 使用场景：场景很多，最常用的是可以拦截一些跳转，例如debug页面在生产环境不打开，或定制startActivity跳转方法。
+ */
 fun setRouterInterceptor(interceptor: RouterInterceptor) {
     routerInterceptor = { route: RouteItem, callback: (RouteItem) -> Unit ->
         interceptor.process(route, object : InterceptorCallback {
@@ -578,10 +637,25 @@ fun setRouterInterceptor(interceptor: RouterInterceptor) {
     }
 }
 
+/**
+ * 路由AOP拦截器
+ * 与前三个处理器不同的点在于，路由的AOP拦截器全局只能有一个。用于实现AOP的能力，在整个TheRouter跳转的过程中，跳转前，目标页是否找到的回调，跳转时，跳转后，都可以做一些自定义的逻辑处理。
+ *
+ * 使用场景：场景很多，最常用的是可以拦截一些跳转，例如debug页面在生产环境不打开，或定制startActivity跳转方法。
+ */
 fun setRouterInterceptor(interceptor: (routeItem: RouteItem, callback: (RouteItem) -> Unit) -> Unit) {
     routerInterceptor = interceptor
 }
 
+/**
+ * 可以被挂起的导航器，通常用于延迟动作。
+ * 延迟跳转主要应用场景有两种：
+ * 第一种：初始化时期，如果路由表的量非常巨大时。这种情况在别的路由框架上要么会白屏一段时间，要么直接丢弃这次跳转。在TheRouter中，框架会暂存当前的跳转动作，在路由表初始化完成后立刻执行跳转。
+ * 第二种：从Android 8.0开始，Activity 不能在后台启动页面，这对于业务判断造成了很大的影响。由于可能会有前台 Service 的情况，不能单纯以 Activity 生命周期判断前后台。在TheRouter中，框架允许业务自定义前后台规则，如果为后台情况，可以将跳转动作暂存，当进入前台后再恢复跳转。
+ *
+ * 回复跳转时需要调用
+ * sendPendingNavigator(); //toplevel方法，无需类名调用，Java请通过NavigatorKt类名调用
+ */
 fun sendPendingNavigator() {
     disposableQueue.forEach { it.action() }
     disposableQueue.clear()

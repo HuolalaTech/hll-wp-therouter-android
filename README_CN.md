@@ -202,7 +202,7 @@ TheRouter
 加入 【TheRouter】 官方微信群：  
 *如过期，请加微信：kymjs123，拉你进群*   
 
-<img src="https://kymjs.com/therouter/wx/therouter_wx.jpg" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
+<img src="https://therouter.cn/assets/img/therouter_wx_group.png" width="40%" alt="TheRouter官方微信群：https://kymjs.com/therouter/wx" />
 
 ### 七、开源协议
 

@@ -11,6 +11,9 @@ fun pushHistory(event: History) = history.addLast(event)
 
 fun popHistory() = history.removeLast()
 
+/**
+ * 导出路由的全部记录
+ */
 fun export(level: Level): List<String> {
     val list = ArrayList<String>()
     ArrayList(history).forEach {

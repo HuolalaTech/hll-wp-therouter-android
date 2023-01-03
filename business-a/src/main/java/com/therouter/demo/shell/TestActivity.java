@@ -15,6 +15,7 @@ import com.therouter.demo.BusinessAPathIndex;
 import com.therouter.demo.di.IRingReferenceTest;
 import com.therouter.demo.di.ITest0;
 import com.therouter.demo.di.ITest1;
+import com.therouter.demo.di.ITestClassAnnotation;
 import com.therouter.inject.RecyclerBin;
 import com.therouter.inject.RouterInject;
 import com.therouter.router.Route;
@@ -72,6 +73,15 @@ public class TestActivity extends AppCompatActivity {
             public void onClick(View v) {
                 //传入不同的params对象，会得到不同的TheRouter返回值
                 textView.append("\n取得对象：" + TheRouter.get(IRingReferenceTest.class));
+            }
+        });
+        final Button button4 = (Button) findViewById(R.id.button4);
+        button4.setText("测试类注释，直接返回接口");
+        button4.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //传入不同的params对象，会得到不同的TheRouter返回值
+                textView.append("\n取得对象：" + TheRouter.get(ITestClassAnnotation.class));
             }
         });
     }

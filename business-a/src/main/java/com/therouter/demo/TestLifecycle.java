@@ -17,7 +17,7 @@ public class TestLifecycle {
     /**
      * 当app3执行以后会被执行
      */
-    @FlowTask(taskName = BusinessAFlowTask.BIZA_INTERCEPTOR, dependsOn = BusinessAFlowTask.MMKV + "," + BusinessAFlowTask.APP_ONCREATE)
+    @FlowTask(taskName = BusinessAFlowTask.BIZA_INTERCEPTOR, dependsOn = BusinessAFlowTask.MMKV + "," + BusinessAFlowTask.THEROUTER_INITIALIZATION)
     public static void test1(Context context) {
         System.out.println("=====来自业务模块====Application.Create，mmkv之后执行");
 
@@ -49,7 +49,7 @@ public class TestLifecycle {
         System.out.println(Thread.currentThread().getName() + "异步====来自业务模块=====login执行以后");
     }
 
-    @FlowTask(taskName = BusinessAFlowTask.BIZA_INIT2, dependsOn = BusinessAFlowTask.LOGIN + BusinessAFlowTask.APP_ONCREATE)
+    @FlowTask(taskName = BusinessAFlowTask.BIZA_INIT2, dependsOn = BusinessAFlowTask.LOGIN + "," + BusinessAFlowTask.THEROUTER_INITIALIZATION)
     public static void test3(Context context) {
         System.out.println(Thread.currentThread().getName() + "线程=====来自业务模块====");
     }

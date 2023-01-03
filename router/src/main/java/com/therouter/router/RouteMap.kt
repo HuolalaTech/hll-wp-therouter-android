@@ -21,7 +21,9 @@ internal var initedRouteMap = false
 private var onRouteMapChangedListener: OnRouteMapChangedListener? = null
 val gson = Gson()
 
-
+/**
+ * 在主线程初始化路由表
+ */
 fun initRouteMap() {
     try {
         InputStreamReader(
@@ -47,6 +49,9 @@ fun initRouteMap() {
     }
 }
 
+/**
+ * 在异步初始化路由表
+ */
 fun asyncInitRouteMap() {
     execute {
         debug("RouteMap", "will be add route map from： initDefaultRouteMap()")
@@ -64,15 +69,26 @@ fun asyncInitRouteMap() {
     }
 }
 
+/**
+ * 设置自定义路由表初始化逻辑，设置后会在异步线程中调用自定义初始化逻辑
+ * 默认初始化逻辑为 initRouteMap()
+ */
 fun setRouteMapInitTask(task: RouterMapInitTask?) = task?.let {
     initTask = task
 }
 
+/**
+ * 当路由项被改变时，会触发回调。例如路由项被覆盖、路由项内容发生变化
+ */
 fun setOnRouteMapChangedListener(listener: OnRouteMapChangedListener?) {
     // 允许被空覆盖
     onRouteMapChangedListener = listener
 }
 
+/**
+ * 设置自定义路由表初始化逻辑，设置后会在异步线程中调用自定义初始化逻辑
+ * 默认初始化逻辑为 initRouteMap()
+ */
 fun setRouteMapInitTask(task: () -> Unit) {
     initTask = object : RouterMapInitTask {
         override fun asyncInitRouteMap() {
@@ -81,6 +97,10 @@ fun setRouteMapInitTask(task: () -> Unit) {
     }
 }
 
+/**
+ * 尝试通过Intent，从路由表中获取对应的路由Path
+ * 如果路由表中没有对应路由，则将类名作为路由Path新创建一条路由项
+ */
 @Synchronized
 fun foundPathFromIntent(intent: Intent): String? {
     val className = intent.component?.className
@@ -99,6 +119,9 @@ fun foundPathFromIntent(intent: Intent): String? {
     return null
 }
 
+/**
+ * 尝试通过Path，从路由表中获取对应的路由项，如果没有对应路由，则返回null
+ */
 @Synchronized
 fun matchRouteMap(url: String?): RouteItem? {
     var path = TheRouter.build(url ?: "").simpleUrl
@@ -112,6 +135,9 @@ fun matchRouteMap(url: String?): RouteItem? {
     return routeItem
 }
 
+/**
+ * 向路由表添加路由
+ */
 @Synchronized
 fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
     if (routeItemArray != null && !routeItemArray.isEmpty()) {
@@ -121,6 +147,9 @@ fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
     }
 }
 
+/**
+ * 向路由表添加路由
+ */
 @Synchronized
 fun addRouteItem(routeItem: RouteItem) {
     var path = routeItem.path

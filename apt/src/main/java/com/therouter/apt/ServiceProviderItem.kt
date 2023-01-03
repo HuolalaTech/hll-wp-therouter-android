@@ -2,7 +2,7 @@ package com.therouter.apt
 
 import javax.lang.model.element.Element
 
-class ServiceProviderItem : Comparable<ServiceProviderItem> {
+class ServiceProviderItem(val isMethod: Boolean) : Comparable<ServiceProviderItem> {
 
     var element: Element? = null
 
@@ -15,7 +15,7 @@ class ServiceProviderItem : Comparable<ServiceProviderItem> {
     var params = ArrayList<String>()
 
     override fun toString(): String {
-        return "ServiceProviderItem(element=$element, className='$className', returnType='$returnType', methodName='$methodName', params=$params)"
+        return "ServiceProviderItem(isMethod=$isMethod, element=$element, className='$className', returnType='$returnType', methodName='$methodName', params=$params)"
     }
 
     override fun compareTo(other: ServiceProviderItem): Int {
