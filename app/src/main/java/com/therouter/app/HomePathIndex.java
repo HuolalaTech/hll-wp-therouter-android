@@ -25,4 +25,5 @@ public interface HomePathIndex extends BusinessAPathIndex, BusinessBPathIndex {
     String CONSENT_TO_PRIVACY_AGREEMENT = "http://kymjs.com/therouter/consent_to_privacy_agreement";
 
     String ACTION = "action://action_test";
+    String ACTION2 = "action://action_test2";
 }

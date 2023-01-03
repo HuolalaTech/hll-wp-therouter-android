@@ -8,17 +8,16 @@ import com.therouter.inject.Singleton
 import com.therouter.router.Autowired
 import com.therouter.router.Route
 import com.therouter.router.Routes
+import com.therouter.router.action.ActionInterceptor
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintStream
-import java.lang.StringBuilder
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
 import javax.lang.model.element.ElementKind.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 /**
@@ -50,6 +49,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         supportTypes.add(Routes::class.java.canonicalName)
         supportTypes.add(Route::class.java.canonicalName)
         supportTypes.add(FlowTask::class.java.canonicalName)
+        supportTypes.add(ActionInterceptor::class.java.canonicalName)
         return supportTypes
     }
 
@@ -65,10 +65,24 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             val providerItemList = parseServiceProvider(roundEnvironment)
             val autowiredItems = parseAutowired(roundEnvironment)
             genAutowiredJavaFile(autowiredItems)
+            val actionInterceptorList = parseActionInterceptor(roundEnvironment)
             val flowTaskList = parseFlowTask(roundEnvironment)
-            genJavaFile(providerItemList, flowTaskList)
+            genJavaFile(providerItemList, flowTaskList, actionInterceptorList)
         }
         return isProcess
+    }
+
+    private fun parseActionInterceptor(roundEnv: RoundEnvironment): MutableList<ActionInterceptorItem> {
+        val list: MutableList<ActionInterceptorItem> = ArrayList()
+        val set = roundEnv.getElementsAnnotatedWith(ActionInterceptor::class.java)
+        for (element in set) {
+            val annotation = element.getAnnotation(ActionInterceptor::class.java)
+            val actionInterceptorItem = ActionInterceptorItem()
+            actionInterceptorItem.actionName = annotation.actionName
+            actionInterceptorItem.className = element.toString()
+            list.add(actionInterceptorItem)
+        }
+        return list
     }
 
     private fun parseFlowTask(roundEnv: RoundEnvironment): MutableList<FlowTaskItem> {
@@ -475,9 +489,10 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
 
     private fun genJavaFile(
         pageList: ArrayList<ServiceProviderItem>,
-        flowTaskList: MutableList<FlowTaskItem>
+        flowTaskList: MutableList<FlowTaskItem>,
+        actionInterceptorList: MutableList<ActionInterceptorItem>
     ) {
-        if (pageList.isEmpty() && flowTaskList.isEmpty()) {
+        if (pageList.isEmpty() && flowTaskList.isEmpty() && actionInterceptorList.isEmpty()) {
             return
         }
         val stringBuilder = StringBuilder()
@@ -485,6 +500,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var isFirst = true
         flowTaskList.sort()
         pageList.sort()
+        actionInterceptorList.sort()
         flowTaskList.forEach {
             if (!isFirst) {
                 stringBuilder.append(",")
@@ -618,6 +634,9 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\t\t\t\treturn \"${item.className}.${item.methodName}(context);\";")
                 ps.println("\t\t\t}")
                 ps.println("\t\t}));")
+            }
+            for (item in actionInterceptorList) {
+                ps.println("\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", new ${item.className}());")
             }
             ps.println("\t}")
             ps.println("}")

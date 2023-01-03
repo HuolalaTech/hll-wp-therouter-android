@@ -25,6 +25,7 @@
             android:textAllCaps="false"
             android:textColor="#333"
             android:textSize="15sp" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -60,6 +61,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="多模块订阅action优先级中断"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="使用注解声明的Action处理器"
             android:textAllCaps="false" />
 
     </LinearLayout>
