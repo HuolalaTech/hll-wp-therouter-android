@@ -277,6 +277,22 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             TheRouterPluginUtils.fillTodoList(flowTaskDependMap, it)
         }
 
+        if (Boolean.valueOf(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.SHOW_FLOW_DEPEND))) {
+            flowTaskDependMap.keySet().each {
+                TheRouterPluginUtils.fillNode(TheRouterPluginUtils.createNode(flowTaskDependMap, it), null)
+            }
+
+            println()
+            println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::dependency   " + "${LogUI.E_NORMAL.value}")
+            println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
+            TheRouterPluginUtils.dependStack.sort().each {
+                println("${LogUI.C_WARN.value}" + "[Root --> $it]" + "${LogUI.E_NORMAL.value}")
+            }
+            println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
+            println()
+
+        }
+
         time = System.currentTimeMillis() - start
         println("---------TheRouter check flow task map, spend:${time}ms--------------")
 

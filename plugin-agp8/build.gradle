@@ -1,6 +1,7 @@
 apply plugin: 'groovy'
 
 group = "cn.therouter"
+description = "plugin"
 
 dependencies {
     implementation gradleApi()
@@ -14,8 +15,8 @@ dependencies {
 }
 
 repositories {
-    mavenCentral()
     google()
+    mavenCentral()
 }
 
 task sourcesJar(type: Jar) {

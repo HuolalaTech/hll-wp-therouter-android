@@ -413,7 +413,6 @@ class TheRouterSymbolProcessor(
                         "dependsOn" -> flowTaskItem.dependencies = "${arg.value}"
                     }
                 }
-                logger.warn(flowTaskItem.taskName + "==111=======" + flowTaskItem.dependencies)
                 list.add(flowTaskItem)
             }
         }
@@ -567,7 +566,6 @@ class TheRouterSymbolProcessor(
             ps.println("\t\t@kotlin.jvm.JvmStatic")
             ps.println("\t\tfun addFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
             for (item in flowTaskList) {
-                logger.warn(item.taskName + "=========" + item.dependencies)
                 ps.println("\t\t\tdigraph.addTask(com.therouter.flow.Task(${item.async}, \"${item.taskName}\", \"${item.dependencies}\", object : com.therouter.flow.FlowTaskRunnable {")
                 ps.println("\t\t\t\toverride fun run() = ${item.className}.${item.methodName}(context)")
                 ps.println()
