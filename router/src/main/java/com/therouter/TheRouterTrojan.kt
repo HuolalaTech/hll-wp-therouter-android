@@ -24,7 +24,7 @@ class InnerTheRouterContentProvider : ContentProvider() {
         }
         if (theRouterUseAutoInit) {
             TheRouter.init(applicationContext)
-            debug("Trojan", "TheRouter auto init in Application")
+            debug("InnerTheRouterContentProvider", "TheRouter auto init in Application")
         }
         return true
     }
