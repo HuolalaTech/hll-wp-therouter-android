@@ -452,7 +452,11 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\tpublic static final String TAG = \"Created by kymjs, and APT Version is ${BuildConfig.VERSION}.\";")
                 ps.println("\tpublic static final String THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\";")
                 ps.println()
-                ps.println(String.format("\tpublic static void autowiredInject(%s target) {", key))
+                ps.println("\tpublic static void autowiredInject(Object obj) {")
+                ps.println()
+                ps.println("\t\tif (obj instanceof $key) {")
+                ps.println()
+                ps.println("\t\t$key target = ($key) obj;")
                 ps.println("\t\tfor (com.therouter.router.interceptor.AutowiredParser parser : com.therouter.TheRouter.getParserList()) {")
                 for ((i, item) in pageMap[key]!!.withIndex()) {
                     val variableName = "variableName$i"
@@ -475,6 +479,8 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     ps.println(String.format("\t\t\t\ttarget.%s = $variableName;", item.fieldName))
                     ps.println("\t\t\t}")
                 }
+                ps.println("\t\t}")
+                ps.println()
                 ps.println("\t\t}")
                 ps.println("\t}")
                 ps.println("}")

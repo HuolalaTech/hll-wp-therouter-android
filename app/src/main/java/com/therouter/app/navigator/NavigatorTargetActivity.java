@@ -18,9 +18,6 @@ import com.therouter.router.interceptor.NavigationCallback;
 
 import org.jetbrains.annotations.NotNull;
 
-@Route(path = HomePathIndex.HOME2, params = {"strFromAnnotation", "来自注解设置的默认值，允许路由动态修改"})
-@Route(path = HomePathIndex.HOME, action = "action://scheme.com",
-        description = "路由测试首页", params = {"strFromAnnotation", "来自注解设置的默认值，允许路由动态修改"})
 public class NavigatorTargetActivity extends AppCompatActivity {
 
 //    .withInt("intValue", 12345678) // 测试传 int 值
