@@ -8,6 +8,10 @@ import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.collections.ArrayList
 
+/**
+ * 用于构建有向图，防止Task出现循环依赖的情况<br>
+ * 详细逻辑请见官网文档：https://therouter.cn/docs/2022/08/26/01
+ */
 class Digraph {
     private val tasks = HashMap<String, Task>()
 
@@ -21,6 +25,9 @@ class Digraph {
     var inited = false
         private set
 
+    /**
+     * 向有向图中加入Task
+     */
     fun addTask(task: Task?) {
         require(task != null, "Digraph", "Task is Null")
         require(!TextUtils.isEmpty(task?.taskName), "Digraph", "Task name is Empty ${task?.javaClass?.name}")
@@ -51,8 +58,14 @@ class Digraph {
         }
     }
 
+    /**
+     * 待执行的task
+     */
     fun addPendingRunnable(r: Runnable) = pendingTaskRunnableList.add(r)
 
+    /**
+     * 初始化方法
+     */
     fun initSchedule() {
         for (task in tasks.values) {
             fillTodoList(task)
@@ -92,6 +105,9 @@ class Digraph {
         }
     }
 
+    /**
+     * 开始调度，依次执行无依赖的task，详细逻辑请见官网文档：https://therouter.cn/docs/2022/08/26/01
+     */
     fun schedule() {
         for (task in todoList) {
             if (task.isNone()) {
@@ -117,6 +133,9 @@ class Digraph {
         }
     }
 
+    /**
+     * VirtualTask 执行完后调用此方法，用于通知其他依赖此 VirtualTask 的其他 Task 执行
+     */
     fun onVirtualTaskDoneListener(name: String) {
         virtualTasks.values.forEach {
             if (it.dependencies.contains(name)) {
@@ -125,12 +144,18 @@ class Digraph {
         }
     }
 
+    /**
+     * 通过taskName获取一个虚拟task，如果不存在，则创建一个新的虚拟task
+     */
     fun getVirtualTask(name: String) = virtualTasks[name] ?: let {
         val vtask = makeVirtualFlowTask(name)
         virtualTasks[name] = vtask
         vtask
     }
 
+    /**
+     * 返回入参 Task 的依赖 Task
+     */
     fun getDepends(root: Task): Set<Task> {
         val set: MutableSet<Task> = HashSet()
         val dependencies = root.dependencies
