@@ -5,7 +5,7 @@ TheRouter: *Android componentization solution*
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
 [![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
 
-中文文档请见：[README_CN.md](https://github.com/HuolalaTech/hll-wp-therouter-android/blob/main/README_CN.md)  
+HomePage | [中文官网](https://therouter.cn/docs/2022/11/23/01)  
 
 ### A. Features
 
@@ -94,6 +94,11 @@ public class HomeActivity extends BaseActivity {
 ### C. proguard rules configuration  
 
 ```
+# need add for Fragment page route
+# -keep public class * extends android.app.Fragment
+# -keep public class * extends androidx.fragment.app.Fragment
+# -keep public class * extends android.support.v4.app.Fragment
+
 -keep class androidx.annotation.Keep
 -keep @androidx.annotation.Keep class * {*;}
 -keepclassmembers class * {
@@ -154,7 +159,7 @@ TheRouter
 
 ### E. Change Log  
 
-link to Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
+link to Releases：[Github Releases](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
 
 ### F. Author 
 <img src="https://github.com/HuolalaTech/hll-wp-therouter-android/wiki/uploads/image/hll.png" width="40%" alt="HUOLALA mobile technology team" />

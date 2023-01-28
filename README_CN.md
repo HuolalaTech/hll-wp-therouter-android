@@ -11,7 +11,7 @@ TheRouter 核心功能具备四大能力：
 
 * 页面导航跳转能力（[Navigator](https://therouter.cn/docs/2022/08/28/01)） 页面跳转能力介绍 
 * 跨模块依赖注入能力（[ServiceProvider](https://therouter.cn/docs/2022/08/27/01)）跨模块依赖注入 
-* 单模块自动初始化能力 （[FlowTaskExecutor](https://therouter.cn/docs/2022/08/26/01)）单模块自动初始化能力介绍 
+* 单模块初始化(业务节点订阅)能力 （[FlowTaskExecutor](https://therouter.cn/docs/2022/08/26/01)）单模块自动初始化能力介绍 
 * 动态化能力 ([ActionManager](https://therouter.cn/docs/2022/08/25/01)) 动态化能力支持 
 
 * Demo:
@@ -20,7 +20,7 @@ TheRouter 核心功能具备四大能力：
 
 ### 二、使用介绍
 
-**更多详细使用文档请查看项目 [Wiki](https://therouter.cn/doc)**
+**更多详细使用文档请查看项目官网 [therouter.cn](https://therouter.cn/doc)**
 
 #### 2.1 Gradle 引入
 
@@ -93,6 +93,11 @@ public class HomeActivity extends BaseActivity {
 #### 2.5 混淆配置  
 
 ```
+# 如果使用了 Fragment 路由，需要保证类名不被混淆
+# -keep public class * extends android.app.Fragment
+# -keep public class * extends androidx.fragment.app.Fragment
+# -keep public class * extends android.support.v4.app.Fragment
+
 -keep class androidx.annotation.Keep
 -keep @androidx.annotation.Keep class * {*;}
 -keepclassmembers class * {
@@ -193,7 +198,7 @@ TheRouter
 
 ### 五、Change Log  
 
-详见 Wiki：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
+详见 releases 记录：[CHANGELOG](https://github.com/HuolalaTech/hll-wp-therouter-android/releases)
 
 ### 六、Author
 
