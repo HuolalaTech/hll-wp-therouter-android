@@ -375,7 +375,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             return
         }
         val path = processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_ROUTER_MAP + "temp").toUri().toString()
-        // 确保只要编译的软硬件环境不变，类名就不会改变
+        // As long as the compiled software and hardware environment remains unchanged, the class name will not change
         val className = PREFIX_ROUTER_MAP + abs(path.hashCode()).toString()
         val routePagelist = duplicateRemove(pageList)
         val json = gson.toJson(routePagelist)
@@ -387,7 +387,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 genJavaFile.delete()
             }
 
-            ps = PrintStream(jfo.openOutputStream())
+            ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
             ps.println(String.format("package %s;", PACKAGE))
             ps.println()
             ps.println("/**")
@@ -439,7 +439,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             var ps: PrintStream? = null
             try {
                 val jfo = processingEnv.filer.createSourceFile(fullClassName)
-                ps = PrintStream(jfo.openOutputStream())
+                ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
                 ps.println(String.format("package %s;", packageName))
                 ps.println()
                 ps.println("/**")
@@ -525,7 +525,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             if (genJavaFile.exists()) {
                 genJavaFile.delete()
             }
-            ps = PrintStream(jfo.openOutputStream())
+            ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
             ps.println(String.format("package %s;", PACKAGE))
             ps.println()
             ps.println("/**")
@@ -581,7 +581,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     }
                 }
                 ps.println(") {")
-                ps.println("\t\t\t// 加上编译期的类型校验，防止方法实际返回类型与注解声明返回类型不匹配")
+                ps.println("\t\t\t//type verification during compilation prevents the actual return type of the method from mismatching with the return type declared by the annotation")
 
                 if (serviceProviderItem.isMethod) {
                     ps.print(
