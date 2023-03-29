@@ -1,6 +1,3 @@
-@file:JvmMultifileClass
-@file:JvmName("TheRouteContentProvider")
-
 package com.therouter
 
 import android.content.ContentProvider
