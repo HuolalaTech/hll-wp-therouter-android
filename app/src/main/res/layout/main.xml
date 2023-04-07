@@ -9,6 +9,14 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/content_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:textColor="#999"
+            android:textSize="12sp" />
+
+        <TextView
             android:id="@+id/content_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
