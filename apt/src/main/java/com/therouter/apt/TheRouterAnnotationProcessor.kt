@@ -393,6 +393,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println("/**")
             ps.println(" * Generated code, Don't modify!!!")
             ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+            ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
             ps.println(
@@ -445,6 +446,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("/**")
                 ps.println(" * Generated code, Don't modify!!!")
                 ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+                ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
                 ps.println(" */")
                 ps.println("@androidx.annotation.Keep")
                 ps.println(String.format("public class %s {", simpleClassName))
@@ -531,6 +533,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println("/**")
             ps.println(" * Generated code, Don't modify!!!")
             ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+            ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
             ps.println(String.format("public class %s implements com.therouter.inject.Interceptor {", className))
