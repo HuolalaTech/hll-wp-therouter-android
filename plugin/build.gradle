@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 group = "cn.therouter"
 
@@ -16,6 +17,14 @@ dependencies {
 repositories {
     mavenCentral()
     google()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 task sourcesJar(type: Jar) {

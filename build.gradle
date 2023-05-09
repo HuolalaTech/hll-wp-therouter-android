@@ -1,7 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+// 自动添加apt和router依赖
+apply plugin: "therouter-starter"
+
 buildscript {
     ext.kotlin_version = '1.5.21'
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
@@ -16,6 +20,7 @@ buildscript {
 allprojects {
     apply from: "${project.getRootDir()}/therouter.gradle"
     repositories {
+        mavenLocal()
         google()
         mavenCentral()
     }
