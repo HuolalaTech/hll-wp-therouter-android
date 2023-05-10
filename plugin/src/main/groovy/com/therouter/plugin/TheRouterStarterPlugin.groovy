@@ -44,12 +44,14 @@ public class TheRouterStarterPlugin implements Plugin<Project> {
 
             }
         } else if (isApp || isLib) {
-            proj.configurations.configureEach { Configuration conf ->
-                def confName = conf.name
-                if (confName == KAPT) {
-                    project.dependencies.add(confName, "cn.therouter:apt:$version")
-                } else if (confName == IMPLEMENTATION) {
-                    project.dependencies.add(confName, "cn.therouter:router:$version")
+            proj.with {
+                configurations.configureEach { Configuration conf ->
+                    def confName = conf.name
+                    if (confName == KAPT) {
+                        project.dependencies.add(confName, "cn.therouter:apt:$version")
+                    } else if (confName == IMPLEMENTATION) {
+                        project.dependencies.add(confName, "cn.therouter:router:$version")
+                    }
                 }
             }
         } else {
