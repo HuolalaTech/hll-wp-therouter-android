@@ -2,6 +2,7 @@ package com.therouter.app;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 
 import com.therouter.TheRouter;
 
@@ -16,6 +17,15 @@ public class MainActivity extends AppCompatActivity {
         setTitle("功能介绍");
         // 如果用到了 @Autowired 注解，需要加这一行，这一行直接写在BaseActivity中更好
 //        TheRouter.inject(this);
+
+        TextView textView = findViewById(R.id.content_version);
+        try {
+            Class<?> aClass = Class.forName("com.therouter.BuildConfig");
+            Object version = aClass.getField("VERSION").get(null);
+            textView.setText("当前SDK版本：" + version.toString());
+        } catch (Exception e) {
+            textView.setText("当前SDK版本：源码依赖");
+        }
 
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override

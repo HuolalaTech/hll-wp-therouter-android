@@ -15,11 +15,16 @@ public class TheRouterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        def isApp = project.plugins.hasPlugin(AppPlugin)
-        if (isApp) {
+        boolean isLibrary = false
+        project.plugins.each {
+            if (it.getClass().name.contains("LibraryPlugin")) {
+                isLibrary = true
+            }
+        }
+        if (!isLibrary) {
             def android = project.extensions.getByType(AppExtension)
-            def therouterTransform = new TheRouterTransform(project);
-            android.registerTransform(therouterTransform);
+            def therouterTransform = new TheRouterTransform(project)
+            android.registerTransform(therouterTransform)
         } else {
             throw new RuntimeException("`apply plugin: 'therouter'` must call in Application module")
         }

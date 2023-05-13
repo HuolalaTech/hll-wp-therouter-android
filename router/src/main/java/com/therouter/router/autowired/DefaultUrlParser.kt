@@ -40,6 +40,14 @@ class DefaultUrlParser : AutowiredParser {
             } catch (e: NumberFormatException) {
             }
         }
+
+        if (value.javaClass.name.contains('$') &&
+            (foundClass(type)?.name == value.javaClass.name
+                    || foundClass(type)?.isAssignableFrom(value.javaClass) == true)
+        ) {
+            return value as T?
+        }
+
         return null
     }
 }
@@ -110,4 +118,16 @@ private fun transform(type: String, value: String) = when (type) {
     }
 
     else -> null
+}
+
+private fun foundClass(type: String): Class<*>? {
+    if (type.contains('.')) {
+        return try {
+            Class.forName(type)
+        } catch (e: ClassNotFoundException) {
+            val index = type.lastIndexOf('.')
+            foundClass(StringBuilder(type).replace(index, index + 1, "$").toString())
+        }
+    }
+    return null
 }

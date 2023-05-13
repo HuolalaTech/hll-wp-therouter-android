@@ -129,7 +129,7 @@
   },
   {
     "path": "http://kymjs.com/therouter/home2",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "",
     "description": "",
     "params": {
@@ -137,15 +137,8 @@
     }
   },
   {
-    "path": "http://kymjs.com/therouter/home2",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
     "path": "http://kymjs.com/therouter/home",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "action://scheme.com",
     "description": "路由测试首页",
     "params": {

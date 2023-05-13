@@ -8,17 +8,16 @@ import com.therouter.inject.Singleton
 import com.therouter.router.Autowired
 import com.therouter.router.Route
 import com.therouter.router.Routes
+import com.therouter.router.action.ActionInterceptor
 import java.io.File
 import java.io.FileInputStream
 import java.io.PrintStream
-import java.lang.StringBuilder
 import java.util.*
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.*
 import javax.lang.model.element.ElementKind.*
-import kotlin.collections.ArrayList
 import kotlin.math.abs
 
 /**
@@ -50,6 +49,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         supportTypes.add(Routes::class.java.canonicalName)
         supportTypes.add(Route::class.java.canonicalName)
         supportTypes.add(FlowTask::class.java.canonicalName)
+        supportTypes.add(ActionInterceptor::class.java.canonicalName)
         return supportTypes
     }
 
@@ -65,10 +65,24 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             val providerItemList = parseServiceProvider(roundEnvironment)
             val autowiredItems = parseAutowired(roundEnvironment)
             genAutowiredJavaFile(autowiredItems)
+            val actionInterceptorList = parseActionInterceptor(roundEnvironment)
             val flowTaskList = parseFlowTask(roundEnvironment)
-            genJavaFile(providerItemList, flowTaskList)
+            genJavaFile(providerItemList, flowTaskList, actionInterceptorList)
         }
         return isProcess
+    }
+
+    private fun parseActionInterceptor(roundEnv: RoundEnvironment): MutableList<ActionInterceptorItem> {
+        val list: MutableList<ActionInterceptorItem> = ArrayList()
+        val set = roundEnv.getElementsAnnotatedWith(ActionInterceptor::class.java)
+        for (element in set) {
+            val annotation = element.getAnnotation(ActionInterceptor::class.java)
+            val actionInterceptorItem = ActionInterceptorItem()
+            actionInterceptorItem.actionName = annotation.actionName
+            actionInterceptorItem.className = element.toString()
+            list.add(actionInterceptorItem)
+        }
+        return list
     }
 
     private fun parseFlowTask(roundEnv: RoundEnvironment): MutableList<FlowTaskItem> {
@@ -243,7 +257,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var toStringStr = annotation.toString()
         //过滤最后一个字符')'
         toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(",").forEach { temp ->
+        toStringStr.split(", ").forEach { temp ->
             if (temp.contains(KEY_RETURNTYPE)) {
                 val value = handleReturnType(temp.trim())
                 if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
@@ -320,7 +334,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString()
         //过滤最后一个字符')'
         toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(",").forEach { temp ->
+        toStringStr.split(", ").forEach { temp ->
             if (temp.contains(KEY_RETURNTYPE)) {
                 val value = handleReturnType(temp.trim())
                 if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
@@ -361,7 +375,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             return
         }
         val path = processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_ROUTER_MAP + "temp").toUri().toString()
-        // 确保只要编译的软硬件环境不变，类名就不会改变
+        // As long as the compiled software and hardware environment remains unchanged, the class name will not change
         val className = PREFIX_ROUTER_MAP + abs(path.hashCode()).toString()
         val routePagelist = duplicateRemove(pageList)
         val json = gson.toJson(routePagelist)
@@ -373,12 +387,13 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 genJavaFile.delete()
             }
 
-            ps = PrintStream(jfo.openOutputStream())
+            ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
             ps.println(String.format("package %s;", PACKAGE))
             ps.println()
             ps.println("/**")
             ps.println(" * Generated code, Don't modify!!!")
             ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+            ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
             ps.println(
@@ -425,12 +440,13 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             var ps: PrintStream? = null
             try {
                 val jfo = processingEnv.filer.createSourceFile(fullClassName)
-                ps = PrintStream(jfo.openOutputStream())
+                ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
                 ps.println(String.format("package %s;", packageName))
                 ps.println()
                 ps.println("/**")
                 ps.println(" * Generated code, Don't modify!!!")
                 ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+                ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
                 ps.println(" */")
                 ps.println("@androidx.annotation.Keep")
                 ps.println(String.format("public class %s {", simpleClassName))
@@ -438,7 +454,11 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\tpublic static final String TAG = \"Created by kymjs, and APT Version is ${BuildConfig.VERSION}.\";")
                 ps.println("\tpublic static final String THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\";")
                 ps.println()
-                ps.println(String.format("\tpublic static void autowiredInject(%s target) {", key))
+                ps.println("\tpublic static void autowiredInject(Object obj) {")
+                ps.println()
+                ps.println("\t\tif (obj instanceof $key) {")
+                ps.println()
+                ps.println("\t\t$key target = ($key) obj;")
                 ps.println("\t\tfor (com.therouter.router.interceptor.AutowiredParser parser : com.therouter.TheRouter.getParserList()) {")
                 for ((i, item) in pageMap[key]!!.withIndex()) {
                     val variableName = "variableName$i"
@@ -462,6 +482,8 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t}")
+                ps.println()
+                ps.println("\t\t}")
                 ps.println("\t}")
                 ps.println("}")
                 ps.flush()
@@ -475,9 +497,10 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
 
     private fun genJavaFile(
         pageList: ArrayList<ServiceProviderItem>,
-        flowTaskList: MutableList<FlowTaskItem>
+        flowTaskList: MutableList<FlowTaskItem>,
+        actionInterceptorList: MutableList<ActionInterceptorItem>
     ) {
-        if (pageList.isEmpty() && flowTaskList.isEmpty()) {
+        if (pageList.isEmpty() && flowTaskList.isEmpty() && actionInterceptorList.isEmpty()) {
             return
         }
         val stringBuilder = StringBuilder()
@@ -485,6 +508,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var isFirst = true
         flowTaskList.sort()
         pageList.sort()
+        actionInterceptorList.sort()
         flowTaskList.forEach {
             if (!isFirst) {
                 stringBuilder.append(",")
@@ -503,12 +527,13 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             if (genJavaFile.exists()) {
                 genJavaFile.delete()
             }
-            ps = PrintStream(jfo.openOutputStream())
+            ps = PrintStream(jfo.openOutputStream(), false, "UTF-8")
             ps.println(String.format("package %s;", PACKAGE))
             ps.println()
             ps.println("/**")
             ps.println(" * Generated code, Don't modify!!!")
             ps.println(" * Created by kymjs, and APT Version is ${BuildConfig.VERSION}.")
+            ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
             ps.println(String.format("public class %s implements com.therouter.inject.Interceptor {", className))
@@ -559,7 +584,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                     }
                 }
                 ps.println(") {")
-                ps.println("\t\t\t// 加上编译期的类型校验，防止方法实际返回类型与注解声明返回类型不匹配")
+                ps.println("\t\t\t//type verification during compilation prevents the actual return type of the method from mismatching with the return type declared by the annotation")
 
                 if (serviceProviderItem.isMethod) {
                     ps.print(
@@ -618,6 +643,9 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\t\t\t\treturn \"${item.className}.${item.methodName}(context);\";")
                 ps.println("\t\t\t}")
                 ps.println("\t\t}));")
+            }
+            for (item in actionInterceptorList) {
+                ps.println("\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", new ${item.className}());")
             }
             ps.println("\t}")
             ps.println("}")

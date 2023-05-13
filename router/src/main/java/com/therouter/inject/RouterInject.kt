@@ -89,7 +89,11 @@ class RouterInject {
         }
 
         //正常情况都会有创建器，如果没有，则使用默认创建器
-        if (!tClass.isInterface) {
+        if (tClass.isInterface) {
+            debugLog("$tClass is interface, but do not have @ServiceProvider")
+        } else if (isNumberClass(tClass.name)) {
+            debugLog("$tClass is primitive data types, but do not have @ServiceProvider")
+        } else {
             val paramsClass = if (params.isNotEmpty()) {
                 val temp = arrayOfNulls<Class<*>?>(params.size)
                 for (i in params.indices) {
@@ -107,10 +111,29 @@ class RouterInject {
                 debugLog(tClass.toString() + " do not have @ServiceProvider class. And constructor error::" + e.message)
                 e.printStackTrace()
             }
-        } else {
-            debugLog("$tClass is interface, but do not have @ServiceProvider")
         }
         return t
+    }
+
+    private fun isNumberClass(type: String) = when (type) {
+        "kotlin.Byte" -> true
+        "kotlin.Short" -> true
+        "kotlin.Int" -> true
+        "kotlin.Long" -> true
+        "kotlin.Float" -> true
+        "kotlin.Double" -> true
+        "kotlin.Boolean" -> true
+        "kotlin.Char" -> true
+        "java.lang.Byte" -> true
+        "java.lang.Short" -> true
+        "java.lang.Integer" -> true
+        "java.lang.Long" -> true
+        "java.lang.Float" -> true
+        "java.lang.Double" -> true
+        "java.lang.Boolean" -> true
+        "java.lang.Character" -> true
+        "java.lang.String" -> true
+        else -> false
     }
 
     /**

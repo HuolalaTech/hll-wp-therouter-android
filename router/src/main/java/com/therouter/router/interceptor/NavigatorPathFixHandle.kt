@@ -6,6 +6,9 @@ package com.therouter.router.interceptor
  * 注：必须在 TheRouter.build() 方法调用前添加处理器，否则处理器前的所有path不会被修改。
  */
 abstract class NavigatorPathFixHandle {
+
+    fun watch(path: String?): Boolean = true
+
     abstract fun fix(path: String?): String?
 
     /**

@@ -101,21 +101,19 @@ public class AddCodeVisitor extends ClassVisitor {
                             Label labelCatch = new Label();
                             mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
 
-                            Label labelIf = new Label();
-                            mv.visitLabel(labelIf);
-                            mv.visitLdcInsn(autowiredClassName);
-                            mv.visitVarInsn(ALOAD, 0);
-                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
-                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z", false);
+//                            Label labelIf = new Label();
+//                            mv.visitLabel(labelIf);
+//                            mv.visitLdcInsn(autowiredClassName);
+//                            mv.visitVarInsn(ALOAD, 0);
+//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
+//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
+//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z", false);
 
                             Label labelInvoke = new Label();
-                            mv.visitJumpInsn(IFEQ, labelInvoke);
+//                            mv.visitJumpInsn(IFEQ, labelInvoke);
                             mv.visitLabel(tryStart);
                             mv.visitVarInsn(ALOAD, 0);
-                            String className = autowiredClassName.replace("__TheRouter__Autowired", "").replace('.', '/');
-                            mv.visitTypeInsn(CHECKCAST, className);
-                            mv.visitMethodInsn(INVOKESTATIC, autowiredClassName.replace('.', '/'), methodName, String.format("(L%s;)V", className), false);
+                            mv.visitMethodInsn(INVOKESTATIC, autowiredClassName.replace('.', '/'), methodName, "(Ljava/lang/Object;)V", false);
                             mv.visitLabel(tryEnd);
                             mv.visitJumpInsn(GOTO, labelInvoke);
                             mv.visitLabel(labelCatch);

@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
+import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Navigator;
 import com.therouter.router.Route;
 import com.therouter.router.interceptor.NavigationCallback;
@@ -29,6 +30,9 @@ public class NavigatorTestActivity extends AppCompatActivity {
         // @Autowired 注入，这一行应该写在BaseActivity中更好
         TheRouter.inject(this);
 
+        InternalBeanTest.RowBean bean = new InternalBeanTest.RowBean();
+        bean.setHello("helloField");
+
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,6 +47,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withChar("charValue", 'c')  // 测试 char
                         .withDouble("double", 3.14159265358972)// 测试double，key与关键字冲突
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
                         .navigation();
             }
         });
@@ -60,6 +66,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withChar("charValue", 'c')
                         .withDouble("double", 3.14159265358972)
                         .withFloat("floatValue", 3.14159265358972F)
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
                         .getUrlWithParams();
                 Toast.makeText(v.getContext(), urlWithParams, Toast.LENGTH_LONG).show();
             }
@@ -78,6 +86,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withChar("charValue", 'c')  // 测试 char
                         .withDouble("double", 3.14159265358972)// 测试double，key与关键字冲突
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
                         .navigation(v.getContext(), new NavigationCallback() {
                             @Override
                             public void onFound(@NotNull Navigator navigator) {

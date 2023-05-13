@@ -64,5 +64,13 @@ public class TestActionActivity extends BaseActivity {
                 // .action(v.getContext());
             }
         });
+        findViewById(R.id.button5).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TheRouter.build(HomePathIndex.ACTION2).action();
+                // 如果传入了Content，则接收处的context参数为此处传入的，否则为Application
+                // .action(v.getContext());
+            }
+        });
     }
 }

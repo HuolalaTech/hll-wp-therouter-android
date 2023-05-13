@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
+import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Autowired;
 import com.therouter.router.Navigator;
 import com.therouter.router.Route;
@@ -18,9 +19,6 @@ import com.therouter.router.interceptor.NavigationCallback;
 
 import org.jetbrains.annotations.NotNull;
 
-@Route(path = HomePathIndex.HOME2, params = {"strFromAnnotation", "来自注解设置的默认值，允许路由动态修改"})
-@Route(path = HomePathIndex.HOME, action = "action://scheme.com",
-        description = "路由测试首页", params = {"strFromAnnotation", "来自注解设置的默认值，允许路由动态修改"})
 public class NavigatorTargetActivity extends AppCompatActivity {
 
 //    .withInt("intValue", 12345678) // 测试传 int 值
@@ -70,6 +68,11 @@ public class NavigatorTargetActivity extends AppCompatActivity {
     @Autowired(id = R.id.button1)
     Button button1;
 
+    @Autowired(name = "SerializableObject")
+    InternalBeanTest.RowBean serializableBean;
+    @Autowired(name = "ParcelableObject")
+    InternalBeanTest.RowBean parcelableBean;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -107,6 +110,12 @@ public class NavigatorTargetActivity extends AppCompatActivity {
 
         final TextView textview9 = findViewById(R.id.textview9);
         textview9.setText("接收float类型的值：" + floatValue);
+
+        final TextView textview10 = findViewById(R.id.textview10);
+        textview10.setText("接收 SerializableObject 的值：" + serializableBean.hello);
+
+        final TextView textview11 = findViewById(R.id.textview11);
+        textview11.setText("接收 ParcelableObject 的值：" + parcelableBean.hello);
 
         button1.setText("展示注解默认值");
         button1.setOnClickListener(new View.OnClickListener() {

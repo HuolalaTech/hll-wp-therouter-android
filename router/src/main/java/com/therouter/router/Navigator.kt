@@ -55,7 +55,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
         require(!TextUtils.isEmpty(url), "Navigator", "Navigator constructor parameter url is empty")
         for (handle in fixHandles) {
             handle?.let {
-                url = it.fix(url)
+                if (it.watch(url)) {
+                    url = it.fix(url)
+                }
             }
         }
 //        uri = Uri.parse(url ?: "")
@@ -226,8 +228,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
         var matchUrl: String? = simpleUrl
         for (interceptor in pathReplaceInterceptors) {
             interceptor?.let {
-                matchUrl = interceptor.replace(matchUrl)
-                debug("Navigator::createIntent", "path replace to $matchUrl")
+                if (it.watch(matchUrl)) {
+                    val temp = matchUrl
+                    matchUrl = it.replace(matchUrl)
+                    debug("Navigator::createIntent", "$temp replace to $matchUrl")
+                }
             }
         }
         var match = matchRouteMap(matchUrl)
@@ -237,9 +242,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         for (interceptor in routerReplaceInterceptors) {
             interceptor?.let {
-                match = interceptor.replace(match)
-                match?.let {
-                    debug("Navigator::createIntent", "route replace to $it")
+                if (it.watch(match)) {
+                    match = it.replace(match)
+                    match?.let { routeItem ->
+                        debug("Navigator::createIntent", "route replace to $routeItem")
+                    }
                 }
             }
         }
@@ -311,7 +318,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
         var matchUrl: String? = simpleUrl
         for (interceptor in pathReplaceInterceptors) {
             interceptor?.let {
-                matchUrl = interceptor.replace(matchUrl)
+                if (it.watch(matchUrl)) {
+                    matchUrl = it.replace(matchUrl)
+                }
             }
         }
         debug("Navigator::navigationFragment", "path replace to $matchUrl")
@@ -322,7 +331,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         for (interceptor in routerReplaceInterceptors) {
             interceptor?.let {
-                match = interceptor.replace(match)
+                if (it.watch(match)) {
+                    match = it.replace(match)
+                }
             }
         }
         debug("Navigator::navigationFragment", "route replace to $match")
@@ -393,8 +404,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
         var matchUrl: String? = simpleUrl
         for (interceptor in pathReplaceInterceptors) {
             interceptor?.let {
-                matchUrl = interceptor.replace(matchUrl)
-                debug("Navigator::navigation", "path replace to $matchUrl")
+                if (it.watch(matchUrl)) {
+                    val temp = matchUrl
+                    matchUrl = it.replace(matchUrl)
+                    debug("Navigator::navigation", "$temp replace to $matchUrl")
+                }
             }
         }
         var match = matchRouteMap(matchUrl)
@@ -411,9 +425,11 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         for (interceptor in routerReplaceInterceptors) {
             interceptor?.let {
-                match = interceptor.replace(match)
-                match?.let {
-                    debug("Navigator::navigation", "route replace to $it")
+                if (it.watch(match)) {
+                    match = it.replace(match)
+                    match?.let { routeItem ->
+                        debug("Navigator::navigation", "route replace to $routeItem")
+                    }
                 }
             }
         }

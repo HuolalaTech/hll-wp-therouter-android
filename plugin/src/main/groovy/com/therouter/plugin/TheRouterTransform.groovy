@@ -54,6 +54,7 @@ public class TheRouterTransform extends Transform {
 
     private void theRouterTransform(boolean isIncremental, Collection<TransformInput> inputs, outputProvider) {
         println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
+        println "当前编译 JDK Version 为::" + System.getProperty("java.version")
         println "本次是增量编译::" + isIncremental
         println "CHECK_ROUTE_MAP::" + getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP)
         println "CHECK_FLOW_UNKNOW_DEPEND::" + getLocalProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND)
@@ -66,35 +67,20 @@ public class TheRouterTransform extends Transform {
         inputs.each { TransformInput input ->
             // 遍历jar包
             input.jarInputs.each { JarInput jarInput ->
-                def jarName = jarInput.name
-                def md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
-                if (jarName.endsWith(".jar")) {
-                    jarName = jarName.substring(0, jarName.length() - 4)
-                }
-                def dest = outputProvider.getContentLocation(jarName + md5Name,
-                        jarInput.contentTypes, jarInput.scopes, Format.JAR)
+                def jarName = jarInput.name.toLowerCase()
+                def dest = outputProvider.getContentLocation(jarName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
                 if (!isIncremental) {
-                    if (!jarInput.file.absolutePath.contains("kotlin-stdlib-") &&
-                            !jarInput.file.absolutePath.contains("google") &&
-                            !jarInput.file.absolutePath.contains("coordinatorlayout-") &&
-                            !jarInput.file.absolutePath.contains("lifecycle-") &&
-                            !jarInput.file.absolutePath.contains("annotations-") &&
-                            !jarInput.file.absolutePath.contains("multidex") &&
-                            !jarInput.file.absolutePath.contains("appcompat") &&
-                            !jarInput.file.absolutePath.contains("legacy-support") &&
-                            !jarInput.file.absolutePath.contains("material") &&
-                            !jarInput.file.absolutePath.contains("rxandroid-") &&
-                            !jarInput.file.absolutePath.contains("rxjava-") &&
-                            !jarInput.file.absolutePath.contains("gson") &&
-                            !jarInput.file.absolutePath.contains("glide") &&
-                            !jarInput.file.absolutePath.contains("upppay-") &&
-                            !jarInput.file.absolutePath.contains("leakcanary-") &&
-                            !jarInput.file.absolutePath.contains("-security-") &&
-                            !jarInput.file.absolutePath.contains("-amap-") &&
-                            !jarInput.file.absolutePath.contains("-lib_hllIm-") &&
-                            !jarInput.file.absolutePath.contains("pinyin4j-") &&
-                            !jarInput.file.absolutePath.contains("SensorsAnalyticsSDK-") &&
-                            !jarInput.file.absolutePath.contains("vectordrawable")) {
+                    if (!jarName.contains("com.google.") &&
+                            !jarName.contains("org.jetbrains") &&
+                            !jarName.contains("androidx.") &&
+                            !jarName.contains("io.reactivex") &&
+                            !jarName.contains("com.squareup") &&
+                            !jarName.contains("glide") &&
+                            !jarName.contains("upppay") &&
+                            !jarName.contains("amap") &&
+                            !jarName.contains("hllim") &&
+                            !jarName.contains("pinyin4j") &&
+                            !jarName.contains("sensors")) {
                         JarInfo jarInfo = TheRouterInjects.tagJar(jarInput.file)
                         routeMapStringSet.addAll(jarInfo.routeMapStringFromJar)
                         flowTaskMap.putAll(jarInfo.flowTaskMapFromJar)
@@ -111,9 +97,6 @@ public class TheRouterTransform extends Transform {
                     JarInfo jarInfo = TheRouterInjects.tagJar(jarInput.file)
                     routeMapStringSet.addAll(jarInfo.routeMapStringFromJar)
                     flowTaskMap.putAll(jarInfo.flowTaskMapFromJar)
-                    if (dest.exists()) {
-                        FileUtils.forceDelete(dest)
-                    }
                     FileUtils.copyFile(jarInput.file, dest)
                 } else if (isIncremental && jarInput.getStatus() == Status.REMOVED) {
                     JarInfo jarInfo = TheRouterInjects.tagJar(jarInput.file)
@@ -151,9 +134,6 @@ public class TheRouterTransform extends Transform {
                                 SourceInfo sourceInfo = TheRouterInjects.tagClass(inputFile.absolutePath)
                                 routeMapStringSet.addAll(sourceInfo.routeMapStringFromSource)
                                 flowTaskMap.putAll(sourceInfo.flowTaskMapFromSource)
-                                if (destFile.exists()) {
-                                    destFile.delete()
-                                }
                                 FileUtils.copyFile(inputFile, destFile)
                                 break
                             default:

@@ -267,8 +267,8 @@ private class Task(
 
 private fun getTrace(trace: Array<StackTraceElement>): String {
     val str = StringBuilder()
-    (3..7).forEach {
-        str.append(trace[it]).append('\n')
+    trace.forEach {
+        str.append(it).append('\n')
     }
     return str.toString()
 }

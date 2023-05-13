@@ -25,6 +25,7 @@
         <activity android:name="com.therouter.app.action.TestActionActivity" />
         <activity android:name="com.therouter.app.navigator.KotlinTestActivity" />
         <activity android:name="com.therouter.app.navigator.NavigatorTargetActivity" />
+        <activity android:name="com.therouter.app.navigator.NavigatorTargetActivity2" />
         <activity android:name="com.therouter.app.navigator.ObjectTargetActivity" />
         <activity android:name="com.therouter.app.navigator.InterceptorActivity" />
         <activity android:name="com.therouter.app.router.PendingTestActivity" />

@@ -12,6 +12,14 @@ const val NONE = 0
 const val DONE = 2
 const val RUNNING = 1
 
+/**
+ * 所有Task都有一个共同的父依赖：THEROUTER_INITIALIZATION
+ *
+ * @param async 是否在异步执行此 task
+ * @param taskName 任务名
+ * @param dependsOn 此 task 依赖的任务，如果有多个，用英文逗号隔开，例如 "mmkv,init"
+ * @param dependsOn 此 task 的执行内容
+ */
 open class Task(
     val async: Boolean,
     val taskName: String,
@@ -20,6 +28,10 @@ open class Task(
 ) {
     @Volatile
     protected var state = NONE
+
+    /**
+     *  此 task 依赖的任务集合
+     */
     val dependencies = HashSet<String>()
 
     init {

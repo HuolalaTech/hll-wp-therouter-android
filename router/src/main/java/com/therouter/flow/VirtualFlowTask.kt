@@ -47,6 +47,9 @@ class VirtualFlowTask(taskName: String, dependsOn: String = "") : Task(true, tas
     }
 }
 
+/**
+ * 内部方法，当应用的首个 Activity.onCreate() 执行后自动调用
+ */
 fun splashInit() = TheRouter.runTask(TheRouterFlowTask.APP_ONSPLASH)
 
 /**
