@@ -110,8 +110,8 @@ public class MainActivity extends AppCompatActivity {
                 TheRouter.get(ITest2.class);
                 TheRouter.get(ITest3.class);
                 TheRouter.get(ITest4.class);
-                TheRouter.get(ITest5.class);
-                TheRouter.get(ITest6.class);
+                TheRouter.get(ITest5.class, "参数1", v.getContext());
+                TheRouter.get(ITest6.class, "参数");
                 TheRouter.get(ITest7.class);
                 TheRouter.get(ITest8.class);
             }

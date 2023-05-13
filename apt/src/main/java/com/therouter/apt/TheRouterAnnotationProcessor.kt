@@ -257,7 +257,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var toStringStr = annotation.toString()
         //过滤最后一个字符')'
         toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(",").forEach { temp ->
+        toStringStr.split(", ").forEach { temp ->
             if (temp.contains(KEY_RETURNTYPE)) {
                 val value = handleReturnType(temp.trim())
                 if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
@@ -334,7 +334,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString()
         //过滤最后一个字符')'
         toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(",").forEach { temp ->
+        toStringStr.split(", ").forEach { temp ->
             if (temp.contains(KEY_RETURNTYPE)) {
                 val value = handleReturnType(temp.trim())
                 if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {

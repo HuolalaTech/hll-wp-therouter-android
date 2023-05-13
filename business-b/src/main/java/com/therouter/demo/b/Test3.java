@@ -77,13 +77,13 @@ public class Test3 implements ITest1, ITest2, ITest3, ITest4, ITest5, ITest6, IT
         return new Test3();
     }
 
-    @ServiceProvider
-    public static ITest5 createTest5() {
+    @ServiceProvider(params = {String.class, Context.class})
+    public static ITest5 createTest5(String str, Context context) {
         return new Test3();
     }
 
-    @ServiceProvider
-    public static ITest6 createTest6() {
+    @ServiceProvider(params = {String.class})
+    public static ITest6 createTest6(String str) {
         return new Test3();
     }
 
