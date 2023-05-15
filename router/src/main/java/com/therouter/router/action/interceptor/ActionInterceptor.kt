@@ -38,14 +38,7 @@ abstract class ActionInterceptor {
      * 响应某个指定Action
      */
     @CallSuper
-    open fun handle(context: Context, navigator: Navigator): Boolean = handle(context, navigator.extras)
-
-    /**
-     * 替换为 handle(Context, Navigator)<br>
-     * 将在 1.1.4 版本移除本
-     */
-    @Deprecated
-    open fun handle(context: Context, args: Bundle): Boolean = false
+    open fun handle(context: Context, navigator: Navigator): Boolean = false
 
     /**
      * 当前Action的所有处理器均处理完成以后回调。
