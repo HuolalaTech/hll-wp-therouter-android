@@ -64,6 +64,9 @@ public class TheRouterTransform extends Transform {
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
         println("---------TheRouter transform start-------------------------------------------")
+        if (!isIncremental) {
+            outputProvider.deleteAll()
+        }
         inputs.each { TransformInput input ->
             // 遍历jar包
             input.jarInputs.each { JarInput jarInput ->
