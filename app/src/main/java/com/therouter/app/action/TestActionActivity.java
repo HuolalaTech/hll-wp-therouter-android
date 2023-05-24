@@ -11,6 +11,7 @@ import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
 import com.therouter.demo.base.BaseActivity;
+import com.therouter.router.Navigator;
 import com.therouter.router.Route;
 import com.therouter.router.action.interceptor.ActionInterceptor;
 
@@ -25,8 +26,9 @@ public class TestActionActivity extends BaseActivity {
 
         TheRouter.addActionInterceptor(HomePathIndex.ACTION, new ActionInterceptor() {
             @Override
-            public boolean handle(@NonNull Context context, @NonNull Bundle args) {
-                Toast.makeText(context, "收到参数" + args.getString("key"), Toast.LENGTH_SHORT).show();
+            public boolean handle(@NonNull Context context, @NonNull Navigator navigator) {
+                super.handle(context, navigator);
+                Toast.makeText(context, "收到参数" + navigator.getExtras().getString("key"), Toast.LENGTH_SHORT).show();
                 return false;
             }
         });
