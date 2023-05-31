@@ -4,6 +4,7 @@ buildscript {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
     }
     dependencies {
         classpath "cn.therouter:plugin:$TheRouterVersion"
@@ -18,6 +19,7 @@ allprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
     }
 }
 
