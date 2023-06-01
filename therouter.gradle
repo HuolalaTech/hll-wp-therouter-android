@@ -46,11 +46,11 @@ def moduleKapt(String compileStr, Closure configureClosure) {
 
     if (includeModule.contains(artifactid)) {
         println(project.name + "源码依赖：===project(\":$artifactid\")")
-        projects.project.dependencies.add("kapt", project(':' + artifactid), configureClosure)
+        projects.project.dependencies.add("ksp", project(':' + artifactid), configureClosure)
 //        projects.project.configurations { compile.exclude group: group, module: artifactid }
     } else {
         println(project.name + "依赖：=======$group:$artifactid:$version")
-        projects.project.dependencies.add("kapt", "$group:$artifactid:$version", configureClosure)
+        projects.project.dependencies.add("ksp", "$group:$artifactid:$version", configureClosure)
     }
 }
 

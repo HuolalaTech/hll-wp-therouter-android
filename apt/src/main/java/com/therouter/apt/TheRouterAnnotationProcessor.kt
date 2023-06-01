@@ -24,19 +24,19 @@ import kotlin.math.abs
  * Created by ZhangTao on 17/8/11.
  */
 
-private const val POINT = "."
-private const val KEY_USE_EXTEND = "USE_EXTENSION"
-private const val PROPERTY_FILE = "gradle.properties"
-private const val STR_TRUE = "true"
-private const val KEY_PARAMS = "params="
-private const val KEY_CLASS = "clazz="
-private const val KEY_RETURNTYPE = "returnType="
-private const val CLASS = "class"
+const val POINT = "."
+const val KEY_USE_EXTEND = "USE_EXTENSION"
+const val PROPERTY_FILE = "gradle.properties"
+const val STR_TRUE = "true"
+const val KEY_PARAMS = "params="
+const val KEY_CLASS = "clazz="
+const val KEY_RETURNTYPE = "returnType="
+const val CLASS = "class"
 const val PACKAGE = "a"
 const val PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
 const val PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
 const val SUFFIX_AUTOWIRED = "__TheRouter__Autowired"
-private val gson = Gson()
+val gson = Gson()
 
 class TheRouterAnnotationProcessor : AbstractProcessor() {
     private var isProcess = false
@@ -214,8 +214,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         }
         return list
     }
-
-    private fun duplicateRemove(pageList: List<RouteItem>) = ArrayList(HashSet(pageList)).apply { sort() }
 
     private fun checkSingleton(roundEnv: RoundEnvironment) {
         val set1 = roundEnv.getElementsAnnotatedWith(
@@ -663,18 +661,21 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         }
         return type
     }
+}
 
-    private fun transformNumber(type: String): String {
-        return when (type) {
-            "byte" -> "Byte"
-            "short" -> "Short"
-            "int" -> "Integer"
-            "long" -> "Long"
-            "float" -> "Float"
-            "double" -> "Double"
-            "boolean" -> "Boolean"
-            "char" -> "Character"
-            else -> type
-        }
+fun transformNumber(type: String): String {
+    return when (type) {
+        "byte" -> "java.lang.Byte"
+        "short" -> "java.lang.Short"
+        "int" -> "java.lang.Integer"
+        "long" -> "java.lang.Long"
+        "float" -> "java.lang.Float"
+        "double" -> "java.lang.Double"
+        "boolean" -> "java.lang.Boolean"
+        "char" -> "java.lang.Character"
+        else -> type
     }
 }
+
+fun duplicateRemove(pageList: List<RouteItem>) =
+    ArrayList(HashSet(pageList)).apply { sort() }

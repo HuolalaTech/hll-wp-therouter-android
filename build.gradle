@@ -9,6 +9,7 @@ buildscript {
     dependencies {
         classpath "cn.therouter:plugin:$TheRouterVersion"
         classpath "com.android.tools.build:gradle:4.1.2"
+        classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.6.21-1.0.6"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.6.0"
     }
