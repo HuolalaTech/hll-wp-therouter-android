@@ -355,7 +355,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
     private fun handleReturnType(str: String): String {
         val index = str.indexOf(KEY_RETURNTYPE)
         return if (index >= 0) {
-            str.substring(index + KEY_RETURNTYPE.length)
+            str.substring(index + KEY_RETURNTYPE.length).replace(".class", "")
         } else ""
     }
 
