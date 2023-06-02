@@ -16,6 +16,7 @@ import com.therouter.demo.di.IRingReferenceTest;
 import com.therouter.demo.di.ITest0;
 import com.therouter.demo.di.ITest1;
 import com.therouter.demo.di.ITestClassAnnotation;
+import com.therouter.demo.di.ITestClassAnnotation2;
 import com.therouter.inject.RecyclerBin;
 import com.therouter.inject.RouterInject;
 import com.therouter.router.Route;
@@ -81,7 +82,9 @@ public class TestActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //传入不同的params对象，会得到不同的TheRouter返回值
-                textView.append("\n取得对象：" + TheRouter.get(ITestClassAnnotation.class));
+                textView.append("\n取得测试对象1：" + TheRouter.get(ITestClassAnnotation.class));
+                //传入不同的params对象，会得到不同的TheRouter返回值
+                textView.append("\n取得测试对象2：" + TheRouter.get(ITestClassAnnotation2.class));
             }
         });
     }

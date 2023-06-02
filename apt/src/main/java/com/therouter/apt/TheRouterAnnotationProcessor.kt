@@ -240,7 +240,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             } else {
                 handleClassServiceProviderItem(element)
             }
-            list.add(serviceProviderItem)
+            list.add(checkServiceProviderItemInvalidData(serviceProviderItem))
         }
         return list
     }
@@ -366,6 +366,26 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             val split = substring.split(",")
             ArrayList(split)
         } else ArrayList<String>()
+    }
+
+    private fun checkServiceProviderItemInvalidData(item: ServiceProviderItem): ServiceProviderItem {
+        if (item.returnType.endsWith(".class")) {
+            item.returnType = item.returnType.replace(".class", "")
+        }
+
+        if (item.params.size == 1) {
+            if (item.params[0] == "{}") {
+                item.params = ArrayList<String>()
+            }
+        } else if (item.params.size > 1) {
+            ArrayList(item.params).forEach {
+                if (it == "{}") {
+                    item.params.remove(it)
+                }
+            }
+        }
+
+        return item
     }
 
     private fun genRouterMapFile(pageList: List<RouteItem>) {

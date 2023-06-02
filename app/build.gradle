@@ -1,7 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'therouter'
 apply plugin: 'kotlin-android'
-//apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.devtools.ksp'
 
 android {
