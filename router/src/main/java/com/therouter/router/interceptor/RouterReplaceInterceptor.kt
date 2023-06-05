@@ -12,7 +12,7 @@ import com.therouter.router.RouteItem
  * 注：必须在 TheRouter.build().navigation() 方法调用前添加处理器，否则处理器前的所有跳转不会被替换。
  */
 abstract class RouterReplaceInterceptor {
-    fun watch(routeItem: RouteItem?): Boolean = true
+    open fun watch(routeItem: RouteItem?): Boolean = true
 
     abstract fun replace(routeItem: RouteItem?): RouteItem?
 
