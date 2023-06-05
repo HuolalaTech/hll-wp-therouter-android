@@ -63,45 +63,8 @@
     "params": {}
   },
   {
-    "path": "http://kymjs.com/therouter/interceptor",
-    "className": "com.therouter.app.router.InterceptorActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/home2",
-    "className": "com.therouter.app.router.HomeActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/home",
-    "className": "com.therouter.app.router.HomeActivity",
-    "action": "action://scheme.com",
-    "description": "路由测试首页",
-    "params": {
-      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
-    }
-  },
-  {
     "path": "http://kymjs.com/therouter/demo_history",
     "className": "com.therouter.app.router.HistoryLogActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/callbacktest2",
-    "className": "com.therouter.app.router.ActivityA",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/callbacktest",
-    "className": "com.therouter.app.router.ActivityA",
     "action": "",
     "description": "",
     "params": {}
@@ -132,9 +95,7 @@
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "",
     "description": "",
-    "params": {
-      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
-    }
+    "params": {}
   },
   {
     "path": "http://kymjs.com/therouter/home2",
@@ -155,9 +116,21 @@
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "action://scheme.com",
     "description": "路由测试首页",
-    "params": {
-      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
-    }
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/home2",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/home",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
+    "action": "action://scheme.com",
+    "description": "路由测试首页",
+    "params": {}
   },
   {
     "path": "http://kymjs.com/therouter/test2",
@@ -181,50 +154,6 @@
     "params": {}
   },
   {
-    "path": "http://kymjs.com/therouter/home2",
-    "className": "com.therouter.app.navigator.HomeActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/home",
-    "className": "com.therouter.app.navigator.HomeActivity",
-    "action": "action://scheme.com",
-    "description": "路由测试首页",
-    "params": {
-      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
-    }
-  },
-  {
-    "path": "http://kymjs.com/therouter/callbacktest2",
-    "className": "com.therouter.app.navigator.ActivityA",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/callbacktest",
-    "className": "com.therouter.app.navigator.ActivityA",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/test2",
-    "className": "com.therouter.app.flowtask.TestActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/test",
-    "className": "com.therouter.app.flowtask.TestActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
     "path": "http://kymjs.com/therouter/consent_to_privacy_agreement",
     "className": "com.therouter.app.flowtask.FlowTaskTestActivity2",
     "action": "",
@@ -234,20 +163,6 @@
   {
     "path": "http://kymjs.com/therouter/demo_flow_task_executor",
     "className": "com.therouter.app.flowtask.FlowTaskTestActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/test2",
-    "className": "com.therouter.app.autoinit.TestActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/test",
-    "className": "com.therouter.app.autoinit.TestActivity",
     "action": "",
     "description": "",
     "params": {}

@@ -21,7 +21,7 @@ public class AddCodeVisitor extends ClassVisitor {
     private final boolean isIncremental;
 
     public AddCodeVisitor(ClassVisitor cv, Map<String, String> serviceProvideMap, Set<String> autowiredSet, Set<String> routeSet, boolean incremental) {
-        super(Opcodes.ASM7, cv);
+        super(Opcodes.ASM9, cv);
         this.serviceProvideList = new ArrayList<>(serviceProvideMap.keySet());
         this.serviceProvideMap = serviceProvideMap;
         this.autowiredList = new ArrayList<>(autowiredSet);
@@ -35,7 +35,7 @@ public class AddCodeVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String methodName, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(access, methodName, desc, signature, exceptions);
-        mv = new AdviceAdapter(Opcodes.ASM7, mv, access, methodName, desc) {
+        mv = new AdviceAdapter(Opcodes.ASM9, mv, access, methodName, desc) {
             @Override
             protected void onMethodEnter() {
                 super.onMethodEnter();
@@ -43,7 +43,9 @@ public class AddCodeVisitor extends ClassVisitor {
                 if (!"<init>".equals(methodName)) {
                     if ("trojan".equals(methodName)) {
                         for (String serviceProviderClassName : serviceProvideList) {
-                            serviceProviderClassName = "a/" + serviceProviderClassName;
+                            if (!serviceProviderClassName.startsWith("a/")) {
+                                serviceProviderClassName = "a/" + serviceProviderClassName;
+                            }
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
@@ -70,8 +72,13 @@ public class AddCodeVisitor extends ClassVisitor {
                     }
                     if ("addFlowTask".equals(methodName)) {
                         for (String serviceProviderClassName : serviceProvideList) {
-                            serviceProviderClassName = "a/" + serviceProviderClassName;
+                            if (!serviceProviderClassName.startsWith("a/")) {
+                                serviceProviderClassName = "a/" + serviceProviderClassName;
+                            }
                             String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
+                            if (aptVersion == null) {
+                                aptVersion = serviceProvideMap.get(serviceProviderClassName);
+                            }
                             // FlowTask 功能是从1.0.13开始引入的，
                             // 没有版本号的都是老版本，不能插入字节码，但源码引用的例外，需要插入字节码
                             if (aptVersion != null && !aptVersion.equals("0.0.0")) {
@@ -103,7 +110,7 @@ public class AddCodeVisitor extends ClassVisitor {
 
 //                            Label labelIf = new Label();
 //                            mv.visitLabel(labelIf);
-//                            mv.visitLdcInsn(autowiredClassName);
+//                            mv.visitLdcInsn(autowiredClassName.replace('/', '.'));
 //                            mv.visitVarInsn(ALOAD, 0);
 //                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
 //                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
