@@ -1,5 +1,7 @@
 package com.therouter.app.navigator;
 
+import static com.therouter.app.KotlinPathIndex.Test.HOME2;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -75,7 +77,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.HOME2)
+                TheRouter.build(HOME2)
                         .withInt("intValue", 12345678) // 测试传 int 值
                         .withString("stringIntValue", "9876543")// 测试用 string 传 int 值
                         .withString("str_123_Value", "使用另一个path跳转过来")// 测试 string

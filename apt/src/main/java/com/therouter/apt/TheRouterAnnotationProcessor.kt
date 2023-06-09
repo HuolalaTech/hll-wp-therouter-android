@@ -496,6 +496,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                         )
                     )
                     ps.println("\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t// ${item.description}")
                     ps.println(String.format("\t\t\t\ttarget.%s = $variableName;", item.fieldName))
                     ps.println("\t\t\t}")
                 }
