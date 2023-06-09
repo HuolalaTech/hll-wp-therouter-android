@@ -99,6 +99,18 @@ class TheRouterSymbolProcessor(
                                         k = null
                                     }
                                 }
+                            } else if (arg.value is java.util.ArrayList<*>) {
+                                require((arg.value as java.util.ArrayList<*>).size % 2 == 0) { "${routeItem.className} @Route(params) is not key value pairs" }
+                                var k: String? = null
+                                for (kv in arg.value as java.util.ArrayList<*>) {
+                                    if (k == null) {
+                                        require(kv != null) { "${routeItem.className} @Route(params) key is null" }
+                                        k = "$kv"
+                                    } else {
+                                        routeItem.params[k] = "$kv"
+                                        k = null
+                                    }
+                                }
                             }
                         }
                     }
