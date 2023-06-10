@@ -253,16 +253,18 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         serviceProviderItem.className = element.toString()
         serviceProviderItem.methodName = ""
 
-        var toStringStr = annotation.toString().replace(" ","")
+        val annotationStr = annotation.toString()
         val matcher =
             Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
-                .matcher(toStringStr)
+                .matcher(annotationStr)
         while (matcher.find()) {
             val params = matcher.group()
             val key = matcher.group(1)
             val value = params.substring(key.length + 1)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) serviceProviderItem.returnType = value
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
+                    serviceProviderItem.returnType = value
+                }
                 KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
                 else ->{}
             }
@@ -324,16 +326,18 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 serviceProviderItem.params = params
             }
         }
-        var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString().replace(" ","")
+        val annotationStr = element.getAnnotation(ServiceProvider::class.java).toString()
         val matcher =
             Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
-                .matcher(toStringStr)
+                .matcher(annotationStr)
         while (matcher.find()) {
             val params = matcher.group()
             val key = matcher.group(1)
             val value = params.substring(key.length + 1)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) serviceProviderItem.returnType = value
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
+                    serviceProviderItem.returnType = value
+                }
                 KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
                 else ->{}
             }
@@ -469,6 +473,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                         )
                     )
                     ps.println("\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t// ${item.description}")
                     ps.println(String.format("\t\t\t\ttarget.%s = $variableName;", item.fieldName))
                     ps.println("\t\t\t}")
                 }
