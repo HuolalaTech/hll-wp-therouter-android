@@ -51,6 +51,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
                         .navigation();
             }
         });
@@ -70,6 +71,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")
                         .getUrlWithParams();
                 Toast.makeText(v.getContext(), urlWithParams, Toast.LENGTH_LONG).show();
             }
@@ -90,6 +92,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
                         .navigation(v.getContext(), new NavigationCallback() {
                             @Override
                             public void onFound(@NotNull Navigator navigator) {
