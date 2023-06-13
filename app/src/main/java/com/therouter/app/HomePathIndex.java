@@ -17,7 +17,7 @@ public interface HomePathIndex extends BusinessAPathIndex, BusinessBPathIndex {
     String KOTLIN = "http://kymjs.com/therouter/test";
     String KOTLIN2 = "http://kymjs.com/therouter/test2";
     String HOME = "http://kymjs.com/therouter/home";
-    String HOME2 = "http://kymjs.com/therouter/home2";
+
     String OBJECT_TEST = "http://kymjs.com/therouter/callbacktest";
     String OBJECT_TEST2 = "http://kymjs.com/therouter/callbacktest2";
     String INTERCEPTOR = "http://kymjs.com/therouter/interceptor";

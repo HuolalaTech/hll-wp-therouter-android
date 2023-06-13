@@ -13,6 +13,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.PrintStream
 import java.util.*
+import java.util.regex.Pattern
 import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.SourceVersion
@@ -28,9 +29,9 @@ const val POINT = "."
 const val KEY_USE_EXTEND = "USE_EXTENSION"
 const val PROPERTY_FILE = "gradle.properties"
 const val STR_TRUE = "true"
-const val KEY_PARAMS = "params="
+const val KEY_PARAMS = "params"
+const val KEY_RETURNTYPE = "returnType"
 const val KEY_CLASS = "clazz="
-const val KEY_RETURNTYPE = "returnType="
 const val CLASS = "class"
 const val PACKAGE = "a"
 const val PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
@@ -252,24 +253,20 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         serviceProviderItem.className = element.toString()
         serviceProviderItem.methodName = ""
 
-        var toStringStr = annotation.toString()
-        //过滤最后一个字符')'
-        toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(", ").forEach { temp ->
-            if (temp.contains(KEY_RETURNTYPE)) {
-                val value = handleReturnType(temp.trim())
-                if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
+        val annotationStr = annotation.toString()
+        val matcher =
+            Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
+                .matcher(annotationStr)
+        while (matcher.find()) {
+            val params = matcher.group()
+            val key = matcher.group(1)
+            val value = params.substring(key.length + 1)
+            when (key) {
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
                     serviceProviderItem.returnType = value
                 }
-            } else if (temp.contains(KEY_PARAMS)) {
-                val value = handleParams(temp.trim())
-                if (value.size > 1) {
-                    serviceProviderItem.params = transform(value)
-                } else if (value.size == 1) {
-                    if (value[0].trim().isNotEmpty()) {
-                        serviceProviderItem.params = transform(value)
-                    }
-                }
+                KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
+                else ->{}
             }
         }
 
@@ -329,43 +326,23 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 serviceProviderItem.params = params
             }
         }
-        var toStringStr = element.getAnnotation(ServiceProvider::class.java).toString()
-        //过滤最后一个字符')'
-        toStringStr = toStringStr.substring(0, toStringStr.length - 1)
-        toStringStr.split(", ").forEach { temp ->
-            if (temp.contains(KEY_RETURNTYPE)) {
-                val value = handleReturnType(temp.trim())
-                if (!ServiceProvider::class.java.name.equals(value, ignoreCase = true)) {
+        val annotationStr = element.getAnnotation(ServiceProvider::class.java).toString()
+        val matcher =
+            Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
+                .matcher(annotationStr)
+        while (matcher.find()) {
+            val params = matcher.group()
+            val key = matcher.group(1)
+            val value = params.substring(key.length + 1)
+            when (key) {
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
                     serviceProviderItem.returnType = value
                 }
-            } else if (temp.contains(KEY_PARAMS)) {
-                val value = handleParams(temp.trim())
-                if (value.size > 1) {
-                    serviceProviderItem.params = transform(value)
-                } else if (value.size == 1) {
-                    if (value[0].trim().isNotEmpty()) {
-                        serviceProviderItem.params = transform(value)
-                    }
-                }
+                KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
+                else ->{}
             }
         }
         return serviceProviderItem
-    }
-
-    private fun handleReturnType(str: String): String {
-        val index = str.indexOf(KEY_RETURNTYPE)
-        return if (index >= 0) {
-            str.substring(index + KEY_RETURNTYPE.length).replace(".class", "")
-        } else ""
-    }
-
-    private fun handleParams(str: String): ArrayList<String> {
-        val index = str.indexOf(KEY_PARAMS)
-        return if (index >= 0) {
-            val substring: String = str.substring(index + KEY_PARAMS.length)
-            val split = substring.split(",")
-            ArrayList(split)
-        } else ArrayList<String>()
     }
 
     private fun checkServiceProviderItemInvalidData(item: ServiceProviderItem): ServiceProviderItem {
@@ -496,6 +473,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                         )
                     )
                     ps.println("\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t// ${item.description}")
                     ps.println(String.format("\t\t\t\ttarget.%s = $variableName;", item.fieldName))
                     ps.println("\t\t\t}")
                 }

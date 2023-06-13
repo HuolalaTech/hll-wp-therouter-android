@@ -15,7 +15,7 @@ import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Autowired;
 import com.therouter.router.Route;
 
-public class NavigatorTargetActivity extends AppCompatActivity {
+public class NavigatorTargetActivity<T> extends AppCompatActivity {
 
 //    .withInt("intValue", 12345678) // 测试传 int 值
 //    .withString("stringIntValue", "12345678")// 测试用 string 传 int 值

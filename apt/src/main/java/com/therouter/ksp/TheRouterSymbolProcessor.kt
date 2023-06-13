@@ -99,6 +99,18 @@ class TheRouterSymbolProcessor(
                                         k = null
                                     }
                                 }
+                            } else if (arg.value is java.util.ArrayList<*>) {
+                                require((arg.value as java.util.ArrayList<*>).size % 2 == 0) { "${routeItem.className} @Route(params) is not key value pairs" }
+                                var k: String? = null
+                                for (kv in arg.value as java.util.ArrayList<*>) {
+                                    if (k == null) {
+                                        require(kv != null) { "${routeItem.className} @Route(params) key is null" }
+                                        k = "$kv"
+                                    } else {
+                                        routeItem.params[k] = "$kv"
+                                        k = null
+                                    }
+                                }
                             }
                         }
                     }
@@ -182,10 +194,25 @@ class TheRouterSymbolProcessor(
             property.annotations.forEach { annotation ->
                 val autowiredItem = AutowiredItem()
                 autowiredItem.fieldName = property.simpleName.asString()
-                autowiredItem.className = property.qualifiedName?.asString()
-                    ?.replace("." + property.simpleName.asString(), "") ?: ""
-                autowiredItem.type =
-                    property.type.resolve().declaration.qualifiedName?.asString() ?: ""
+                autowiredItem.className =
+                    property.qualifiedName?.asString()?.replace("." + property.simpleName.asString(), "") ?: ""
+                autowiredItem.classNameAndTypeParameters = autowiredItem.className
+
+                property.parentDeclaration?.typeParameters?.size?.let { size ->
+                    if (size > 0) {
+                        val classNameBuilder = StringBuilder(autowiredItem.className).append("<")
+                        for (i in 0 until size) {
+                            classNameBuilder.append("*")
+                            if (i != size - 1) {
+                                classNameBuilder.append(",")
+                            }
+                        }
+                        classNameBuilder.append(">")
+                        autowiredItem.classNameAndTypeParameters = classNameBuilder.toString()
+                    }
+                }
+
+                autowiredItem.type = property.type.resolve().declaration.qualifiedName?.asString() ?: ""
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -200,8 +227,7 @@ class TheRouterSymbolProcessor(
                         "args" -> autowiredItem.args = "${arg.value}"
                         "id" -> autowiredItem.id = "${arg.value ?: 0}".toInt()
                         "required" -> {
-                            autowiredItem.required =
-                                "${arg.value}".equals("true", ignoreCase = true)
+                            autowiredItem.required = "${arg.value}".equals("true", ignoreCase = true)
                         }
 
                         "description" -> autowiredItem.description = "${arg.value}"
@@ -224,6 +250,7 @@ class TheRouterSymbolProcessor(
         keyList.sort()
         for (key in keyList) {
             val fullClassName = key + SUFFIX_AUTOWIRED
+            val fullClassNameAndTypeParameters = pageMap[key]?.get(0)?.classNameAndTypeParameters ?: key
             val simpleName = fullClassName.substring(fullClassName.lastIndexOf('.') + 1)
             val pkgName = fullClassName.substring(0, fullClassName.lastIndexOf('.'))
             var ps: PrintStream? = null
@@ -251,8 +278,8 @@ class TheRouterSymbolProcessor(
                 ps.println()
                 ps.println("\t@JvmStatic")
                 ps.println("\tfun autowiredInject(obj: Any) {")
-                ps.println(String.format("\t\tif (obj is %s) {", key))
-                ps.println(String.format("\t\tval target = obj as %s", key))
+                ps.println(String.format("\t\tif (obj is %s) {", fullClassNameAndTypeParameters))
+                ps.println(String.format("\t\tval target = obj as %s", fullClassNameAndTypeParameters))
                 ps.println()
                 ps.println("\t\tfor (parser in com.therouter.TheRouter.parserList) {")
                 for ((i, item) in pageMap[key]!!.withIndex()) {
@@ -277,6 +304,7 @@ class TheRouterSymbolProcessor(
                         )
                     )
                     ps.println("\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t// ${item.description}")
                     ps.println(String.format("\t\t\t\ttarget.%s = $variableName", item.fieldName))
                     ps.println("\t\t\t}")
                 }

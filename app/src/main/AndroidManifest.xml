@@ -32,6 +32,7 @@
         <activity android:name="com.therouter.app.router.PendingTestActivity" />
         <activity android:name="com.therouter.app.router.OtherFunctionActivity" />
         <activity android:name="com.therouter.app.router.HistoryLogActivity" />
+        <activity android:name="com.therouter.app.navigator.NavigatorFragmentActivity" />
     </application>
 
 </manifest>
