@@ -11,9 +11,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
+import com.therouter.app.KotlinPathIndex;
 import com.therouter.app.R;
 import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Navigator;
@@ -53,6 +55,27 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withParcelable("ParcelableObject", bean)
                         .withString("stringChildClassField", "数据在子类解析")// 测试 string
                         .navigation();
+            }
+        });
+        findViewById(R.id.button1_0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = TheRouter.build(KotlinPathIndex.Test.FRAGMENT_TEST)
+                        .withInt("intValue", 12345678) // 测试传 int 值
+                        .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
+                        .withString("str_123_Value", "测试传中文字符串")// 测试 string
+                        .withString("boolParseError", "非boolean值") // 测试用 boolean 解析字符串的情况
+                        .withString("shortParseError", "12345678") // 测试用 short 解析超长数字的情况
+                        .withBoolean("boolValue", true) // 测试 boolean
+                        .withLong("longValue", 123456789012345L)  // 测试 long
+                        .withChar("charValue", 'c')  // 测试 char
+                        .withDouble("double", 3.14159265358972)// 测试double，key与关键字冲突
+                        .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子Fragment解析")// 测试 string
+                        .createFragment();
+                TheRouter.build(KotlinPathIndex.Test.FRAGMENT_HOST).withObject("fragment", fragment).navigation();
             }
         });
         findViewById(R.id.button1_1).setOnClickListener(new View.OnClickListener() {

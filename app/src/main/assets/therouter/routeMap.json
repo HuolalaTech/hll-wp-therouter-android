@@ -97,6 +97,27 @@
     }
   },
   {
+    "path": "http://kymjs.com/therouter/fragment_host_activity",
+    "className": "com.therouter.app.navigator.NavigatorFragmentActivity",
+    "action": "",
+    "description": "Fragment容器页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment",
+    "className": "com.therouter.app.navigator.NavigatorFragment2",
+    "action": "",
+    "description": "Fragment测试页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment",
+    "className": "com.therouter.app.navigator.NavigatorFragment",
+    "action": "",
+    "description": "Fragment测试页",
+    "params": {}
+  },
+  {
     "path": "http://kymjs.com/therouter/test2",
     "className": "com.therouter.app.navigator.KotlinTestActivity",
     "action": "",
