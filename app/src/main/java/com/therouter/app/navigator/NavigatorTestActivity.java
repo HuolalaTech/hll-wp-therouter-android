@@ -24,6 +24,11 @@ import com.therouter.router.interceptor.NavigationCallback;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 @Route(path = HomePathIndex.DEMO_NAVIGATOR)
 public class NavigatorTestActivity extends AppCompatActivity {
     @Override
@@ -40,6 +45,10 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ArrayList<ArrayList<String>> stringChildClassFields = new ArrayList<>();
+                ArrayList<String> item = new ArrayList<>();
+                item.add("stringChildClassFields");
+                stringChildClassFields.add(item);
                 TheRouter.build(HomePathIndex.HOME)
                         .withInt("intValue", 12345678) // 测试传 int 值
                         .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
@@ -54,6 +63,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
                         .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
                         .navigation();
             }
         });

@@ -212,7 +212,7 @@ class TheRouterSymbolProcessor(
                     }
                 }
 
-                autowiredItem.type = property.type.resolve().declaration.qualifiedName?.asString() ?: ""
+                autowiredItem.type = getFieldType(property.type.resolve())
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -243,6 +243,19 @@ class TheRouterSymbolProcessor(
             }
         }
     }
+
+    private fun getFieldType(type: KSType?): String =
+        if (type != null && type.arguments.isNotEmpty()) {
+            val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
+            type.arguments.forEach {
+                classNameBuilder.append(getFieldType(it.type?.resolve())).append(",")
+            }
+            classNameBuilder.deleteCharAt(classNameBuilder.length - 1)
+            classNameBuilder.append(">")
+            classNameBuilder.toString()
+        } else {
+            type?.declaration?.qualifiedName?.asString() ?: ""
+        }
 
     private fun genAutowiredFile(pageMap: Map<String, List<AutowiredItem>>) {
         val keyList = ArrayList(pageMap.keys)

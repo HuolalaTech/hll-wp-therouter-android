@@ -2,8 +2,10 @@ package com.therouter.router.autowired
 
 import android.app.Activity
 import android.app.Fragment
+import android.os.Parcelable
 import com.therouter.router.AutowiredItem
 import com.therouter.router.interceptor.AutowiredParser
+import java.io.Serializable
 
 class DefaultUrlParser : AutowiredParser {
 
@@ -15,9 +17,11 @@ class DefaultUrlParser : AutowiredParser {
             is Activity -> {
                 return parseValue(target.intent?.extras?.get(item.key), type) as T?
             }
+
             is Fragment -> {
                 return parseValue(target.arguments?.get(item.key), type) as T?
             }
+
             is androidx.fragment.app.Fragment -> {
                 return parseValue(target.arguments?.get(item.key), type) as T?
             }
@@ -39,6 +43,10 @@ class DefaultUrlParser : AutowiredParser {
                 return transform(type, value.toString()) as T?
             } catch (e: NumberFormatException) {
             }
+        }
+
+        if (value is Serializable || value is Parcelable) {
+            return value as T?
         }
 
         if (value.javaClass.name.contains('$') &&
