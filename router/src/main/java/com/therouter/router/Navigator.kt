@@ -423,6 +423,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
     @JvmOverloads
     fun navigation(ctx: Context?, fragment: Fragment?, requestCode: Int, ncb: NavigationCallback? = null) {
         if (!initedRouteMap || pending) {
+            pending = true
             debug("Navigator::navigation", "add pending navigator $simpleUrl")
             disposableQueue.addLast(PendingNavigator(this) {
                 pending = false
