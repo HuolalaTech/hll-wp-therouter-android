@@ -230,6 +230,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 pending = false
                 callback(createIntent(ctx))
             })
+        } else {
+            callback(createIntent(ctx))
         }
     }
 
@@ -337,6 +339,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 pending = false
                 callback(createFragment() as T?)
             })
+        } else {
+            callback(createFragment() as T?)
         }
     }
 
