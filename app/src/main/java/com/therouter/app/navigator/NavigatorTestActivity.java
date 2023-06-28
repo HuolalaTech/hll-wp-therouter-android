@@ -64,6 +64,12 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withParcelable("ParcelableObject", bean)
                         .withString("stringChildClassField", "数据在子类解析")// 测试 string
                         .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .navigation();
             }
         });
@@ -105,6 +111,12 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
                         .withString("stringChildClassField", "数据在子类解析")
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .getUrlWithParams();
                 Toast.makeText(v.getContext(), urlWithParams, Toast.LENGTH_LONG).show();
             }
@@ -126,6 +138,12 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
                         .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .navigation(v.getContext(), new NavigationCallback() {
                             @Override
                             public void onFound(@NotNull Navigator navigator) {
