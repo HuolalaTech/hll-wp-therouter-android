@@ -301,9 +301,10 @@ class TheRouterSymbolProcessor(
                         type += "?"
                     }
                     val variableName = "variableName$i"
+                    ps.println("\t\t\ttry {")
                     ps.println(
                         String.format(
-                            "\t\t\tval %s: %s = parser.parse(\"%s\", target, com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"))",
+                            "\t\t\t\tval %s: %s = parser.parse(\"%s\", target, com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"))",
                             variableName, type,
                             item.type,
                             item.type,
@@ -316,9 +317,12 @@ class TheRouterSymbolProcessor(
                             item.description
                         )
                     )
-                    ps.println("\t\t\tif ($variableName != null){")
-                    ps.println("\t\t\t\t// ${item.description}")
-                    ps.println(String.format("\t\t\t\ttarget.%s = $variableName", item.fieldName))
+                    ps.println("\t\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t\t// ${item.description}")
+                    ps.println(String.format("\t\t\t\t\ttarget.%s = $variableName", item.fieldName))
+                    ps.println("\t\t\t\t}")
+                    ps.println("\t\t\t} catch (e: Exception) {")
+                    ps.println("\t\t\t\tif (com.therouter.TheRouter.isDebug) { e.printStackTrace() }")
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t} // for end")
