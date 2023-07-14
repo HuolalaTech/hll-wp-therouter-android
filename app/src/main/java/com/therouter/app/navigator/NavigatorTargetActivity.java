@@ -57,12 +57,14 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
 
     @Autowired
     float floatValue;
+    @Autowired
+    Runnable runnable;
 
     @Autowired
     String strFromAnnotation;  // 来自注解设置的默认值，允许路由动态修改
 
     // id需要是final变量
-    //    @Autowired(id = R.id.button1)
+    @Autowired(id = R.id.button1)
     Button button1;
 
     @Autowired(name = "SerializableObject")
@@ -120,6 +122,9 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(NavigatorTargetActivity.this, "提示:" + strFromAnnotation, Toast.LENGTH_SHORT).show();
+                    if (runnable != null) {
+                        runnable.run();
+                    }
                 }
             });
         }

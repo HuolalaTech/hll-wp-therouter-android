@@ -457,9 +457,10 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\t\tfor (com.therouter.router.interceptor.AutowiredParser parser : com.therouter.TheRouter.getParserList()) {")
                 for ((i, item) in pageMap[key]!!.withIndex()) {
                     val variableName = "variableName$i"
+                    ps.println("\t\t\ttry {")
                     ps.println(
                         String.format(
-                            "\t\t\t%s %s = parser.parse(\"%s\", target, new com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"));",
+                            "\t\t\t\t%s %s = parser.parse(\"%s\", target, new com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"));",
                             transformNumber(item.type), variableName,
                             item.type,
                             item.type,
@@ -472,9 +473,12 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                             item.description
                         )
                     )
-                    ps.println("\t\t\tif ($variableName != null){")
-                    ps.println("\t\t\t\t// ${item.description}")
-                    ps.println(String.format("\t\t\t\ttarget.%s = $variableName;", item.fieldName))
+                    ps.println("\t\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t\t// ${item.description}")
+                    ps.println(String.format("\t\t\t\t\ttarget.%s = $variableName;", item.fieldName))
+                    ps.println("\t\t\t\t}")
+                    ps.println("\t\t\t} catch (Exception e) {")
+                    ps.println("\t\t\t\tif (com.therouter.TheRouter.isDebug()) { e.printStackTrace(); }")
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t}")

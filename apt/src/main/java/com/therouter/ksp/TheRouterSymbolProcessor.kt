@@ -212,7 +212,7 @@ class TheRouterSymbolProcessor(
                     }
                 }
 
-                autowiredItem.type = property.type.resolve().declaration.qualifiedName?.asString() ?: ""
+                autowiredItem.type = getFieldType(property.type.resolve())
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -243,6 +243,19 @@ class TheRouterSymbolProcessor(
             }
         }
     }
+
+    private fun getFieldType(type: KSType?): String =
+        if (type != null && type.arguments.isNotEmpty()) {
+            val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
+            type.arguments.forEach {
+                classNameBuilder.append(getFieldType(it.type?.resolve())).append(",")
+            }
+            classNameBuilder.deleteCharAt(classNameBuilder.length - 1)
+            classNameBuilder.append(">")
+            classNameBuilder.toString()
+        } else {
+            type?.declaration?.qualifiedName?.asString() ?: ""
+        }
 
     private fun genAutowiredFile(pageMap: Map<String, List<AutowiredItem>>) {
         val keyList = ArrayList(pageMap.keys)
@@ -288,9 +301,10 @@ class TheRouterSymbolProcessor(
                         type += "?"
                     }
                     val variableName = "variableName$i"
+                    ps.println("\t\t\ttry {")
                     ps.println(
                         String.format(
-                            "\t\t\tval %s: %s = parser.parse(\"%s\", target, com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"))",
+                            "\t\t\t\tval %s: %s = parser.parse(\"%s\", target, com.therouter.router.AutowiredItem(\"%s\",\"%s\",%s,\"%s\",\"%s\",\"%s\",%s,\"%s\"))",
                             variableName, type,
                             item.type,
                             item.type,
@@ -303,9 +317,12 @@ class TheRouterSymbolProcessor(
                             item.description
                         )
                     )
-                    ps.println("\t\t\tif ($variableName != null){")
-                    ps.println("\t\t\t\t// ${item.description}")
-                    ps.println(String.format("\t\t\t\ttarget.%s = $variableName", item.fieldName))
+                    ps.println("\t\t\t\tif ($variableName != null){")
+                    ps.println("\t\t\t\t\t// ${item.description}")
+                    ps.println(String.format("\t\t\t\t\ttarget.%s = $variableName", item.fieldName))
+                    ps.println("\t\t\t\t}")
+                    ps.println("\t\t\t} catch (e: Exception) {")
+                    ps.println("\t\t\t\tif (com.therouter.TheRouter.isDebug) { e.printStackTrace() }")
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t} // for end")

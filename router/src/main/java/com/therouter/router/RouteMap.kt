@@ -136,6 +136,23 @@ fun matchRouteMap(url: String?): RouteItem? {
 }
 
 /**
+ * 尝试通过ClassName，从路由表中获取对应的路由项，如果没有对应路由，则返回空数组
+ */
+@Synchronized
+fun matchRouteMapForClassName(className: String?): List<RouteItem> {
+    val result = ArrayList<RouteItem>()
+    ROUTER_MAP.values.forEach {
+        it?.let {
+            if (it.className == className) {
+                // copy是为了防止外部修改影响路由表
+                result.add(it.copy())
+            }
+        }
+    }
+    return result
+}
+
+/**
  * 向路由表添加路由
  */
 @Synchronized
