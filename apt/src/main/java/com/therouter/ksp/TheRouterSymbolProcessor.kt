@@ -49,21 +49,15 @@ class TheRouterSymbolProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger
 ) : SymbolProcessor {
-    // we are not going to use visitor so manually avoid the processing over and over
-    private var visited = false
     private var sourcePath = ""
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        if (visited) {
-            return emptyList()
-        }
         genRouterMapFile(parseRoute(resolver))
         genAutowiredFile(parseAutowired(resolver))
         val providerItemList = parseServiceProvider(resolver)
         val flowTaskList = parseFlowTask(resolver)
         val actionInterceptorList = parseActionInterceptor(resolver)
         genServiceProviderFile(providerItemList, flowTaskList, actionInterceptorList)
-        visited = true
         return emptyList()
     }
 
