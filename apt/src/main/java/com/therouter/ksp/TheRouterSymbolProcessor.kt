@@ -130,7 +130,7 @@ class TheRouterSymbolProcessor(
         val json = gson.toJson(routePagelist)
         var ps: PrintStream? = null
         try {
-            ps = PrintStream(codeGenerator.createNewFile(Dependencies(false), PACKAGE, className))
+            ps = PrintStream(codeGenerator.createNewFile(Dependencies.ALL_FILES, PACKAGE, className))
             ps.println("@file:JvmName(\"$className\")")
             ps.println("package $PACKAGE")
             ps.println()
@@ -264,7 +264,7 @@ class TheRouterSymbolProcessor(
             try {
                 ps = PrintStream(
                     codeGenerator.createNewFile(
-                        Dependencies(false),
+                        Dependencies.ALL_FILES,
                         pkgName, simpleName
                     )
                 )
@@ -602,7 +602,7 @@ class TheRouterSymbolProcessor(
         )
         var ps: PrintStream? = null
         try {
-            ps = PrintStream(codeGenerator.createNewFile(Dependencies(false), PACKAGE, className))
+            ps = PrintStream(codeGenerator.createNewFile(Dependencies.ALL_FILES, PACKAGE, className))
             ps.println("@file:JvmName(\"$className\")")
             ps.println(String.format("package %s", PACKAGE))
             ps.println()

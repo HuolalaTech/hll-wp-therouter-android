@@ -64,7 +64,7 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
     String strFromAnnotation;  // 来自注解设置的默认值，允许路由动态修改
 
     // id需要是final变量
-    @Autowired(id = R.id.button1)
+//    @Autowired(id = R.id.button1)
     Button button1;
 
     @Autowired(name = "SerializableObject")
@@ -111,10 +111,14 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
         textview9.setText("接收float类型的值：" + floatValue);
 
         final TextView textview10 = findViewById(R.id.textview10);
-        textview10.setText("接收 SerializableObject 的值：" + serializableBean.hello);
+        if (serializableBean != null) {
+            textview10.setText("接收 SerializableObject 的值：" + serializableBean.hello);
+        }
 
         final TextView textview11 = findViewById(R.id.textview11);
-        textview11.setText("接收 ParcelableObject 的值：" + parcelableBean.hello);
+        if (parcelableBean != null) {
+            textview11.setText("接收 ParcelableObject 的值：" + parcelableBean.hello);
+        }
 
         if (button1 != null) {
             button1.setText("展示注解默认值");

@@ -74,7 +74,9 @@
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "",
     "description": "",
-    "params": {}
+    "params": {
+      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
+    }
   },
   {
     "path": "http://kymjs.com/therouter/home2",
@@ -90,36 +92,22 @@
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "action://scheme.com",
     "description": "路由测试首页",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/home",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
-    "action": "action://scheme.com",
-    "description": "路由测试首页",
     "params": {
       "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
     }
-  },
-  {
-    "path": "http://kymjs.com/therouter/home2",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/home",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity",
-    "action": "action://scheme.com",
-    "description": "路由测试首页",
-    "params": {}
   },
   {
     "path": "http://kymjs.com/therouter/fragment_host_activity",
     "className": "com.therouter.app.navigator.NavigatorFragmentActivity",
     "action": "",
     "description": "Fragment容器页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment2",
+    "className": "com.therouter.app.navigator.NavigatorFragment2",
+    "action": "",
+    "description": "Fragment测试页",
     "params": {}
   },
   {

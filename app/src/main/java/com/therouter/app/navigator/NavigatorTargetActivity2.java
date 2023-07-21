@@ -27,6 +27,8 @@ public class NavigatorTargetActivity2 extends NavigatorTargetActivity<String> {
         super.onCreate(savedInstanceState);
         TextView textView = findViewById(R.id.textview12);
         textView.setText("子类 @Autowired 数据：" + stringChildClassField);
-        textView.append("\n stringChildClassFields: " + stringChildClassFields.get(0).get(0));
+        if (stringChildClassFields != null) {
+            textView.append("\n stringChildClassFields: " + stringChildClassFields.get(0).get(0));
+        }
     }
 }
