@@ -21,7 +21,7 @@ public class AddCodeVisitor extends ClassVisitor {
     private final boolean isIncremental;
 
     public AddCodeVisitor(ClassVisitor cv, Map<String, String> serviceProvideMap, Set<String> autowiredSet, Set<String> routeSet, boolean incremental) {
-        super(Opcodes.ASM7, cv);
+        super(Opcodes.ASM9, cv);
         this.serviceProvideList = new ArrayList<>(serviceProvideMap.keySet());
         this.serviceProvideMap = serviceProvideMap;
         this.autowiredList = new ArrayList<>(autowiredSet);
@@ -35,7 +35,7 @@ public class AddCodeVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String methodName, String desc, String signature, String[] exceptions) {
         MethodVisitor mv = cv.visitMethod(access, methodName, desc, signature, exceptions);
-        mv = new AdviceAdapter(Opcodes.ASM7, mv, access, methodName, desc) {
+        mv = new AdviceAdapter(Opcodes.ASM9, mv, access, methodName, desc) {
             @Override
             protected void onMethodEnter() {
                 super.onMethodEnter();
