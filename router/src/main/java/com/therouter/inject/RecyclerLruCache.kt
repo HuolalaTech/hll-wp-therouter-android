@@ -17,26 +17,26 @@ package com.therouter.inject
 
 import android.util.LruCache
 
-class RecyclerLruCache(maxSize: Int) : LruCache<ClassWrapper<*>?, Any?>(maxSize) {
-    private var mListener: (key: ClassWrapper<*>?, oldValue: Any?, newValue: Any?) -> Unit = { _, _, _ ->
+class RecyclerLruCache<K, V>(maxSize: Int) : LruCache<K, V>(maxSize) {
+    private var mListener: (key: K, oldValue: V, newValue: V) -> Unit = { _, _, _ ->
     }
 
-    override fun entryRemoved(evicted: Boolean, key: ClassWrapper<*>?, oldValue: Any?, newValue: Any?) {
+    override fun entryRemoved(evicted: Boolean, key: K, oldValue: V, newValue: V) {
         super.entryRemoved(evicted, key, oldValue, newValue)
         mListener(key, oldValue, newValue)
     }
 
-    fun setOnEntryRemovedListener(listener: OnEntryRemovedListener?) {
+    fun setOnEntryRemovedListener(listener: OnEntryRemovedListener<K, V>?) {
         listener?.let {
             mListener = it::entryRemoved
         }
     }
 
-    fun setOnEntryRemovedListener(block: (key: ClassWrapper<*>?, oldValue: Any?, newValue: Any?) -> Unit) {
+    fun setOnEntryRemovedListener(block: (key: K, oldValue: V, newValue: V) -> Unit) {
         mListener = block
     }
 
-    interface OnEntryRemovedListener {
-        fun entryRemoved(key: ClassWrapper<*>?, oldValue: Any?, newValue: Any?)
+    interface OnEntryRemovedListener<K, V> {
+        fun entryRemoved(key: K, oldValue: V, newValue: V)
     }
 }
