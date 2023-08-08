@@ -8,9 +8,9 @@ import kotlin.collections.ArrayList
 
 private var counter: Long = 0
 
-private var MAX_SIZE = 30
+var HISTORY_LOG_MAX_SIZE = 30
 
-private val mCacher = RecyclerLruCache<String?, History?>(MAX_SIZE).apply {
+private val mCacher = RecyclerLruCache<String?, History?>(HISTORY_LOG_MAX_SIZE).apply {
     setOnEntryRemovedListener { key, oldValue, _ -> m2ndCacher[key] = oldValue }
 }
 
