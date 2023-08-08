@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 
 group = "cn.therouter"
-description = "plugin"
+description = "plugin-agp8"
 
 //repositories {
 //    mavenCentral()
