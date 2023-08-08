@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 
 import com.therouter.TheRouter;
 import com.therouter.app.flowtask.lifecycle.FlowTask;
+import com.therouter.router.Navigator;
 import com.therouter.router.action.interceptor.ActionInterceptor;
 
 
@@ -22,8 +23,10 @@ public class TestLifecycle {
         System.out.println("=====来自业务模块====Application.Create，mmkv之后执行");
 
         TheRouter.addActionInterceptor(BusinessAPathIndex.A_ACTION_TOAST, new ActionInterceptor() {
+
             @Override
-            public boolean handle(@NonNull Context context, @NonNull Bundle args) {
+            public boolean handle(@NonNull Context context, @NonNull Navigator navigator) {
+                super.handle(context, navigator);
                 Toast.makeText(context, "业务A弹出，return false", Toast.LENGTH_SHORT).show();
                 return false;
             }
@@ -36,7 +39,8 @@ public class TestLifecycle {
             }
 
             @Override
-            public boolean handle(@NonNull Context context, @NonNull Bundle args) {
+            public boolean handle(@NonNull Context context, @NonNull Navigator navigator) {
+                super.handle(context, navigator);
                 Log.d("debug", "业务A弹出");
                 Toast.makeText(context, "业务A弹出，优先级低，return false", Toast.LENGTH_SHORT).show();
                 return false;

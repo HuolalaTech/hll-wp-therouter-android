@@ -24,6 +24,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
+            android:text="TheRouter支持Fragment导航"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button1_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试Fragment导航功能"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
             android:text="路由导航时，会将所有参数作为url传递给下一个页面" />
 
         <Button

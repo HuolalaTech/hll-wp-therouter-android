@@ -7,7 +7,7 @@ package com.therouter.router.interceptor
  */
 abstract class NavigatorPathFixHandle {
 
-    fun watch(path: String?): Boolean = true
+    open fun watch(path: String?): Boolean = true
 
     abstract fun fix(path: String?): String?
 

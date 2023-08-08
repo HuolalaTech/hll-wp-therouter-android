@@ -9,7 +9,7 @@ package com.therouter.router.interceptor
  */
 abstract class PathReplaceInterceptor {
 
-    fun watch(path: String?): Boolean = true
+    open fun watch(path: String?): Boolean = true
 
     abstract fun replace(path: String?): String?
 

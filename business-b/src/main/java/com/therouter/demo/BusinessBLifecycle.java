@@ -10,6 +10,7 @@ import androidx.annotation.NonNull;
 import com.therouter.TheRouter;
 import com.therouter.TheRouterThreadPool;
 import com.therouter.app.flowtask.lifecycle.FlowTask;
+import com.therouter.router.Navigator;
 import com.therouter.router.action.interceptor.ActionInterceptor;
 
 public class BusinessBLifecycle {
@@ -23,7 +24,8 @@ public class BusinessBLifecycle {
     public static void test3(Context context) {
         TheRouter.addActionInterceptor(BusinessBPathIndex.ACTION_TOAST, new ActionInterceptor() {
             @Override
-            public boolean handle(@NonNull Context context, @NonNull Bundle args) {
+            public boolean handle(@NonNull Context context, @NonNull Navigator navigator) {
+                super.handle(context, navigator);
                 TheRouterThreadPool.execute(new Runnable() {
                     @Override
                     public void run() {
@@ -50,7 +52,8 @@ public class BusinessBLifecycle {
             }
 
             @Override
-            public boolean handle(@NonNull Context context, @NonNull Bundle args) {
+            public boolean handle(@NonNull Context context, @NonNull Navigator navigator) {
+                super.handle(context, navigator);
                 Log.d("debug", "业务B弹出");
                 Toast.makeText(context, "业务B弹出，优先级最高，return true，阻断其他响应", Toast.LENGTH_SHORT).show();
                 return true;

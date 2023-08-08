@@ -1,5 +1,7 @@
 package com.therouter.app.navigator;
 
+import static com.therouter.app.KotlinPathIndex.Test.HOME2;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,9 +11,11 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
+import com.therouter.app.KotlinPathIndex;
 import com.therouter.app.R;
 import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Navigator;
@@ -19,6 +23,11 @@ import com.therouter.router.Route;
 import com.therouter.router.interceptor.NavigationCallback;
 
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 @Route(path = HomePathIndex.DEMO_NAVIGATOR)
 public class NavigatorTestActivity extends AppCompatActivity {
@@ -32,6 +41,11 @@ public class NavigatorTestActivity extends AppCompatActivity {
 
         InternalBeanTest.RowBean bean = new InternalBeanTest.RowBean();
         bean.setHello("helloField");
+
+        ArrayList<ArrayList<String>> stringChildClassFields = new ArrayList<>();
+        ArrayList<String> item = new ArrayList<>();
+        item.add("stringChildClassFields");
+        stringChildClassFields.add(item);
 
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -49,7 +63,37 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .navigation();
+            }
+        });
+        findViewById(R.id.button1_0).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = TheRouter.build(KotlinPathIndex.Test.FRAGMENT_TEST2)
+                        .withInt("intValue", 12345678) // 测试传 int 值
+                        .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
+                        .withString("str_123_Value", "测试传中文字符串")// 测试 string
+                        .withString("boolParseError", "非boolean值") // 测试用 boolean 解析字符串的情况
+                        .withString("shortParseError", "12345678") // 测试用 short 解析超长数字的情况
+                        .withBoolean("boolValue", true) // 测试 boolean
+                        .withLong("longValue", 123456789012345L)  // 测试 long
+                        .withChar("charValue", 'c')  // 测试 char
+                        .withDouble("double", 3.14159265358972)// 测试double，key与关键字冲突
+                        .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
+                        .createFragment();
+                TheRouter.build(KotlinPathIndex.Test.FRAGMENT_HOST).withObject("fragment", fragment).navigation();
             }
         });
         findViewById(R.id.button1_1).setOnClickListener(new View.OnClickListener() {
@@ -68,6 +112,14 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .getUrlWithParams();
                 Toast.makeText(v.getContext(), urlWithParams, Toast.LENGTH_LONG).show();
             }
@@ -75,7 +127,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.HOME2)
+                TheRouter.build(HOME2)
                         .withInt("intValue", 12345678) // 测试传 int 值
                         .withString("stringIntValue", "9876543")// 测试用 string 传 int 值
                         .withString("str_123_Value", "使用另一个path跳转过来")// 测试 string
@@ -88,6 +140,14 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .withFloat("floatValue", 3.14159265358972F)// 测试float，自动四舍五入
                         .withSerializable("SerializableObject", bean)
                         .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
+                        .withObject("runnable", new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(v.getContext(), "来自 withObject 的 toast", Toast.LENGTH_SHORT).show();
+                            }
+                        })
                         .navigation(v.getContext(), new NavigationCallback() {
                             @Override
                             public void onFound(@NotNull Navigator navigator) {
@@ -192,6 +252,10 @@ public class NavigatorTestActivity extends AppCompatActivity {
                         .append("&")
                         .append("floatValue=3.14159265358972");
                 TheRouter.build(stringBuilder.toString())
+                        .withSerializable("SerializableObject", bean)
+                        .withParcelable("ParcelableObject", bean)
+                        .withString("stringChildClassField", "数据在子类解析")// 测试 string
+                        .withSerializable("stringChildClassFields", stringChildClassFields) // 嵌套的泛型参数
                         .navigation();
             }
         });

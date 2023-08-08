@@ -217,6 +217,25 @@ open class Navigator(var url: String?, val intent: Intent?) {
     fun optObject(key: String) = arguments[key]?.get()
 
     /**
+     * 通过导航器创建Intent，会自动将Navigator中的参数传入Intent，异步回调返回
+     * intent.putExtra(KEY_ACTION, routeItem.action)
+     * intent.putExtra(KEY_PATH, getUrlWithParams())
+     * intent.putExtra(KEY_DESCRIPTION, routeItem.description)
+     */
+    fun createIntentWithCallback(ctx: Context?, callback: (Intent) -> Unit) {
+        if (!initedRouteMap || pending) {
+            pending = true
+            debug("Navigator::createIntentWithCallback", "add pending navigator $simpleUrl")
+            disposableQueue.addLast(PendingNavigator(this) {
+                pending = false
+                callback(createIntent(ctx))
+            })
+        } else {
+            callback(createIntent(ctx))
+        }
+    }
+
+    /**
      * 通过导航器创建Intent，会自动将Navigator中的参数传入Intent
      * intent.putExtra(KEY_ACTION, routeItem.action)
      * intent.putExtra(KEY_PATH, getUrlWithParams())
@@ -309,7 +328,24 @@ open class Navigator(var url: String?, val intent: Intent?) {
     }
 
     /**
-     * 通过导航器创建Fragment
+     * 通过导航器创建Fragment，异步回调
+     * 接收方可通过argus或@Autowired获取参数
+     */
+    fun <T : Fragment?> createFragmentWithCallback(callback: (T?) -> Unit) {
+        if (!initedRouteMap || pending) {
+            pending = true
+            debug("Navigator::createFragmentWithCallback", "add pending navigator $simpleUrl")
+            disposableQueue.addLast(PendingNavigator(this) {
+                pending = false
+                callback(createFragment() as T?)
+            })
+        } else {
+            callback(createFragment() as T?)
+        }
+    }
+
+    /**
+     * 通过导航器创建Fragment，当TheRouter没有初始化完成时，将返回null
      * 接收方可通过argus或@Autowired获取参数
      */
     fun <T : Fragment?> createFragment(): T? {
@@ -391,6 +427,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
     @JvmOverloads
     fun navigation(ctx: Context?, fragment: Fragment?, requestCode: Int, ncb: NavigationCallback? = null) {
         if (!initedRouteMap || pending) {
+            pending = true
             debug("Navigator::navigation", "add pending navigator $simpleUrl")
             disposableQueue.addLast(PendingNavigator(this) {
                 pending = false

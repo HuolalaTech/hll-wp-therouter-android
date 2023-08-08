@@ -9,6 +9,18 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:text="以下内容在Fragment呈现"
+            android:textAllCaps="false"
+            android:textColor="#333"
+            android:textSize="17sp" />
+
+        <TextView
             android:id="@+id/textview1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
@@ -72,26 +84,10 @@
             android:textAllCaps="false" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="15dp"
-            android:text="\@Autowired解析规则有很多，且允许自定义解析规则，详细使用可以查看技术文档" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="默认值相当于代码取不到参数时设置的初始值，用路由设置默认值的好处在于：APP上线发布后可以根据动态下发路由表，改变默认值而减少对业务逻辑的侵入" />
-
-        <Button
-            android:id="@+id/button1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
             android:id="@+id/textview12"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="子类数据获取测试"
+            android:text="子类Fragment数据获取测试"
             android:textAllCaps="false" />
     </LinearLayout>
 </ScrollView>

@@ -4,11 +4,6 @@ package com.therouter.flow;
  * 内置初始化节点定义
  */
 public interface TheRouterFlowTask {
-    /**
-     * 替换为 {@link TheRouterFlowTask.THEROUTER_INITIALIZATION}，将在 1.1.4 版本移除
-     */
-    @Deprecated
-    String APP_ONCREATE = "TheRouter_application_oncreate";
 
     /**
      * 当应用的首个 Activity.onCreate() 执行后初始化

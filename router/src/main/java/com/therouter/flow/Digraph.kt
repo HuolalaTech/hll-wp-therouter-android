@@ -173,10 +173,6 @@ class Digraph {
 
     private fun makeVirtualFlowTask(name: String) = when (name) {
         TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION -> VirtualFlowTask(name)
-        TheRouterFlowTask.APP_ONCREATE -> VirtualFlowTask(
-            TheRouterFlowTask.APP_ONCREATE,
-            TheRouterFlowTask.THEROUTER_INITIALIZATION
-        )
         TheRouterFlowTask.THEROUTER_INITIALIZATION -> VirtualFlowTask(
             TheRouterFlowTask.THEROUTER_INITIALIZATION,
             TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION

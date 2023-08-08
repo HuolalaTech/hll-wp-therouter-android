@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 
 group = "cn.therouter.demo"
 
@@ -8,7 +9,7 @@ android {
     compileSdkVersion 30
 
     defaultConfig {
-        minSdkVersion 19
+        minSdkVersion 17
         targetSdkVersion 30
         versionCode 1
         versionName "1.0.0"

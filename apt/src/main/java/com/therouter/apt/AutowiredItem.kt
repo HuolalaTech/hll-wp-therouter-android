@@ -12,6 +12,8 @@ class AutowiredItem : Comparable<AutowiredItem> {
 
     var className = ""
 
+    var classNameAndTypeParameters = ""
+
     var fieldName = ""
 
     var required = false

@@ -7,7 +7,7 @@ import java.util.*
  */
 class RecyclerBin internal constructor() {
     private val singletonMap = HashMap<ClassWrapper<*>, Any>()
-    private val mCacher = RecyclerLruCache(MAX_SIZE).apply {
+    private val mCacher = RecyclerLruCache<ClassWrapper<*>?, Any?>(MAX_SIZE).apply {
         setOnEntryRemovedListener { key, oldValue, _ -> m2ndCacher[key] = oldValue }
     }
 

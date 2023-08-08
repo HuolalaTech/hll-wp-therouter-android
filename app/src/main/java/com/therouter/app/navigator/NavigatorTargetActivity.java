@@ -19,7 +19,7 @@ import com.therouter.router.interceptor.NavigationCallback;
 
 import org.jetbrains.annotations.NotNull;
 
-public class NavigatorTargetActivity extends AppCompatActivity {
+public class NavigatorTargetActivity<T> extends AppCompatActivity {
 
 //    .withInt("intValue", 12345678) // 测试传 int 值
 //    .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
@@ -61,11 +61,14 @@ public class NavigatorTargetActivity extends AppCompatActivity {
 
     @Autowired
     float floatValue;
+    @Autowired
+    Runnable runnable;
 
     @Autowired
     String strFromAnnotation;  // 来自注解设置的默认值，允许路由动态修改
 
-    @Autowired(id = R.id.button1)
+    // id需要是final变量
+//    @Autowired(id = R.id.button1)
     Button button1;
 
     @Autowired(name = "SerializableObject")
@@ -112,17 +115,26 @@ public class NavigatorTargetActivity extends AppCompatActivity {
         textview9.setText("接收float类型的值：" + floatValue);
 
         final TextView textview10 = findViewById(R.id.textview10);
-        textview10.setText("接收 SerializableObject 的值：" + serializableBean.hello);
+        if (serializableBean != null) {
+            textview10.setText("接收 SerializableObject 的值：" + serializableBean.hello);
+        }
 
         final TextView textview11 = findViewById(R.id.textview11);
-        textview11.setText("接收 ParcelableObject 的值：" + parcelableBean.hello);
+        if (parcelableBean != null) {
+            textview11.setText("接收 ParcelableObject 的值：" + parcelableBean.hello);
+        }
 
-        button1.setText("展示注解默认值");
-        button1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(NavigatorTargetActivity.this, "提示:" + strFromAnnotation, Toast.LENGTH_SHORT).show();
-            }
-        });
+        if (button1 != null) {
+            button1.setText("展示注解默认值");
+            button1.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(NavigatorTargetActivity.this, "提示:" + strFromAnnotation, Toast.LENGTH_SHORT).show();
+                    if (runnable != null) {
+                        runnable.run();
+                    }
+                }
+            });
+        }
     }
 }
