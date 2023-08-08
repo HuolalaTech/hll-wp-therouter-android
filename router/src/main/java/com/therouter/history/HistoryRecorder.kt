@@ -2,45 +2,61 @@
 
 package com.therouter.history
 
+import com.therouter.inject.RecyclerLruCache
 import java.util.*
 import kotlin.collections.ArrayList
 
-private val history = LinkedList<History>()
+private var counter: Long = 0
 
-fun pushHistory(event: History) = history.addLast(event)
+private var MAX_SIZE = 30
 
-fun popHistory() = history.removeLast()
+private val mCacher = RecyclerLruCache<String?, History?>(MAX_SIZE).apply {
+    setOnEntryRemovedListener { key, oldValue, _ -> m2ndCacher[key] = oldValue }
+}
+
+private val m2ndCacher = WeakHashMap<String?, History?>()
+
+@Synchronized
+fun pushHistory(event: History) = mCacher.put("${counter++}", event)
 
 /**
  * 导出路由的全部记录
  */
+@Synchronized
 fun export(level: Level): List<String> {
     val list = ArrayList<String>()
-    ArrayList(history).forEach {
-        when (it) {
-            is ActivityNavigatorHistory -> {
-                if (level.v.and(Level.ACTIVITY.v) == Level.ACTIVITY.v) {
-                    list.add(it.event)
+    for (index in 0..counter) {
+        val item = mCacher.get("$index") ?: m2ndCacher["$index"]
+        item?.let { history ->
+            when (history) {
+                is ActivityNavigatorHistory -> {
+                    if (level.v.and(Level.ACTIVITY.v) == Level.ACTIVITY.v) {
+                        list.add(history.event)
+                    }
                 }
-            }
-            is FragmentNavigatorHistory -> {
-                if (level.v.and(Level.FRAGMENT.v) == Level.FRAGMENT.v) {
-                    list.add(it.event)
+
+                is FragmentNavigatorHistory -> {
+                    if (level.v.and(Level.FRAGMENT.v) == Level.FRAGMENT.v) {
+                        list.add(history.event)
+                    }
                 }
-            }
-            is ActionNavigatorHistory -> {
-                if (level.v.and(Level.ACTION.v) == Level.ACTION.v) {
-                    list.add(it.event)
+
+                is ActionNavigatorHistory -> {
+                    if (level.v.and(Level.ACTION.v) == Level.ACTION.v) {
+                        list.add(history.event)
+                    }
                 }
-            }
-            is ServiceProviderHistory -> {
-                if (level.v.and(Level.SERVICE_PROVIDER.v) == Level.SERVICE_PROVIDER.v) {
-                    list.add(it.event)
+
+                is ServiceProviderHistory -> {
+                    if (level.v.and(Level.SERVICE_PROVIDER.v) == Level.SERVICE_PROVIDER.v) {
+                        list.add(history.event)
+                    }
                 }
-            }
-            is FlowTaskHistory -> {
-                if (level.v.and(Level.FLOW_TASK.v) == Level.FLOW_TASK.v) {
-                    list.add(it.event)
+
+                is FlowTaskHistory -> {
+                    if (level.v.and(Level.FLOW_TASK.v) == Level.FLOW_TASK.v) {
+                        list.add(history.event)
+                    }
                 }
             }
         }
