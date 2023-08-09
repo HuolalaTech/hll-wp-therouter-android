@@ -1,7 +1,5 @@
 apply plugin: 'groovy'
 
-description = "plugin-agp8"
-
 //repositories {
 //    mavenCentral()
 //    gradlePluginPortal()
