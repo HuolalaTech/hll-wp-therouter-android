@@ -1,6 +1,5 @@
 apply plugin: 'groovy'
 
-group = "cn.therouter"
 description = "plugin-agp8"
 
 //repositories {
