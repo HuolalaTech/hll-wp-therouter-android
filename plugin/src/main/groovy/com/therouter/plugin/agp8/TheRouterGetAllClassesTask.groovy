@@ -23,6 +23,8 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -47,8 +49,31 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         println("---------TheRouter transform start-------------------------------------------")
         File theRouterJar = null;
         JarEntry theRouterServiceProvideInjecter = null;
+
+        List<RegularFile> jars = new ArrayList<>()
+        allJars.get().forEach {
+            File jarFile = it.asFile
+            if (jarFile.getPath() == output.asFile.get().getPath()) {
+                // 如果之前有处理过的jar，备份出来
+                File tempFile = new File(jarFile.absolutePath.replace(jarFile.getName(), "temp" + jarFile.getName()))
+                try {
+                    Files.copy(jarFile.toPath(), tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                } catch (IOException e) {
+                }
+                jarFile.delete()
+                jars.add(new RegularFile() {
+                    @Override
+                    File getAsFile() {
+                        return tempFile
+                    }
+                })
+            } else {
+                jars.add(it)
+            }
+        }
+        
         OutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutput().get().getAsFile())))
-        allJars.get().each { file ->
+        jars.each { file ->
             JarFile jarFile = new JarFile(file.asFile)
             for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
                 JarEntry jarEntry = e.nextElement();
