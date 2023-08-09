@@ -1,7 +1,5 @@
 apply plugin: 'groovy'
 
-group = "cn.therouter"
-
 dependencies {
     implementation gradleApi()
     implementation localGroovy()
