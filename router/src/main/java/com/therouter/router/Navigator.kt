@@ -34,7 +34,7 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  * Navigator 用于描述一个路由项的跳转动作
  */
 open class Navigator(var url: String?, val intent: Intent?) {
-    val normalUrl = url
+    val originalUrl = url
     val extras = Bundle()
     private var optionsCompat: Bundle? = null
     private var pending = false
