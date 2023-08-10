@@ -13,7 +13,11 @@ import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
 import com.therouter.app.router.InternalBeanTest;
 import com.therouter.router.Autowired;
+import com.therouter.router.Navigator;
 import com.therouter.router.Route;
+import com.therouter.router.interceptor.NavigationCallback;
+
+import org.jetbrains.annotations.NotNull;
 
 public class NavigatorTargetActivity<T> extends AppCompatActivity {
 

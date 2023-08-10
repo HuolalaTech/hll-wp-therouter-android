@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="导航也是兼容 Action 事件的，如果 path 为一个 Action 事件，则会自动响应 action()"
+            android:textAllCaps="false"
+            android:textColor="#333"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="但如果一个path，既是 Action 事件，又是一个路由页面，则优先响应路由事件"
+            android:textAllCaps="false"
+            android:textColor="#333"
+            android:textSize="15sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="所以如果你希望同时兼容 导航 和 Action，则应该使用 navigation()方法"
+            android:textAllCaps="false"
+            android:textColor="#333"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试兼容路由能力，使用路由触发action"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="传参弹出Toast"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="多模块订阅action，弹出Toast"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="多模块订阅action优先级中断"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="使用注解声明的Action处理器"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,169 @@
+[
+  {
+    "path": "http://kymjs.com/business_a/testinject",
+    "className": "com.therouter.demo.shell.TestInjectActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/business_a/testinject3",
+    "className": "com.therouter.demo.shell.TestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/business_a/testinject4",
+    "className": "com.therouter.demo.shell.MultiThreadActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_service_provider",
+    "className": "com.therouter.demo.shell.MainActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/pending",
+    "className": "com.therouter.app.router.PendingTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_other",
+    "className": "com.therouter.app.router.OtherFunctionActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_history",
+    "className": "com.therouter.app.router.HistoryLogActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/callbacktest2",
+    "className": "com.therouter.app.navigator.ObjectTargetActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/callbacktest",
+    "className": "com.therouter.app.navigator.ObjectTargetActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_navigator",
+    "className": "com.therouter.app.navigator.NavigatorTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "null",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
+    "action": "",
+    "description": "",
+    "params": {
+      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
+    }
+  },
+  {
+    "path": "http://kymjs.com/therouter/home2",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
+    "action": "",
+    "description": "",
+    "params": {
+      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
+    }
+  },
+  {
+    "path": "http://kymjs.com/therouter/home",
+    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
+    "action": "action://scheme.com",
+    "description": "路由测试首页",
+    "params": {
+      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
+    }
+  },
+  {
+    "path": "http://kymjs.com/therouter/fragment_host_activity",
+    "className": "com.therouter.app.navigator.NavigatorFragmentActivity",
+    "action": "",
+    "description": "Fragment容器页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment2",
+    "className": "com.therouter.app.navigator.NavigatorFragment2",
+    "action": "",
+    "description": "Fragment测试页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment",
+    "className": "com.therouter.app.navigator.NavigatorFragment2",
+    "action": "",
+    "description": "Fragment测试页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test_fragment",
+    "className": "com.therouter.app.navigator.NavigatorFragment",
+    "action": "",
+    "description": "Fragment测试页",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test2",
+    "className": "com.therouter.app.navigator.KotlinTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/test",
+    "className": "com.therouter.app.navigator.KotlinTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/interceptor",
+    "className": "com.therouter.app.navigator.InterceptorActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/consent_to_privacy_agreement",
+    "className": "com.therouter.app.flowtask.FlowTaskTestActivity2",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_flow_task_executor",
+    "className": "com.therouter.app.flowtask.FlowTaskTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_action_manager",
+    "className": "com.therouter.app.action.TestActionActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  }
+]

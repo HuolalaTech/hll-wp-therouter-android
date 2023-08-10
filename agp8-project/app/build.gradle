@@ -1,0 +1,52 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+    id 'org.jetbrains.kotlin.kapt'
+    id 'therouter'
+    id "com.google.devtools.ksp"
+}
+
+android {
+    namespace = "com.therouter.app"
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.therouter.app"
+        minSdk 21
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            multiDexKeepProguard file('multiDexKeep.pro')
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds = false
+        tasks.lint.enabled = false
+    }
+}
+
+dependencies {
+    implementation 'androidx.multidex:multidex:2.0.1'
+    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20"
+
+    moduleKapt "cn.therouter:apt:$TheRouterVersion"
+    moduleImplementation "cn.therouter:router:$TheRouterVersion"
+    api project(":business-base")
+    api project(":business-a")
+    api project(":business-b")
+}

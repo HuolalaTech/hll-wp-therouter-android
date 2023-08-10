@@ -1,0 +1,132 @@
+def getLocalProperties() {
+    def properties = new Properties()
+    try {
+        File localPropertiesFile
+        try {
+            localPropertiesFile = new File(rootDir, 'local.properties');
+            if (localPropertiesFile == null || !localPropertiesFile.exists()) {
+                localPropertiesFile = new File("../local.properties")
+            }
+        } catch (Exception e) {
+            localPropertiesFile = new File("../local.properties")
+        }
+        println("localPropertiesFile===:" + localPropertiesFile.absolutePath)
+        properties.load(new FileInputStream(localPropertiesFile))
+        return properties
+    } catch (Exception e) {
+        e.printStackTrace()
+        return properties
+    }
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleKapt(String compileStr) {
+    moduleKapt(compileStr, {})
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleKapt(String compileStr, Closure configureClosure) {
+    String[] temp = compileStr.split(":")
+    String group = temp[0]
+    String artifactid = temp[1]
+    String version = temp[2]
+
+    Set<String> includeModule = new HashSet<>()
+    rootProject.getAllprojects().each {
+        if (it != rootProject) includeModule.add(it.name)
+    }
+
+    if (includeModule.contains(artifactid)) {
+        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        projects.project.dependencies.add(Boolean.valueOf(USE_KAPT) ? "kapt" : "ksp", project(':' + artifactid), configureClosure)
+//        projects.project.configurations { compile.exclude group: group, module: artifactid }
+    } else {
+        println(project.name + "依赖：=======$group:$artifactid:$version")
+        projects.project.dependencies.add(Boolean.valueOf(USE_KAPT) ? "kapt" : "ksp", "$group:$artifactid:$version", configureClosure)
+    }
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleApi(String compileStr) {
+    moduleApi(compileStr, {})
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleApi(String compileStr, Closure configureClosure) {
+    String[] temp = compileStr.split(":")
+    String group = temp[0]
+    String artifactid = temp[1]
+    String version = temp[2]
+
+    Set<String> includeModule = new HashSet<>()
+    rootProject.getAllprojects().each {
+        if (it != rootProject) includeModule.add(it.name)
+    }
+
+    if (includeModule.contains(artifactid)) {
+        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        projects.project.dependencies.add("api", project(':' + artifactid), configureClosure)
+//        projects.project.configurations { compile.exclude group: group, module: artifactid }
+    } else {
+        println(project.name + "依赖：=======$group:$artifactid:$version")
+        projects.project.dependencies.add("api", "$group:$artifactid:$version", configureClosure)
+    }
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleImplementation(String compileStr) {
+    moduleImplementation(compileStr, {})
+}
+
+/**
+ * 如果工程中有源码，则依赖源码，
+ * 否则依赖当前 baseVersion 对应的最新版本
+ * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
+ */
+def moduleImplementation(String compileStr, Closure configureClosure) {
+    String[] temp = compileStr.split(":")
+    String group = temp[0]
+    String artifactid = temp[1]
+    String version = temp[2]
+
+    Set<String> includeModule = new HashSet<>()
+    rootProject.getAllprojects().each {
+        if (it != rootProject) includeModule.add(it.name)
+    }
+
+    if (includeModule.contains(artifactid)) {
+        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        projects.project.dependencies.add("implementation", project(':' + artifactid), configureClosure)
+//        projects.project.configurations { compile.exclude group: group, module: artifactid }
+    } else {
+        println(project.name + "依赖：=======$group:$artifactid:$version")
+        projects.project.dependencies.add("implementation", "$group:$artifactid:$version", configureClosure)
+    }
+}
+
+ext {
+    moduleKapt = this.&moduleKapt
+    moduleApi = this.&moduleApi
+    moduleImplementation = this.&moduleImplementation
+    getLocalProperties = this.&getLocalProperties
+}

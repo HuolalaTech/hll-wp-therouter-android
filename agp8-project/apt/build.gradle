@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+    id 'kotlin'
+    id "com.google.devtools.ksp"
+}
+
+dependencies {
+    implementation 'com.google.code.gson:gson:2.9.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20"
+    implementation "com.google.devtools.ksp:symbol-processing-api:1.8.20-1.0.11"
+    implementation "com.google.auto.service:auto-service-annotations:1.0"
+    ksp "dev.zacsweers.autoservice:auto-service-ksp:0.5.2"
+}
+
+task sourcesJar(type: Jar) {
+//    classifier = 'sources'
+    archiveClassifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+//    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
+    from javadoc.destinationDir
+}

@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="导航参数支持所有Intent支持的参数、任何一个对象(无需序列化，无对象大小限制)、Float类型超出精度会自动舍入不会溢出" />
+
+        <Button
+            android:id="@+id/button1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试导航功能" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="TheRouter支持Fragment导航"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button1_0"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试Fragment导航功能"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="路由导航时，会将所有参数作为url传递给下一个页面" />
+
+        <Button
+            android:id="@+id/button1_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="展示完整路由path"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="TheRouter支持将多个path映射到同一个页面，也就是页面与path一对多的关系，并且支持页面导航的整个导航过程回调，详情请见代码 NavigatorTestActivity.java" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="多url指向同一个Activity，增加跳转回调"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button2_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试导航回调：找不到页面时的场景"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button2_2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试导航回调：能正常打开的情况"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="路由导航path，也可以是服务器下发的一个地址，把参数拼在path后面即可" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="含参path直接跳转"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试Kotlin的多url指向同一个Activity"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button5"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试Kotlin，另一个url"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="TheRouter支持将任何一个对象(无需序列化，无对象大小限制)，直接传递给下一个页面。可以用来传callback类事件，解决onActivityResult逻辑断裂的问题" />
+
+        <Button
+            android:id="@+id/button6"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="向下个页面传入非序列化对象"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="拦截器有多个拦截点可供选择，技术文档内有非常详细的介绍" />
+
+        <Button
+            android:id="@+id/button7"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试拦截器" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="在使用第三方SDK的场景下，如果不方便获取落地页path，可以兼容使用Intent方式" />
+
+        <Button
+            android:id="@+id/button8"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试Intent"
+            android:textAllCaps="false" />
+    </LinearLayout>
+</ScrollView>
