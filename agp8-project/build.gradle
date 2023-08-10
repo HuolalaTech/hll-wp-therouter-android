@@ -15,7 +15,7 @@ plugins {
 }
 
 allprojects {
-    apply from: "${project.getRootDir()}/therouter.gradle"
+    apply from: "${project.getRootDir()}/../therouter.gradle"
 }
 
 task clean(type: Delete) {

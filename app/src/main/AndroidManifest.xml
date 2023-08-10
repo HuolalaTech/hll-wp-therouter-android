@@ -13,7 +13,9 @@
         android:supportsRtl="true"
         android:testOnly="false"
         android:theme="@style/AppTheme">
-        <activity android:name="com.therouter.app.MainActivity">
+        <activity
+            android:name="com.therouter.app.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
