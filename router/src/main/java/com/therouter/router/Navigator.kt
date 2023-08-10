@@ -44,9 +44,9 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     val simpleUrl: String
         get() {
-            return if (normalUrl?.contains("?") == true) {
-                normalUrl.substring(0, normalUrl.indexOf('?'))
-            } else normalUrl ?: ""
+            return if (url?.contains("?") == true) {
+                url.substring(0, url.indexOf('?'))
+            } else url ?: ""
         }
 
     constructor(url: String?) : this(url, null)
