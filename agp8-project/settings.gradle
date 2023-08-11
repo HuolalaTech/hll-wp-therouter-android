@@ -23,7 +23,12 @@ getLocalProperties().entrySet().each { entry ->
     if (Boolean.valueOf(entry.value)) {
         def moduleName = entry.key
         if (!String.valueOf(moduleName).isEmpty()) {
-            def file = new File(rootDir, "../$moduleName")
+            def file
+            if ("plugin".equals(moduleName)) {
+                file = new File(rootDir, moduleName)
+            } else {
+                file = new File(rootDir, "../$moduleName")
+            }
             if (file.exists()) {
                 include ":$moduleName"
                 def moduleProject = project(":$moduleName")

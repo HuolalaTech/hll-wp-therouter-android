@@ -30,3 +30,11 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
+
+apply from: "${project.getRootDir()}/../buildsystem/module.gradle"
+
+apply from: "${project.getRootDir()}/../buildsystem/publish.gradle"
+
+apply from: "${project.getRootDir()}/../buildsystem/module.gradle"
+
+apply from: "${project.getRootDir()}/../buildsystem/publish.gradle"
