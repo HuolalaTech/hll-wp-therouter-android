@@ -21,7 +21,7 @@ public class AddCodeVisitor extends ClassVisitor {
     private final boolean isIncremental;
 
     public AddCodeVisitor(ClassVisitor cv, Map<String, String> serviceProvideMap, Set<String> autowiredSet, Set<String> routeSet, boolean incremental) {
-        super(Opcodes.ASM9, cv);
+        super(Opcodes.ASM7, cv);
         this.serviceProvideList = new ArrayList<>(serviceProvideMap.keySet());
         this.serviceProvideMap = serviceProvideMap;
         this.autowiredList = new ArrayList<>(autowiredSet);
