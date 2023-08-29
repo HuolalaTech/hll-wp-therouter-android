@@ -282,7 +282,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                         val gradleProperties = FileInputStream(PROPERTY_FILE)
                         prop.load(gradleProperties)
                     } catch (e: Exception) {
-                        e.printStackTrace()
                     }
                     if (!STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
                         throw IllegalArgumentException(
@@ -417,8 +416,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
 
             ps.println("}")
             ps.flush()
-        } catch (e: Exception) {
-            e.printStackTrace()
         } finally {
             ps?.close()
         }
@@ -487,8 +484,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 ps.println("\t}")
                 ps.println("}")
                 ps.flush()
-            } catch (e: Exception) {
-                e.printStackTrace()
             } finally {
                 ps?.close()
             }
@@ -550,7 +545,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 val gradleProperties = FileInputStream(PROPERTY_FILE)
                 prop.load(gradleProperties)
             } catch (e: Exception) {
-                e.printStackTrace()
             }
             for (serviceProviderItem in pageList) {
                 //处理 USE_EXTEND 开关
@@ -650,8 +644,6 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println("\t}")
             ps.println("}")
             ps.flush()
-        } catch (e: Exception) {
-            e.printStackTrace()
         } finally {
             ps?.close()
         }

@@ -45,7 +45,9 @@ fun initRouteMap() {
             }
         }
     } catch (e: Exception) {
-        e.printStackTrace()
+        debug("RouteMap", "initRouteMap InputStreamReader error") {
+            e.printStackTrace()
+        }
     }
 }
 

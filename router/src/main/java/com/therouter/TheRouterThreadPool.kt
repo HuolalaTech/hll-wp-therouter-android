@@ -47,7 +47,9 @@ fun execute(command: Runnable) {
         executor.execute(command)
     } catch (e: Exception) {
         //RejectedExecutionException if this task cannot be accepted for execution
-        e.printStackTrace()
+        debug("TheRouterThreadPool", "rejected execute runnable") {
+            e.printStackTrace()
+        }
     }
 }
 
@@ -170,9 +172,11 @@ private class BufferExecutor : ExecutorService, Executor {
             taskQueue.size > MAX_QUEUE_SIZE * 100 -> {
                 threadPoolExecutor.corePoolSize = MAXIMUM_CORE_POOL_SIZE
             }
+
             taskQueue.size > MAX_QUEUE_SIZE * 10 -> {
                 threadPoolExecutor.corePoolSize = BIGGER_CORE_POOL_SIZE
             }
+
             else -> {
                 threadPoolExecutor.corePoolSize = CORE_POOL_SIZE
             }
