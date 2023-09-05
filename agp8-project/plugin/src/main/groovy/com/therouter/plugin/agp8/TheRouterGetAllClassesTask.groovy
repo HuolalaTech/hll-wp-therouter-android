@@ -31,6 +31,8 @@ import java.util.jar.JarOutputStream
 
 abstract class TheRouterGetAllClassesTask extends DefaultTask {
 
+    private final Set<String> allClass = new HashSet<>()
+
     @InputFiles
     abstract ListProperty<RegularFile> getAllJars();
 
@@ -71,7 +73,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 jars.add(it)
             }
         }
-        
+
         OutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutput().get().getAsFile())))
         jars.each { file ->
             JarFile jarFile = new JarFile(file.asFile)
@@ -325,7 +327,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         println("---------TheRouter transform finish, spend:${time}ms------------------------------------------")
     }
 
-    static void tag(String className) {
+    void tag(String className) {
         className = className.replaceAll(TheRouterPlugin.DOT_CLASS, "")
         if (isAutowired(className)) {
             TheRouterPlugin.autowiredSet.add(className)
@@ -334,6 +336,8 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         } else if (isServiceProvider(className)) {
             TheRouterPlugin.serviceProvideMap.put(className, BuildConfig.VERSION)
         }
+        println "=111=========" + className
+        allClass.add(className)
     }
 
     static boolean isAutowired(String className) {

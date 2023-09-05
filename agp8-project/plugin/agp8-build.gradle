@@ -1,10 +1,10 @@
 apply plugin: 'groovy'
 
-//repositories {
-//    mavenCentral()
-//    gradlePluginPortal()
-//    google()
-//}
+repositories {
+    mavenCentral()
+    gradlePluginPortal()
+    google()
+}
 
 dependencies {
     implementation gradleApi()
