@@ -336,8 +336,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         } else if (isServiceProvider(className)) {
             TheRouterPlugin.serviceProvideMap.put(className, BuildConfig.VERSION)
         }
-        println "=111=========" + className
-        allClass.add(className)
+        allClass.add(className.replaceAll("/", "."))
     }
 
     static boolean isAutowired(String className) {
