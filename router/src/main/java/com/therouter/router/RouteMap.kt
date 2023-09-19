@@ -5,12 +5,15 @@ import android.content.Intent
 import android.text.TextUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import com.therouter.*
+import com.therouter.ROUTE_MAP_ASSETS_PATH
+import com.therouter.TheRouter
 import com.therouter.debug
+import com.therouter.execute
+import com.therouter.executeInMainThread
+import com.therouter.getApplicationContext
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.lang.Exception
-import java.nio.charset.StandardCharsets
+import java.nio.charset.Charset
 
 // 路由表
 private val ROUTER_MAP = RegexpKeyedMap<RouteItem>()
@@ -27,7 +30,7 @@ val gson = Gson()
 fun initRouteMap() {
     try {
         InputStreamReader(
-            getStreamFromAssets(getApplicationContext(), ROUTE_MAP_ASSETS_PATH), StandardCharsets.UTF_8
+            getStreamFromAssets(getApplicationContext(), ROUTE_MAP_ASSETS_PATH), Charset.forName("UTF-8")
         ).use {
             BufferedReader(it).use { read ->
                 var lineText: String?
