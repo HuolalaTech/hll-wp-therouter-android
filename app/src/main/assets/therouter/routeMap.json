@@ -49,6 +49,13 @@
     "params": {}
   },
   {
+    "path": "http://kymjs.com/therouter/viewbinding_fragment",
+    "className": "com.therouter.app.navigator.ViewBindingTestFragment",
+    "action": "",
+    "description": "ViewBinding测试页",
+    "params": {}
+  },
+  {
     "path": "http://kymjs.com/therouter/callbacktest2",
     "className": "com.therouter.app.navigator.ObjectTargetActivity",
     "action": "",

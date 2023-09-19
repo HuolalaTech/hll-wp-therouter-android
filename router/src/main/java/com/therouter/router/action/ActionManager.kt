@@ -59,7 +59,7 @@ internal object ActionManager {
         val realAction = Navigator(action).simpleUrl
         var actionList = actionHandleMap[realAction]
         if (actionList == null) {
-            actionList = ArrayList<ActionInterceptor?>()
+            actionList = CopyOnWriteArrayList<ActionInterceptor?>()
         }
         if (!actionList.contains(interceptor)) {
             actionList.add(interceptor)

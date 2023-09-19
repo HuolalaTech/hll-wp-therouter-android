@@ -96,6 +96,16 @@ public class NavigatorTestActivity extends AppCompatActivity {
                 TheRouter.build(KotlinPathIndex.Test.FRAGMENT_HOST).withObject("fragment", fragment).navigation();
             }
         });
+        findViewById(R.id.button1_0_1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Fragment fragment = TheRouter.build(KotlinPathIndex.Test.VIEW_BINDING_FRAGMENT_TEST)
+                        .withInt("intValue", 12345678) // 测试传 int 值
+                        .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
+                        .createFragment();
+                TheRouter.build(KotlinPathIndex.Test.FRAGMENT_HOST).withObject("fragment", fragment).navigation();
+            }
+        });
         findViewById(R.id.button1_1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

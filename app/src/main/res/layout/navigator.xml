@@ -34,6 +34,13 @@
             android:text="测试Fragment导航功能"
             android:textAllCaps="false" />
 
+        <Button
+            android:id="@+id/button1_0_1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试ViewBinding Fragment"
+            android:textAllCaps="false" />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

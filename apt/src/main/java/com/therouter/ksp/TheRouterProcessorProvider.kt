@@ -7,10 +7,6 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 
 @AutoService(SymbolProcessorProvider::class)
 class SimpleClassGeneratorProcessorProvider : SymbolProcessorProvider {
-    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor {
-        return TheRouterSymbolProcessor(
-            environment.codeGenerator,
-            environment.logger
-        )
-    }
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
+        TheRouterSymbolProcessor(environment.codeGenerator, environment.logger)
 }
