@@ -107,7 +107,7 @@ class TheRouterSymbolProcessor(
                             }
                         }
 
-                        else -> throw RuntimeException("unknow type for " + routeItem.className + "." + arg.name?.asString())
+                        else -> throw RuntimeException(routeItem.className + " unknow type for " + "@Route(" + arg.name?.asString() + ")")
                     }
                 }
                 list.add(routeItem)
