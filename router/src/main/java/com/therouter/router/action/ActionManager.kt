@@ -59,9 +59,9 @@ internal object ActionManager {
         val realAction = Navigator(action).simpleUrl
         var actionList = actionHandleMap[realAction]
         if (actionList == null) {
-            actionList = ArrayList()
+            actionList = Collections.synchronizedList(ArrayList())
         }
-        if (!actionList.contains(interceptor)) {
+        if (actionList != null && !actionList.contains(interceptor)) {
             actionList.add(interceptor)
             Collections.sort(actionList, Comparator { o1, o2 ->
                 return@Comparator if (o1 == null) {
