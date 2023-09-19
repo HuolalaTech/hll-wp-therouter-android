@@ -17,7 +17,7 @@ import kotlin.collections.ArrayList
 
 internal object ActionManager {
     // simpleUrl - runnable
-    private val actionHandleMap = ConcurrentHashMap<String, CopyOnWriteArrayList<ActionInterceptor?>>()
+    private val actionHandleMap = ConcurrentHashMap<String, MutableList<ActionInterceptor?>>()
 
     internal fun isAction(navigator: Navigator) = actionHandleMap[navigator.simpleUrl] != null
 
@@ -31,7 +31,7 @@ internal object ActionManager {
         }
 
         val list = ArrayList<ActionInterceptor>()
-        val interceptorList = actionHandleMap[navigator.simpleUrl]
+        val interceptorList = actionHandleMap[navigator.simpleUrl]?.let { CopyOnWriteArrayList(it) }
         var bundle = Bundle()
         if (interceptorList != null) {
             for (item in interceptorList) {
@@ -59,7 +59,7 @@ internal object ActionManager {
         val realAction = Navigator(action).simpleUrl
         var actionList = actionHandleMap[realAction]
         if (actionList == null) {
-            actionList = CopyOnWriteArrayList<ActionInterceptor?>()
+            actionList = ArrayList()
         }
         if (!actionList.contains(interceptor)) {
             actionList.add(interceptor)
