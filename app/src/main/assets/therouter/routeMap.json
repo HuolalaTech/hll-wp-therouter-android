@@ -49,6 +49,13 @@
     "params": {}
   },
   {
+    "path": "",
+    "className": "com.therouter.app.router.HistoryLogActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
     "path": "http://kymjs.com/therouter/viewbinding_fragment",
     "className": "com.therouter.app.navigator.ViewBindingTestFragment",
     "action": "",

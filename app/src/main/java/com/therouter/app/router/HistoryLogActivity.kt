@@ -1,5 +1,6 @@
 package com.therouter.app.router
 
+import android.annotation.SuppressLint
 import com.therouter.app.HomePathIndex
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -11,6 +12,7 @@ import com.therouter.history.*
 import com.therouter.router.Route
 import java.lang.StringBuilder
 
+@SuppressLint("test")
 @Route(path = HomePathIndex.DEMO_HISTORY)
 class HistoryLogActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
