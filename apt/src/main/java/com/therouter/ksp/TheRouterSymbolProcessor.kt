@@ -34,7 +34,6 @@ import com.therouter.router.Route
 import com.therouter.router.action.ActionInterceptor
 import java.io.FileInputStream
 import java.io.PrintStream
-import java.lang.RuntimeException
 import java.lang.StringBuilder
 import java.util.HashMap
 import java.util.Locale
@@ -107,7 +106,7 @@ class TheRouterSymbolProcessor(
                             }
                         }
 
-                        else -> throw RuntimeException(routeItem.className + " unknow type for " + "@Route(" + arg.name?.asString() + ")")
+                        else -> throw IllegalArgumentException(routeItem.className + " unknow type for " + "@Route(" + arg.name?.asString() + ")")
                     }
                 }
                 list.add(routeItem)
@@ -223,6 +222,7 @@ class TheRouterSymbolProcessor(
                         }
 
                         "description" -> autowiredItem.description = "${arg.value}"
+                        else -> throw IllegalArgumentException(autowiredItem.className + " unknow type for " + "@Autowired(" + arg.name?.asString() + ")")
                     }
                 }
                 var list = map[autowiredItem.className]
@@ -372,6 +372,8 @@ class TheRouterSymbolProcessor(
                             }
                             serviceProviderItem.params = params
                         }
+
+                        else -> throw IllegalArgumentException(serviceProviderItem.className + " unknow type for " + "@ServiceProvider(" + arg.name?.asString() + ")")
                     }
                 }
 
@@ -473,6 +475,11 @@ class TheRouterSymbolProcessor(
                             }
                             serviceProviderItem.params = params
                         }
+
+                        else -> throw IllegalArgumentException(
+                            serviceProviderItem.className + "." + serviceProviderItem.methodName
+                                    + " unknow type for " + "@ServiceProvider(" + arg.name?.asString() + ")"
+                        )
                     }
                 }
                 list.add(serviceProviderItem)
@@ -523,6 +530,10 @@ class TheRouterSymbolProcessor(
                         "taskName" -> flowTaskItem.taskName = "${arg.value}"
                         "async" -> flowTaskItem.async = "${arg.value}".toBoolean()
                         "dependsOn" -> flowTaskItem.dependencies = "${arg.value}"
+                        else -> throw IllegalArgumentException(
+                            flowTaskItem.className + "." + flowTaskItem.methodName
+                                    + " unknow type for " + "@FlowTask(" + arg.name?.asString() + ")"
+                        )
                     }
                 }
                 list.add(flowTaskItem)
@@ -548,6 +559,9 @@ class TheRouterSymbolProcessor(
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "actionName" -> item.actionName = "${arg.value}"
+                        else -> throw IllegalArgumentException(
+                            item.className + " unknow type for " + "@ActionInterceptor(" + arg.name?.asString() + ")"
+                        )
                     }
                 }
                 list.add(item)
