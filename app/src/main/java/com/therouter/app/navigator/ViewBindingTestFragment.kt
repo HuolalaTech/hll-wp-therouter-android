@@ -5,13 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.therouter.app.KotlinPathIndex.Test.FRAGMENT_TEST
 import com.therouter.app.KotlinPathIndex.Test.VIEW_BINDING_FRAGMENT_TEST
 import com.therouter.app.R
 import com.therouter.app.databinding.ViewbindingTestBinding
-import com.therouter.app.router.InternalBeanTest.RowBean
 import com.therouter.demo.base.BaseFragment
-import com.therouter.router.Autowired
 import com.therouter.router.Route
 
 @Route(path = VIEW_BINDING_FRAGMENT_TEST, description = "ViewBinding测试页")
