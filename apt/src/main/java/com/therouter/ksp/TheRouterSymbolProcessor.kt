@@ -12,8 +12,6 @@ import com.google.devtools.ksp.symbol.KSDeclaration
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
-import com.google.devtools.ksp.symbol.KSVisitorVoid
-import com.google.devtools.ksp.validate
 import com.therouter.app.flowtask.lifecycle.FlowTask
 import com.therouter.apt.ActionInterceptorItem
 import com.therouter.apt.AutowiredItem
@@ -64,13 +62,13 @@ class TheRouterSymbolProcessor(
     private fun parseRoute(resolver: Resolver): List<RouteItem> {
         val list: ArrayList<RouteItem> = ArrayList()
         resolver.getSymbolsWithAnnotation(Route::class.java.name)
-            .filter { it.validate() }
             .forEach { it.accept(RouteVisitor(list), Unit) }
         return list
     }
 
-    inner class RouteVisitor(private val list: ArrayList<RouteItem>) : KSVisitorVoid() {
+    inner class RouteVisitor(private val list: ArrayList<RouteItem>) : TheRouterVisitor(logger) {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+            super.visitClassDeclaration(classDeclaration, data)
             sourcePath = getSourcePath(classDeclaration)
             classDeclaration.annotations.forEach { annotation ->
                 val routeItem = RouteItem()
@@ -140,32 +138,28 @@ class TheRouterSymbolProcessor(
             ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
-            ps.println("class $className : com.therouter.router.IRouterMapAPT {")
+            ps.println("object $className : com.therouter.router.IRouterMapAPT {")
             ps.println()
-            ps.println("\tcompanion object { ")
             ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             val routeMapJson = json.replace("\"", "\\\"")
             ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
             ps.println()
-            ps.println("\t@JvmStatic")
-            ps.println("\tfun addRoute() {")
+            ps.println("@JvmStatic")
+            ps.println("fun addRoute() {")
             var i = 0
             for (item in routePagelist) {
                 i++
-                ps.println("\t\tval item$i = com.therouter.router.RouteItem(\"${item.path}\",\"${item.className}\",\"${item.action}\",\"${item.description}\")")
+                ps.println("\tval item$i = com.therouter.router.RouteItem(\"${item.path}\",\"${item.className}\",\"${item.action}\",\"${item.description}\")")
                 item.params.keys.forEach {
-                    ps.println("\t\titem$i.addParams(\"$it\", \"${item.params[it]}\")")
+                    ps.println("\titem$i.addParams(\"$it\", \"${item.params[it]}\")")
                 }
-                ps.println("\t\tcom.therouter.router.addRouteItem(item$i)")
+                ps.println("\tcom.therouter.router.addRouteItem(item$i)")
             }
-            ps.println("\t}")
-            ps.println("\t}")
+            ps.println("}")
             ps.println("}")
             ps.flush()
-        } catch (e: Exception) {
-            e.printStackTrace()
         } finally {
             ps?.close()
         }
@@ -174,13 +168,12 @@ class TheRouterSymbolProcessor(
     private fun parseAutowired(resolver: Resolver): Map<String, ArrayList<AutowiredItem>> {
         val map = HashMap<String, ArrayList<AutowiredItem>>()
         resolver.getSymbolsWithAnnotation(Autowired::class.java.name)
-            .filter { it.validate() }
             .forEach { it.accept(AutowiredVisitor(map), Unit) }
         return map
     }
 
     inner class AutowiredVisitor(private val map: HashMap<String, ArrayList<AutowiredItem>>) :
-        KSVisitorVoid() {
+        TheRouterVisitor(logger) {
 
         override fun visitPropertyDeclaration(property: KSPropertyDeclaration, data: Unit) {
             super.visitPropertyDeclaration(property, data)
@@ -325,8 +318,6 @@ class TheRouterSymbolProcessor(
                 ps.println("\t}")
                 ps.println("}")
                 ps.flush()
-            } catch (e: Exception) {
-                e.printStackTrace()
             } finally {
                 ps?.close()
             }
@@ -336,13 +327,12 @@ class TheRouterSymbolProcessor(
     private fun parseServiceProvider(resolver: Resolver): ArrayList<ServiceProviderItem> {
         val list: ArrayList<ServiceProviderItem> = ArrayList()
         resolver.getSymbolsWithAnnotation(ServiceProvider::class.java.name)
-            .filter { it.validate() }
             .forEach { it.accept(ServiceProviderVisitor(list), Unit) }
         return list
     }
 
     inner class ServiceProviderVisitor(private val list: ArrayList<ServiceProviderItem>) :
-        KSVisitorVoid() {
+        TheRouterVisitor(logger) {
 
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
             super.visitClassDeclaration(classDeclaration, data)
@@ -395,7 +385,6 @@ class TheRouterSymbolProcessor(
                             val gradleProperties = FileInputStream(PROPERTY_FILE)
                             prop.load(gradleProperties)
                         } catch (e: Exception) {
-                            e.printStackTrace()
                         }
                         if (!STR_TRUE.equals(
                                 prop.getProperty(KEY_USE_EXTEND),
@@ -489,13 +478,12 @@ class TheRouterSymbolProcessor(
     private fun parseFlowTask(resolver: Resolver): ArrayList<FlowTaskItem> {
         val list = ArrayList<FlowTaskItem>()
         resolver.getSymbolsWithAnnotation(FlowTask::class.java.name)
-            .filter { it.validate() }
             .forEach { it.accept(FlowTaskVisitor(list), Unit) }
         return list
     }
 
     inner class FlowTaskVisitor(private val list: ArrayList<FlowTaskItem>) :
-        KSVisitorVoid() {
+        TheRouterVisitor(logger) {
 
         override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
             super.visitFunctionDeclaration(function, data)
@@ -540,13 +528,12 @@ class TheRouterSymbolProcessor(
     private fun parseActionInterceptor(resolver: Resolver): ArrayList<ActionInterceptorItem> {
         val list = ArrayList<ActionInterceptorItem>()
         resolver.getSymbolsWithAnnotation(ActionInterceptor::class.java.name)
-            .filter { it.validate() }
             .forEach { it.accept(ActionInterceptorVisitor(list), Unit) }
         return list
     }
 
     inner class ActionInterceptorVisitor(private val list: ArrayList<ActionInterceptorItem>) :
-        KSVisitorVoid() {
+        TheRouterVisitor(logger) {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
             super.visitClassDeclaration(classDeclaration, data)
             sourcePath = getSourcePath(classDeclaration)
@@ -614,7 +601,7 @@ class TheRouterSymbolProcessor(
             ps.println("@androidx.annotation.Keep")
             ps.println(
                 String.format(
-                    "public class %s : com.therouter.inject.Interceptor {",
+                    "object %s : com.therouter.inject.Interceptor {",
                     className
                 )
             )
@@ -627,7 +614,6 @@ class TheRouterSymbolProcessor(
                 val gradleProperties = FileInputStream(PROPERTY_FILE)
                 prop.load(gradleProperties)
             } catch (e: Exception) {
-                e.printStackTrace()
             }
             for (serviceProviderItem in pageList) {
                 //处理 USE_EXTEND 开关
@@ -715,30 +701,25 @@ class TheRouterSymbolProcessor(
             ps.println("        return obj")
             ps.println("    }")
             ps.println()
-            ps.println("\tcompanion object { ")
-            ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             ps.println("\tconst val FLOW_TASK_JSON = \"${stringBuilder}\"")
             ps.println()
-            ps.println("\t\t@kotlin.jvm.JvmStatic")
-            ps.println("\t\tfun addFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
+            ps.println("\t@kotlin.jvm.JvmStatic")
+            ps.println("\tfun addFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
             for (item in flowTaskList) {
-                ps.println("\t\t\tdigraph.addTask(com.therouter.flow.Task(${item.async}, \"${item.taskName}\", \"${item.dependencies}\", object : com.therouter.flow.FlowTaskRunnable {")
-                ps.println("\t\t\t\toverride fun run() = ${item.className}.${item.methodName}(context)")
+                ps.println("\t\tdigraph.addTask(com.therouter.flow.Task(${item.async}, \"${item.taskName}\", \"${item.dependencies}\", object : com.therouter.flow.FlowTaskRunnable {")
+                ps.println("\t\t\toverride fun run() = ${item.className}.${item.methodName}(context)")
                 ps.println()
-                ps.println("\t\t\t\toverride fun log() = \"${item.className}.${item.methodName}(context)\"")
-                ps.println("\t\t\t}))")
+                ps.println("\t\t\toverride fun log() = \"${item.className}.${item.methodName}(context)\"")
+                ps.println("\t\t}))")
             }
             for (item in actionInterceptorList) {
-                ps.println("\t\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", ${item.className}());")
+                ps.println("\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", ${item.className}());")
             }
-            ps.println("\t\t}")
             ps.println("\t}")
             ps.println("}")
             ps.flush()
-        } catch (e: Exception) {
-            e.printStackTrace()
         } finally {
             ps?.close()
         }
