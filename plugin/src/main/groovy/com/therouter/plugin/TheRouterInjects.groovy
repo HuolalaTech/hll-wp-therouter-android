@@ -53,9 +53,6 @@ class TheRouterInjects {
                     String className = jarEntry.name.substring(start, end)
                             .replace('\\', '.')
                             .replace('/', '.')
-                    if (className.indexOf('$') > 0) {
-                        className = className.substring(0, className.indexOf('$'))
-                    }
                     InputStream inputStream = file.getInputStream(jarEntry)
                     ClassReader reader = new ClassReader(inputStream)
                     ClassNode cn = new ClassNode()
