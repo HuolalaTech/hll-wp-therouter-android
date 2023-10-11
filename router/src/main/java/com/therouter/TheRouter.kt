@@ -69,7 +69,7 @@ object TheRouter {
      *     2. 添加 @Autowired 路由解析器
      */
     @JvmStatic
-    fun init(context: Context?) {
+    fun init(context: Context?, asyncInitRouterInject: Boolean = true) {
         if (!inited) {
             debug("init", "TheRouter init start!")
             addFlowTask(context, digraph)
@@ -81,7 +81,11 @@ object TheRouter {
                 debug("init", "TheRouter.init() method do @FlowTask schedule")
                 runInitFlowTask()
             }
-            routerInject.asyncInitRouterInject(context)
+            if (asyncInitRouterInject) {
+                routerInject.asyncInitRouterInject(context)
+            } else {
+                routerInject.syncInitRouterInject(context)
+            }
             asyncInitRouteMap()
             execute {
                 context?.apply {
