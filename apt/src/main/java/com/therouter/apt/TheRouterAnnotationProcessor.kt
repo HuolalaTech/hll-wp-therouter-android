@@ -254,19 +254,18 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         serviceProviderItem.methodName = ""
 
         val annotationStr = annotation.toString()
-        val matcher =
-            Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
-                .matcher(annotationStr)
+        val matcher = Pattern.compile("(returnType|params)=([\\w\\.]+[\\w\\.,]*)").matcher(annotationStr)
         while (matcher.find()) {
-            val params = matcher.group()
             val key = matcher.group(1)
-            val value = params.substring(key.length + 1)
+            val value = matcher.group(2)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) {
                     serviceProviderItem.returnType = value
                 }
+
                 KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
-                else ->{}
+
+                else -> {}
             }
         }
 
@@ -326,19 +325,18 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             }
         }
         val annotationStr = element.getAnnotation(ServiceProvider::class.java).toString()
-        val matcher =
-            Pattern.compile("(\\w+)=(,?([a-zA-Z]+[0-9a-zA-Z_]*(\\.[a-zA-Z]+[0-9a-zA-Z_]*)*))+")
-                .matcher(annotationStr)
+        val matcher = Pattern.compile("(returnType|params)=([\\w\\.]+[\\w\\.,]*)").matcher(annotationStr)
         while (matcher.find()) {
-            val params = matcher.group()
             val key = matcher.group(1)
-            val value = params.substring(key.length + 1)
+            val value = matcher.group(2)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)){
+                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) {
                     serviceProviderItem.returnType = value
                 }
+
                 KEY_PARAMS -> serviceProviderItem.params = transform(value.split(",").toCollection(ArrayList()))
-                else ->{}
+
+                else -> {}
             }
         }
         return serviceProviderItem
@@ -650,10 +648,14 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
     }
 
     private fun transform(type: ArrayList<String>): ArrayList<String> {
+        val list = ArrayList<String>()
         for (i in type.indices) {
-            type[i] = transformNumber(type[i])
+            val item = transformNumber(type[i])
+            if (item.isNotBlank()) {
+                list.add(item)
+            }
         }
-        return type
+        return list
     }
 }
 
