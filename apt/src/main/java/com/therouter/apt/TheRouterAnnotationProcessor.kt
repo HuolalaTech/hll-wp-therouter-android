@@ -259,7 +259,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             val key = matcher.group(1)
             val value = matcher.group(2)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) {
+                KEY_RETURNTYPE -> if (!"com.therouter.inject.ServiceProvider".equals(value)) {
                     serviceProviderItem.returnType = value
                 }
 
@@ -330,7 +330,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             val key = matcher.group(1)
             val value = matcher.group(2)
             when (key) {
-                KEY_RETURNTYPE -> if (!ServiceProvider::class.java.name.equals(value)) {
+                KEY_RETURNTYPE -> if (!"com.therouter.inject.ServiceProvider".equals(value)) {
                     serviceProviderItem.returnType = value
                 }
 
