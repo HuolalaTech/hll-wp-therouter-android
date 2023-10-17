@@ -53,23 +53,25 @@ class TheRouterInjects {
                     String className = jarEntry.name.substring(start, end)
                             .replace('\\', '.')
                             .replace('/', '.')
-                    InputStream inputStream = file.getInputStream(jarEntry)
-                    ClassReader reader = new ClassReader(inputStream)
-                    ClassNode cn = new ClassNode()
-                    reader.accept(cn, 0)
-                    List<FieldNode> fieldList = cn.fields
-                    String aptVersion = NOT_FOUND_VERSION
-                    for (FieldNode fieldNode : fieldList) {
-                        if (FIELD_FLOW_TASK_JSON == fieldNode.name) {
-                            println("---------TheRouter in jar get flow task json from: ${jarEntry.name}-------------------------------")
-                            Map<String, String> map = gson.fromJson(fieldNode.value, HashMap.class);
-                            jarInfo.flowTaskMapFromJar.putAll(map)
-                        } else if (FIELD_APT_VERSION == fieldNode.name) {
-                            aptVersion = fieldNode.value
+                    if (className.indexOf('$') <= 0) { // 只处理非内部类
+                        InputStream inputStream = file.getInputStream(jarEntry)
+                        ClassReader reader = new ClassReader(inputStream)
+                        ClassNode cn = new ClassNode()
+                        reader.accept(cn, 0)
+                        List<FieldNode> fieldList = cn.fields
+                        String aptVersion = NOT_FOUND_VERSION
+                        for (FieldNode fieldNode : fieldList) {
+                            if (FIELD_FLOW_TASK_JSON == fieldNode.name) {
+                                println("---------TheRouter in jar get flow task json from: ${jarEntry.name}-------------------------------")
+                                Map<String, String> map = gson.fromJson(fieldNode.value, HashMap.class);
+                                jarInfo.flowTaskMapFromJar.putAll(map)
+                            } else if (FIELD_APT_VERSION == fieldNode.name) {
+                                aptVersion = fieldNode.value
+                            }
                         }
-                    }
-                    if (!serviceProvideMap.containsKey(className) || aptVersion != NOT_FOUND_VERSION) {
-                        serviceProvideMap.put(className, aptVersion)
+                        if (!serviceProvideMap.containsKey(className) || aptVersion != NOT_FOUND_VERSION) {
+                            serviceProvideMap.put(className, aptVersion)
+                        }
                     }
                 } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
                     String className = jarEntry.name
