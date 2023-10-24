@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
-import com.therouter.app.serviceprovider.IKotlinSerivce;
+import com.therouter.demo.di.IKotlinSerivce;
 import com.therouter.router.Route;
 
 @Route(path = HomePathIndex.DEMO_OTHER)
