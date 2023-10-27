@@ -26,6 +26,13 @@ class RouterInject {
         }
     }
 
+    fun syncInitRouterInject(context: Context?) {
+        trojan()
+        if (mInterceptors.isEmpty()) {
+            initServiceProvider(context)
+        }
+    }
+
     internal fun initServiceProvider(context: Context?) {
         execute {
             getAllDI(context)
