@@ -138,8 +138,9 @@ class TheRouterSymbolProcessor(
             ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
             ps.println(" */")
             ps.println("@androidx.annotation.Keep")
-            ps.println("object $className : com.therouter.router.IRouterMapAPT {")
+            ps.println("class $className : com.therouter.router.IRouterMapAPT {")
             ps.println()
+            ps.println("\tcompanion object { ")
             ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
@@ -151,12 +152,13 @@ class TheRouterSymbolProcessor(
             var i = 0
             for (item in routePagelist) {
                 i++
-                ps.println("\tval item$i = com.therouter.router.RouteItem(\"${item.path}\",\"${item.className}\",\"${item.action}\",\"${item.description}\")")
+                ps.println("\t\tval item$i = com.therouter.router.RouteItem(\"${item.path}\",\"${item.className}\",\"${item.action}\",\"${item.description}\")")
                 item.params.keys.forEach {
-                    ps.println("\titem$i.addParams(\"$it\", \"${item.params[it]}\")")
+                    ps.println("\t\titem$i.addParams(\"$it\", \"${item.params[it]}\")")
                 }
-                ps.println("\tcom.therouter.router.addRouteItem(item$i)")
+                ps.println("\t\tcom.therouter.router.addRouteItem(item$i)")
             }
+            ps.println("\t}")
             ps.println("\t}")
             ps.println("}")
             ps.flush()
@@ -601,7 +603,7 @@ class TheRouterSymbolProcessor(
             ps.println("@androidx.annotation.Keep")
             ps.println(
                 String.format(
-                    "object %s : com.therouter.inject.Interceptor {",
+                    "public class %s : com.therouter.inject.Interceptor {",
                     className
                 )
             )
@@ -701,22 +703,25 @@ class TheRouterSymbolProcessor(
             ps.println("        return obj")
             ps.println("    }")
             ps.println()
+            ps.println("\tcompanion object { ")
+            ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             ps.println("\tconst val FLOW_TASK_JSON = \"${stringBuilder}\"")
             ps.println()
-            ps.println("\t@kotlin.jvm.JvmStatic")
-            ps.println("\tfun addFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
+            ps.println("\t\t@kotlin.jvm.JvmStatic")
+            ps.println("\t\tfun addFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
             for (item in flowTaskList) {
-                ps.println("\t\tdigraph.addTask(com.therouter.flow.Task(${item.async}, \"${item.taskName}\", \"${item.dependencies}\", object : com.therouter.flow.FlowTaskRunnable {")
-                ps.println("\t\t\toverride fun run() = ${item.className}.${item.methodName}(context)")
+                ps.println("\t\t\tdigraph.addTask(com.therouter.flow.Task(${item.async}, \"${item.taskName}\", \"${item.dependencies}\", object : com.therouter.flow.FlowTaskRunnable {")
+                ps.println("\t\t\t\toverride fun run() = ${item.className}.${item.methodName}(context)")
                 ps.println()
-                ps.println("\t\t\toverride fun log() = \"${item.className}.${item.methodName}(context)\"")
-                ps.println("\t\t}))")
+                ps.println("\t\t\t\toverride fun log() = \"${item.className}.${item.methodName}(context)\"")
+                ps.println("\t\t\t}))")
             }
             for (item in actionInterceptorList) {
-                ps.println("\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", ${item.className}());")
+                ps.println("\t\t\tcom.therouter.TheRouter.addActionInterceptor(\"${item.actionName}\", ${item.className}());")
             }
+            ps.println("\t\t}")
             ps.println("\t}")
             ps.println("}")
             ps.flush()
