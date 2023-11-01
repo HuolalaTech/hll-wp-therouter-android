@@ -173,18 +173,23 @@ public class TheRouterTransform extends Transform {
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            String assetString = FileUtils.readFileToString(assetRouteMap)
-            println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
-            try {
-                List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
-                }.getType())
-                for (RouteItem item : assetsList) {
-                    if (!pageSet.contains(item)) {
-                        pageSet.add(item)
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                assetRouteMap.delete()
+                assetRouteMap.createNewFile()
+            } else {
+                String assetString = FileUtils.readFileToString(assetRouteMap)
+                println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
+                try {
+                    List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
+                    }.getType())
+                    for (RouteItem item : assetsList) {
+                        if (!pageSet.contains(item)) {
+                            pageSet.add(item)
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace()
                 }
-            } catch (Exception e) {
-                e.printStackTrace()
             }
         } else {
             println("---------TheRouter route map does not exist: /assets/therouter/routeMap.json-------")
@@ -412,22 +417,40 @@ public class TheRouterTransform extends Transform {
 
     def getLocalProperties() {
         def properties = new Properties()
+        File gradlePropertiesFile
         try {
-            File localPropertiesFile
-            try {
-                localPropertiesFile = new File(mProject.rootDir, 'local.properties');
-                if (localPropertiesFile == null || !localPropertiesFile.exists()) {
-                    localPropertiesFile = new File("../local.properties")
-                }
-            } catch (Exception e) {
-                localPropertiesFile = new File("../local.properties")
+            gradlePropertiesFile = new File(mProject.rootDir, 'gradle.properties');
+            if (gradlePropertiesFile == null || !gradlePropertiesFile.exists()) {
+                gradlePropertiesFile = new File("../gradle.properties")
             }
-            properties.load(new FileInputStream(localPropertiesFile))
-            return properties
+        } catch (Exception e) {
+            gradlePropertiesFile = new File("../gradle.properties")
+        }
+        try {
+            properties.load(new FileInputStream(gradlePropertiesFile))
         } catch (Exception e) {
             e.printStackTrace()
-            return properties
         }
+
+        def temp = new Properties()
+        File localPropertiesFile
+        try {
+            localPropertiesFile = new File(mProject.rootDir, 'local.properties');
+            if (localPropertiesFile == null || !localPropertiesFile.exists()) {
+                localPropertiesFile = new File("../local.properties")
+            }
+        } catch (Exception e) {
+            localPropertiesFile = new File("../local.properties")
+        }
+        try {
+            temp.load(new FileInputStream(localPropertiesFile))
+            for (Object k : temp.keySet()) {
+                properties.put(k, temp.get(k))
+            }
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+        return properties
     }
 
 }

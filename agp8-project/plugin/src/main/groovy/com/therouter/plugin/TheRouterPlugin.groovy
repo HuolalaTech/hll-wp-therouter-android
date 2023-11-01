@@ -20,6 +20,7 @@ class TheRouterPlugin implements Plugin<Project> {
     public static final String INCREMENTAL = "THEROUTER_OPEN_INCREMENTAL";
     public static final String WARNING = "warning";
     public static final String ERROR = "error";
+    public static final String DELETE = "delete";
 
     public static final PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
     public static final PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"

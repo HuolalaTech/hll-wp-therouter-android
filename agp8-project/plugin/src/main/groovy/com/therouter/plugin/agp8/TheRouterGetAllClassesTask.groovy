@@ -188,18 +188,23 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(TheRouterPlugin.mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            String assetString = FileUtils.readFileToString(assetRouteMap)
-            println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
-            try {
-                List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
-                }.getType())
-                for (RouteItem item : assetsList) {
-                    if (!pageSet.contains(item)) {
-                        pageSet.add(item)
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                assetRouteMap.delete()
+                assetRouteMap.createNewFile()
+            } else {
+                String assetString = FileUtils.readFileToString(assetRouteMap)
+                println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
+                try {
+                    List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
+                    }.getType())
+                    for (RouteItem item : assetsList) {
+                        if (!pageSet.contains(item)) {
+                            pageSet.add(item)
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace()
                 }
-            } catch (Exception e) {
-                e.printStackTrace()
             }
         } else {
             println("---------TheRouter route map does not exist: /assets/therouter/routeMap.json-------")

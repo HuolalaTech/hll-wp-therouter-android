@@ -16,22 +16,40 @@ public class TheRouterPluginUtils {
 
     public static def getLocalProperties(Project project) {
         def properties = new Properties()
+        File gradlePropertiesFile
         try {
-            File localPropertiesFile
-            try {
-                localPropertiesFile = new File(project.rootDir, 'local.properties');
-                if (localPropertiesFile == null || !localPropertiesFile.exists()) {
-                    localPropertiesFile = new File("../local.properties")
-                }
-            } catch (Exception e) {
-                localPropertiesFile = new File("../local.properties")
+            gradlePropertiesFile = new File(project.rootDir, 'gradle.properties');
+            if (gradlePropertiesFile == null || !gradlePropertiesFile.exists()) {
+                gradlePropertiesFile = new File("../gradle.properties")
             }
-            properties.load(new FileInputStream(localPropertiesFile))
-            return properties
+        } catch (Exception e) {
+            gradlePropertiesFile = new File("../gradle.properties")
+        }
+        try {
+            properties.load(new FileInputStream(gradlePropertiesFile))
         } catch (Exception e) {
             e.printStackTrace()
-            return properties
         }
+
+        def temp = new Properties()
+        File localPropertiesFile
+        try {
+            localPropertiesFile = new File(project.rootDir, 'local.properties');
+            if (localPropertiesFile == null || !localPropertiesFile.exists()) {
+                localPropertiesFile = new File("../local.properties")
+            }
+        } catch (Exception e) {
+            localPropertiesFile = new File("../local.properties")
+        }
+        try {
+            temp.load(new FileInputStream(localPropertiesFile))
+            for (Object k : temp.keySet()) {
+                properties.put(k, temp.get(k))
+            }
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+        return properties
     }
 
 
