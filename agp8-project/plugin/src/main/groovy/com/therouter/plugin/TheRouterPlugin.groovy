@@ -52,23 +52,17 @@ class TheRouterPlugin implements Plugin<Project> {
             println "CHECK_ROUTE_MAP::${TheRouterPluginUtils.getLocalProperty(project, CHECK_ROUTE_MAP)}"
             println "CHECK_FLOW_UNKNOW_DEPEND::${TheRouterPluginUtils.getLocalProperty(project, CHECK_FLOW_UNKNOW_DEPEND)}"
 
-            if (project.gradle.gradleVersion >= "8") {
-                def android = project.extensions.getByType(AndroidComponentsExtension.class)
-                android.onVariants(android.selector().all(), new Action<Variant>() {
-                    @Override
-                    void execute(Variant variant) {
-                        TaskProvider<TheRouterGetAllClassesTask> getAllClassesTask = project.tasks.register("${variant.name}TheRouterGetAllClasses", TheRouterGetAllClassesTask.class)
-                        variant.artifacts
-                                .forScope(ScopedArtifacts.Scope.ALL)
-                                .use(getAllClassesTask)
-                                .toTransform(ScopedArtifact.CLASSES.INSTANCE, { it.getAllJars() }, { it.getAllDirectories() }, { it.getOutput() })
-                    }
-                })
-            } else {
-                def android = project.extensions.getByType(AppExtension)
-                def therouterTransform = new TheRouterTransform(project)
-                android.registerTransform(therouterTransform)
-            }
+            def android = project.extensions.getByType(AndroidComponentsExtension.class)
+            android.onVariants(android.selector().all(), new Action<Variant>() {
+                @Override
+                void execute(Variant variant) {
+                    TaskProvider<TheRouterGetAllClassesTask> getAllClassesTask = project.tasks.register("${variant.name}TheRouterGetAllClasses", TheRouterGetAllClassesTask.class)
+                    variant.artifacts
+                            .forScope(ScopedArtifacts.Scope.ALL)
+                            .use(getAllClassesTask)
+                            .toTransform(ScopedArtifact.CLASSES.INSTANCE, { it.getAllJars() }, { it.getAllDirectories() }, { it.getOutput() })
+                }
+            })
         } else {
             throw new RuntimeException("`apply plugin: 'therouter'` must call in Application module")
         }

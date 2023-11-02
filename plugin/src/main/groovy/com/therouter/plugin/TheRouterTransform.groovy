@@ -15,6 +15,8 @@ import org.gradle.api.Project
 
 public class TheRouterTransform extends Transform {
 
+    private final Map<String, String> buildProperties = new HashMap<>()
+
     private Project mProject
     private final Set<String> allClass = new HashSet<>()
     private final Set<String> deletedClass = new HashSet<>()
@@ -407,7 +409,10 @@ public class TheRouterTransform extends Transform {
 
     def getLocalProperty(String key) {
         try {
-            def value = getLocalProperties().getProperty(key)
+            if (!buildProperties.containsKey(key)) {
+                initProperties()
+            }
+            def value = buildProperties.get(key)
             return value == null ? "" : value
         } catch (Exception e) {
             e.printStackTrace()
@@ -415,8 +420,7 @@ public class TheRouterTransform extends Transform {
         }
     }
 
-    def getLocalProperties() {
-        def properties = new Properties()
+    def initProperties() {
         File gradlePropertiesFile
         try {
             gradlePropertiesFile = new File(mProject.rootDir, 'gradle.properties');
@@ -426,13 +430,17 @@ public class TheRouterTransform extends Transform {
         } catch (Exception e) {
             gradlePropertiesFile = new File("../gradle.properties")
         }
+        def gradleProperties = new Properties()
         try {
-            properties.load(new FileInputStream(gradlePropertiesFile))
+            gradleProperties.load(new FileInputStream(gradlePropertiesFile))
         } catch (Exception e) {
             e.printStackTrace()
         }
+        buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, gradleProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP))
+        buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, gradleProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, gradleProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.INCREMENTAL, gradleProperties.getProperty(TheRouterPlugin.INCREMENTAL))
 
-        def temp = new Properties()
         File localPropertiesFile
         try {
             localPropertiesFile = new File(mProject.rootDir, 'local.properties');
@@ -442,15 +450,15 @@ public class TheRouterTransform extends Transform {
         } catch (Exception e) {
             localPropertiesFile = new File("../local.properties")
         }
+        def localProperties = new Properties()
         try {
-            temp.load(new FileInputStream(localPropertiesFile))
-            for (Object k : temp.keySet()) {
-                properties.put(k, temp.get(k))
-            }
+            localProperties.load(new FileInputStream(localPropertiesFile))
         } catch (Exception e) {
             e.printStackTrace()
         }
-        return properties
+        buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, localProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP))
+        buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, localProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, localProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.INCREMENTAL, localProperties.getProperty(TheRouterPlugin.INCREMENTAL))
     }
-
 }
