@@ -84,15 +84,6 @@
     "params": {}
   },
   {
-    "path": "null",
-    "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
-    "action": "",
-    "description": "",
-    "params": {
-      "strFromAnnotation": "来自注解设置的默认值，允许路由动态修改"
-    }
-  },
-  {
     "path": "http://kymjs.com/therouter/home2",
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "",
@@ -119,13 +110,6 @@
   },
   {
     "path": "http://kymjs.com/therouter/test_fragment2",
-    "className": "com.therouter.app.navigator.NavigatorFragment2",
-    "action": "",
-    "description": "Fragment测试页",
-    "params": {}
-  },
-  {
-    "path": "http://kymjs.com/therouter/test_fragment",
     "className": "com.therouter.app.navigator.NavigatorFragment2",
     "action": "",
     "description": "Fragment测试页",
