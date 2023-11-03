@@ -189,6 +189,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         File assetRouteMap = new File(TheRouterPlugin.mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
             if (TheRouterPlugin.DELETE.equalsIgnoreCase(getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                println("---------TheRouter delete route map------------------------------------------")
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
             } else {

@@ -176,6 +176,7 @@ public class TheRouterTransform extends Transform {
         File assetRouteMap = new File(mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
             if (TheRouterPlugin.DELETE.equalsIgnoreCase(getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                println("---------TheRouter delete route map------------------------------------------")
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
             } else {
