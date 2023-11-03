@@ -57,10 +57,22 @@ public class TheRouterPluginUtils {
         } catch (Exception e) {
             e.printStackTrace()
         }
-        buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, localProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP))
-        buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, localProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))
-        buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, localProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND))
-        buildProperties.put(TheRouterPlugin.INCREMENTAL, localProperties.getProperty(TheRouterPlugin.INCREMENTAL))
+        def v = localProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.INCREMENTAL)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.INCREMENTAL, v)
+        }
     }
 
     private static final List<String> loopDependStack = new ArrayList<>()
