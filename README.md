@@ -28,18 +28,18 @@ TheRouter core functions have four functionalities:
 
 |module| apt                                                                                                      | router                                                                                                            | plugin                                                                                                            |
 |---|----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-|version| [![apt](https://img.shields.io/badge/apt-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/apt/) | [![router](https://img.shields.io/badge/router-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/router/) | [![plugin](https://img.shields.io/badge/plugin-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/plugin/) |
+|version| [![apt](https://img.shields.io/badge/apt-1.2.1-green)](https://repo1.maven.org/maven2/cn/therouter/apt/) | [![router](https://img.shields.io/badge/router-1.2.1-green)](https://repo1.maven.org/maven2/cn/therouter/router/) | [![plugin](https://img.shields.io/badge/plugin-1.2.1-green)](https://repo1.maven.org/maven2/cn/therouter/plugin/) |
 
 ```
 // root build.gradle 
-classpath 'cn.therouter:plugin:1.2.0'
+classpath 'cn.therouter:plugin:1.2.1'
 
 // app module 
 apply plugin: 'therouter'
 
 // dependencies
-kapt "cn.therouter:apt:1.2.0"
-implementation "cn.therouter:router:1.2.0"
+kapt "cn.therouter:apt:1.2.1"
+implementation "cn.therouter:router:1.2.1"
 ```
 
 #### B2. initialization library
