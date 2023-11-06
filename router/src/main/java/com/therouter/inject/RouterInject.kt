@@ -72,7 +72,7 @@ class RouterInject {
         for (f in mCustomInterceptors) {
             t = f.interception(tClass, *params)
             if (t != null) {
-                debugLog("mCustomInterceptors::===" + tClass + "===" + t.javaClass.simpleName + t.hashCode())
+                routerInjectDebugLog("mCustomInterceptors::===" + tClass + "===" + t.javaClass.simpleName + t.hashCode())
                 return t
             }
         }
@@ -82,7 +82,7 @@ class RouterInject {
         for (f in mInterceptors) {
             t = f.interception(tClass, *params)
             if (t != null) {
-                debugLog("interception::===" + tClass + "===" + t.javaClass.simpleName + t.hashCode())
+                routerInjectDebugLog("interception::===" + tClass + "===" + t.javaClass.simpleName + t.hashCode())
                 try {
                     mInterceptors.readLock().unlock()
                 } catch (e: Exception) {
@@ -97,9 +97,9 @@ class RouterInject {
 
         //正常情况都会有创建器，如果没有，则使用默认创建器
         if (tClass.isInterface) {
-            debugLog("$tClass is interface, but do not have @ServiceProvider")
+            routerInjectDebugLog("$tClass is interface, but do not have @ServiceProvider")
         } else if (isNumberClass(tClass.name)) {
-            debugLog("$tClass is primitive data types, but do not have @ServiceProvider")
+            routerInjectDebugLog("$tClass is primitive data types, but do not have @ServiceProvider")
         } else {
             val paramsClass = if (params.isNotEmpty()) {
                 val temp = arrayOfNulls<Class<*>?>(params.size)
@@ -115,8 +115,9 @@ class RouterInject {
                 }
                 t = constructor.newInstance(*params) as T
             } catch (e: Exception) {
-                debugLog(tClass.toString() + " do not have @ServiceProvider class. And constructor error::" + e.message)
-                e.printStackTrace()
+                routerInjectDebugLog(tClass.toString() + " do not have @ServiceProvider class. And constructor error::" + e.message) {
+                    e.printStackTrace()
+                }
             }
         }
         return t
@@ -186,7 +187,7 @@ class RouterInject {
                 }
             }
         } catch (e: Exception) {
-            debugLog("getAllDI error") {
+            routerInjectDebugLog("getAllDI error") {
                 e.printStackTrace()
             }
         } finally {
@@ -202,6 +203,6 @@ class RouterInject {
 const val PACKAGE = "a"
 const val SUFFIX = "ServiceProvider__TheRouter__"
 const val CLASS_NAME = "TheRouterServiceProvideInjecter"
-private fun debugLog(msg: String, block: () -> Unit = {}) {
+private fun routerInjectDebugLog(msg: String, block: () -> Unit = {}) {
     debug("RouterInject", msg, block)
 }

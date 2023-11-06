@@ -34,7 +34,7 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  * Navigator 用于描述一个路由项的跳转动作
  */
 open class Navigator(var url: String?, val intent: Intent?) {
-    val normalUrl = url
+    val originalUrl = url
     val extras = Bundle()
     private var optionsCompat: Bundle? = null
     private var pending = false
@@ -44,9 +44,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
 
     val simpleUrl: String
         get() {
-            return if (normalUrl?.contains("?") == true) {
-                normalUrl.substring(0, normalUrl.indexOf('?'))
-            } else normalUrl ?: ""
+            val tempUrl = url ?: ""
+            return if (tempUrl.contains("?")) {
+                tempUrl.substring(0, tempUrl.indexOf('?'))
+            } else tempUrl
         }
 
     constructor(url: String?) : this(url, null)

@@ -12,6 +12,7 @@ public class TheRouterPlugin implements Plugin<Project> {
     public static final String INCREMENTAL = "THEROUTER_OPEN_INCREMENTAL";
     public static final String WARNING = "warning";
     public static final String ERROR = "error";
+    public static final String DELETE = "delete";
 
     @Override
     void apply(Project project) {

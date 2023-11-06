@@ -1,0 +1,40 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        google()
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
+        maven { url 'https://plugins.gradle.org/m2/' }
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
+    }
+}
+
+rootProject.name = "TheRouter-AGP8"
+
+apply from: "${rootDir}/../therouter.gradle"
+getLocalProperties().entrySet().each { entry ->
+    if (Boolean.valueOf(entry.value)) {
+        def moduleName = entry.key
+        if (!String.valueOf(moduleName).isEmpty()) {
+            def file
+            if ("plugin".equals(moduleName)) {
+                file = new File(rootDir, moduleName)
+            } else {
+                file = new File(rootDir, "../$moduleName")
+            }
+            if (file.exists()) {
+                include ":$moduleName"
+                def moduleProject = project(":$moduleName")
+                moduleProject.projectDir = file
+                moduleProject.buildFileName = "agp8-build.gradle"
+            }
+        }
+    }
+}

@@ -9,6 +9,7 @@ public interface AppFlowTask extends TheRouterFlowTask, BusinessBaseFlowTask {
     String TEST_APP3 = "app3";
     String TEST_APP4 = "app4";
     String TEST_LATE_1 = "late1";
+    String TEST_LATE_2 = "late2";
     String TEST_BUSINESS_LATE = "business_demo";
     String CONSENT_AGREEMENT = "consent_to_privacy_agreement";
 }

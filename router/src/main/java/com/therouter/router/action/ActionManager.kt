@@ -10,15 +10,18 @@ import com.therouter.history.ActionNavigatorHistory
 import com.therouter.history.pushHistory
 import com.therouter.router.Navigator
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.Comparator
 import kotlin.collections.ArrayList
 
 internal object ActionManager {
     // simpleUrl - runnable
-    private val actionHandleMap: HashMap<String, MutableList<ActionInterceptor?>> = HashMap()
+    private val actionHandleMap = ConcurrentHashMap<String, MutableList<ActionInterceptor?>>()
 
     internal fun isAction(navigator: Navigator) = actionHandleMap[navigator.simpleUrl] != null
 
+    @Synchronized
     internal fun handleAction(navigator: Navigator, context: Context?) {
         if (TextUtils.isEmpty(navigator.simpleUrl)) return
         debug("ActionManager", "handleAction->${navigator.getUrlWithParams()}") {
@@ -28,7 +31,7 @@ internal object ActionManager {
         }
 
         val list = ArrayList<ActionInterceptor>()
-        val interceptorList = actionHandleMap[navigator.simpleUrl]
+        val interceptorList = actionHandleMap[navigator.simpleUrl]?.let { CopyOnWriteArrayList(it) }
         var bundle = Bundle()
         if (interceptorList != null) {
             for (item in interceptorList) {
@@ -50,14 +53,15 @@ internal object ActionManager {
         }
     }
 
+    @Synchronized
     internal fun addActionInterceptor(action: String?, interceptor: ActionInterceptor?) {
         if (TextUtils.isEmpty(action)) return
         val realAction = Navigator(action).simpleUrl
         var actionList = actionHandleMap[realAction]
         if (actionList == null) {
-            actionList = ArrayList<ActionInterceptor?>()
+            actionList = Collections.synchronizedList(ArrayList())
         }
-        if (!actionList.contains(interceptor)) {
+        if (actionList != null && !actionList.contains(interceptor)) {
             actionList.add(interceptor)
             Collections.sort(actionList, Comparator { o1, o2 ->
                 return@Comparator if (o1 == null) {
@@ -73,6 +77,7 @@ internal object ActionManager {
     /**
      * 移除所有action对应的拦截器，如果action有多个拦截器，则都会被移除
      */
+    @Synchronized
     internal fun removeAllInterceptorForKey(action: String?): MutableList<ActionInterceptor?> {
         if (TextUtils.isEmpty(action)) return ArrayList()
         val realAction = Navigator(action).simpleUrl
@@ -82,6 +87,7 @@ internal object ActionManager {
     /**
      * 移除所有指定拦截器，如果有多个action共用同一个拦截器，则都会被移除
      */
+    @Synchronized
     internal fun removeAllInterceptorForValue(interceptor: ActionInterceptor?) {
         actionHandleMap.keys.forEach { k ->
             val actionList = actionHandleMap[k]
@@ -92,6 +98,7 @@ internal object ActionManager {
         }
     }
 
+    @Synchronized
     internal fun removeActionInterceptor(action: String?, interceptor: ActionInterceptor?) {
         if (TextUtils.isEmpty(action)) return
         val realAction = Navigator(action).simpleUrl

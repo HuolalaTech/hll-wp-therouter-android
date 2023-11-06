@@ -81,7 +81,6 @@ fun getMD5(file: File): String? {
         }
         inputStream.close()
     } catch (e: Exception) {
-        e.printStackTrace()
         return null
     }
     val bigInt = BigInteger(1, digest.digest())

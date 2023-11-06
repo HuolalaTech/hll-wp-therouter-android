@@ -2,6 +2,7 @@ package com.therouter.app.serviceprovider
 
 import android.content.Context
 import android.widget.Toast
+import com.therouter.demo.di.IKotlinSerivce
 import com.therouter.inject.ServiceProvider
 
 @ServiceProvider(returnType = IKotlinSerivce::class, params = [Context::class, String::class])

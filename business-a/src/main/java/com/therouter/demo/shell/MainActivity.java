@@ -5,6 +5,7 @@ import android.os.Process;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -13,7 +14,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import com.therouter.TheRouter;
+import com.therouter.businessa.R;
 import com.therouter.demo.BusinessAPathIndex;
+import com.therouter.demo.di.IJavaServiceProvider;
+import com.therouter.demo.di.IJavaServiceProvider2;
+import com.therouter.demo.di.IKotlinSerivce;
 import com.therouter.demo.di.ITest;
 import com.therouter.demo.di.ITest0;
 import com.therouter.demo.di.ITest1;
@@ -195,6 +200,32 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 TheRouter.build(BusinessAPathIndex.INJECT_TEST4).navigation();
+            }
+        });
+        final Button button12 = (Button) findViewById(R.id.button12);
+        button12.setText("测试Java静态方法");
+        button12.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String str = TheRouter.get(IJavaServiceProvider.class).getString();
+                Toast.makeText(v.getContext(), str, Toast.LENGTH_SHORT).show();
+            }
+        });
+        final Button button13 = (Button) findViewById(R.id.button13);
+        button13.setText("测试 Java 类注解");
+        button13.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String str = TheRouter.get(IJavaServiceProvider2.class).getString();
+                Toast.makeText(v.getContext(), str, Toast.LENGTH_SHORT).show();
+            }
+        });
+        final Button button14 = (Button) findViewById(R.id.button14);
+        button14.setText("测试Kotlin Top Level方法");
+        button14.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TheRouter.get(IKotlinSerivce.class, v.getContext(), "Kotlin Top Level方法").hello();
             }
         });
     }

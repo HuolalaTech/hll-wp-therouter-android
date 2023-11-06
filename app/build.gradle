@@ -33,6 +33,9 @@ android {
         checkReleaseBuilds = false
         tasks.lint.enabled = false
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {

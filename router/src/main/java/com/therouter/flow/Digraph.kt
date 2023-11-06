@@ -29,8 +29,9 @@ class Digraph {
      * 向有向图中加入Task
      */
     fun addTask(task: Task?) {
-        require(task != null, "Digraph", "Task is Null")
-        require(!TextUtils.isEmpty(task?.taskName), "Digraph", "Task name is Empty ${task?.javaClass?.name}")
+        require(task != null, "FlowTask", "Task is Null")
+        require(!TextUtils.isEmpty(task?.taskName), "FlowTask", "Task name is Empty ${task?.javaClass?.name}")
+        debug("FlowTask", "FlowTask addTask ${task?.taskName}")
 
         task?.taskName?.let {
             if (!tasks.containsKey(it)) {
@@ -177,10 +178,12 @@ class Digraph {
             TheRouterFlowTask.THEROUTER_INITIALIZATION,
             TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION
         )
+
         TheRouterFlowTask.APP_ONSPLASH -> VirtualFlowTask(
             TheRouterFlowTask.APP_ONSPLASH,
             TheRouterFlowTask.THEROUTER_INITIALIZATION
         )
+
         else -> VirtualFlowTask(name, TheRouterFlowTask.THEROUTER_INITIALIZATION)
     }
 }

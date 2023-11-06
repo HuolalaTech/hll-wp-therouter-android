@@ -15,6 +15,8 @@ import org.gradle.api.Project
 
 public class TheRouterTransform extends Transform {
 
+    private final Map<String, String> buildProperties = new HashMap<>()
+
     private Project mProject
     private final Set<String> allClass = new HashSet<>()
     private final Set<String> deletedClass = new HashSet<>()
@@ -173,18 +175,24 @@ public class TheRouterTransform extends Transform {
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            String assetString = FileUtils.readFileToString(assetRouteMap)
-            println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
-            try {
-                List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
-                }.getType())
-                for (RouteItem item : assetsList) {
-                    if (!pageSet.contains(item)) {
-                        pageSet.add(item)
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                println("---------TheRouter delete route map------------------------------------------")
+                assetRouteMap.delete()
+                assetRouteMap.createNewFile()
+            } else {
+                String assetString = FileUtils.readFileToString(assetRouteMap)
+                println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
+                try {
+                    List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
+                    }.getType())
+                    for (RouteItem item : assetsList) {
+                        if (!pageSet.contains(item)) {
+                            pageSet.add(item)
+                        }
                     }
+                } catch (Exception e) {
+                    e.printStackTrace()
                 }
-            } catch (Exception e) {
-                e.printStackTrace()
             }
         } else {
             println("---------TheRouter route map does not exist: /assets/therouter/routeMap.json-------")
@@ -402,7 +410,10 @@ public class TheRouterTransform extends Transform {
 
     def getLocalProperty(String key) {
         try {
-            def value = getLocalProperties().getProperty(key)
+            if (!buildProperties.containsKey(key)) {
+                initProperties()
+            }
+            def value = buildProperties.get(key)
             return value == null ? "" : value
         } catch (Exception e) {
             e.printStackTrace()
@@ -410,24 +421,57 @@ public class TheRouterTransform extends Transform {
         }
     }
 
-    def getLocalProperties() {
-        def properties = new Properties()
+    def initProperties() {
+        File gradlePropertiesFile
         try {
-            File localPropertiesFile
-            try {
-                localPropertiesFile = new File(mProject.rootDir, 'local.properties');
-                if (localPropertiesFile == null || !localPropertiesFile.exists()) {
-                    localPropertiesFile = new File("../local.properties")
-                }
-            } catch (Exception e) {
-                localPropertiesFile = new File("../local.properties")
+            gradlePropertiesFile = new File(mProject.rootDir, 'gradle.properties');
+            if (gradlePropertiesFile == null || !gradlePropertiesFile.exists()) {
+                gradlePropertiesFile = new File("../gradle.properties")
             }
-            properties.load(new FileInputStream(localPropertiesFile))
-            return properties
+        } catch (Exception e) {
+            gradlePropertiesFile = new File("../gradle.properties")
+        }
+        def gradleProperties = new Properties()
+        try {
+            gradleProperties.load(new FileInputStream(gradlePropertiesFile))
         } catch (Exception e) {
             e.printStackTrace()
-            return properties
+        }
+        buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, gradleProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP))
+        buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, gradleProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, gradleProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND))
+        buildProperties.put(TheRouterPlugin.INCREMENTAL, gradleProperties.getProperty(TheRouterPlugin.INCREMENTAL))
+
+        File localPropertiesFile
+        try {
+            localPropertiesFile = new File(mProject.rootDir, 'local.properties');
+            if (localPropertiesFile == null || !localPropertiesFile.exists()) {
+                localPropertiesFile = new File("../local.properties")
+            }
+        } catch (Exception e) {
+            localPropertiesFile = new File("../local.properties")
+        }
+        def localProperties = new Properties()
+        try {
+            localProperties.load(new FileInputStream(localPropertiesFile))
+        } catch (Exception e) {
+            e.printStackTrace()
+        }
+        def v = localProperties.getProperty(TheRouterPlugin.CHECK_ROUTE_MAP)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.CHECK_ROUTE_MAP, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.SHOW_FLOW_DEPEND)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.SHOW_FLOW_DEPEND, v)
+        }
+        v = localProperties.getProperty(TheRouterPlugin.INCREMENTAL)
+        if (v != null && v.length() > 0) {
+            buildProperties.put(TheRouterPlugin.INCREMENTAL, v)
         }
     }
-
 }

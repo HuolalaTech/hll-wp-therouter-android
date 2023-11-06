@@ -5,7 +5,7 @@ TheRouter: *Android componentization solution*
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
 [![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
 
-HomePage | [iOS](https://ios.therouter.cn) | [中文官网](https://therouter.cn/docs/2022/11/23/01)  
+HomePage | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios) | [中文官网](https://therouter.cn)  
 
 ### A. Features
 
@@ -28,18 +28,18 @@ TheRouter core functions have four functionalities:
 
 |module| apt                                                                                                      | router                                                                                                            | plugin                                                                                                            |
 |---|----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
-|version| [![apt](https://img.shields.io/badge/apt-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/apt/) | [![router](https://img.shields.io/badge/router-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/router/) | [![plugin](https://img.shields.io/badge/plugin-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/plugin/) |
+|version| [![apt](https://img.shields.io/badge/apt-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/apt/) | [![router](https://img.shields.io/badge/router-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/router/) | [![plugin](https://img.shields.io/badge/plugin-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/plugin/) |
 
 ```
 // root build.gradle 
-classpath 'cn.therouter:plugin:1.1.4'
+classpath 'cn.therouter:plugin:1.2.0'
 
 // app module 
 apply plugin: 'therouter'
 
 // dependencies
-kapt "cn.therouter:apt:1.1.4"
-implementation "cn.therouter:router:1.1.4"
+kapt "cn.therouter:apt:1.2.0"
+implementation "cn.therouter:router:1.2.0"
 ```
 
 #### B2. initialization library

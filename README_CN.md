@@ -9,7 +9,7 @@ TheRouter Android | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios)
 
 ### 一、功能介绍
 
-TheRouter 核心功能具备四大能力：  
+TheRouter 具备四大能力：  
 
 * 页面导航跳转能力（[Navigator](https://therouter.cn/docs/2022/08/28/01)） 页面跳转能力介绍 
 * 跨模块依赖注入能力（[ServiceProvider](https://therouter.cn/docs/2022/08/27/01)）跨模块依赖注入 
@@ -28,18 +28,18 @@ TheRouter 核心功能具备四大能力：
 
 |module| apt                                                                                                     | router                                                                                                          | plugin                                                                                                          |
 |---|---------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------|
-|version| [![apt](https://img.shields.io/badge/apt-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/apt) | [![router](https://img.shields.io/badge/router-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/router) | [![plugin](https://img.shields.io/badge/plugin-1.1.4-green)](https://repo1.maven.org/maven2/cn/therouter/plugin) |
+|version| [![apt](https://img.shields.io/badge/apt-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/apt) | [![router](https://img.shields.io/badge/router-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/router) | [![plugin](https://img.shields.io/badge/plugin-1.2.0-green)](https://repo1.maven.org/maven2/cn/therouter/plugin) |
 
 ```
 // 项目根目录 build.gradle 引入
-classpath 'cn.therouter:plugin:1.1.4'
+classpath 'cn.therouter:plugin:1.2.0'
 
 // app module 中引入
 apply plugin: 'therouter'
 
 // 依赖，所有使用了注解的模块都要添加
-kapt "cn.therouter:apt:1.1.4"
-implementation "cn.therouter:router:1.1.4"
+kapt "cn.therouter:apt:1.2.0"
+implementation "cn.therouter:router:1.2.0"
 ```
 
 #### 2.2 初始化
