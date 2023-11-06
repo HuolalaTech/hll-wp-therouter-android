@@ -188,7 +188,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(TheRouterPlugin.mProject.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            if (TheRouterPlugin.DELETE.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.CHECK_ROUTE_MAP))) {
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_ROUTE_MAP))) {
                 println("---------TheRouter delete route map------------------------------------------")
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
