@@ -11,7 +11,7 @@ public class TheRouterPluginUtils {
     public static def getLocalProperty(Project project, String key) {
         try {
             if (!buildProperties.containsKey(key)) {
-                initProperties()
+                initProperties(project)
             }
             def value = buildProperties.get(key)
             return value == null ? "" : value
@@ -21,7 +21,7 @@ public class TheRouterPluginUtils {
         }
     }
 
-    def initProperties() {
+    def static initProperties(Project mProject) {
         File gradlePropertiesFile
         try {
             gradlePropertiesFile = new File(mProject.rootDir, 'gradle.properties');
