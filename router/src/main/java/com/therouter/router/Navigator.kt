@@ -70,16 +70,49 @@ open class Navigator(var url: String?, val intent: Intent?) {
         // encodedQuery() 无法解析带#的url，例如 https://kymjs.com/#/index?k=v，会造成k=v丢失
         url?.let { noNullUrl ->
             val index = noNullUrl.indexOf('?')
-            if (index >= 0 && noNullUrl.length > index) {
+            val paramsStr = if (index >= 0 && noNullUrl.length > index) {
                 noNullUrl.substring(index + 1)
             } else {
-                noNullUrl
-            }.split("&").forEach {
-                val idx = it.indexOf("=")
-                val key = if (idx > 0) it.substring(0, idx) else it
-                val value: String? = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else null
-                // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-                extras.putString(key, value)
+                ""
+            }
+            if (!TextUtils.isEmpty(paramsStr)) {
+                // 解决url嵌套问题,严格来讲这已经不是一个合法的url了.
+                // 例如 http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b
+                // 所有 ?后面的参数都认为是嵌套的子url,不再做单独解析
+                val childUrlIndex = paramsStr.indexOf('?')
+
+                // 有子url嵌套, ?后面的参数都认为是嵌套的子url,不再做单独解析
+                if (childUrlIndex > 0) {
+                    val childParamsStr = paramsStr.substring(childUrlIndex)
+                    val array = paramsStr.substring(0, childUrlIndex).split("&")
+
+                    for (i in array.indices) {
+                        val kvPair = array[i]
+                        val idx = kvPair.indexOf("=")
+                        //  http://therouter.cn/page?hello&world=&a=b
+                        //  这个url中,hello和world都被认为是只有k没有v的参数
+                        val key = if (idx > 0) kvPair.substring(0, idx) else kvPair
+                        val value = if (idx > 0 && kvPair.length > idx + 1) kvPair.substring(idx + 1) else ""
+                        // 最后一个KV对,要接上子url的参数
+                        val realValue = if (i == array.size - 1) {
+                            value + childParamsStr
+                        } else {
+                            value
+                        }
+                        // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+                        extras.putString(key, realValue)
+                    }
+                } else {
+                    paramsStr.split("&").forEach {
+                        val idx = it.indexOf("=")
+                        //  http://therouter.cn/page?hello&world=&a=b
+                        //  这个url中,hello和world都被认为是只有k没有v的参数
+                        val key = if (idx > 0) it.substring(0, idx) else it
+                        val value = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else ""
+                        // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+                        extras.putString(key, value)
+                    }
+                }
             }
         }
     }
@@ -714,3 +747,58 @@ fun sendPendingNavigator() {
     disposableQueue.forEach { it.action() }
     disposableQueue.clear()
 }
+
+//fun main() {
+////    val url = "http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b"
+////    val url = "http://therouter.cn/page?hello&world=&a=b"
+////    val url = "http://therouter.cn/page?"
+//    val url = "http://therouter.cn/page?hello&world=&a=b&path=/HLSignContractPage?k=v&id=0&a=b"
+//
+//    url.let { noNullUrl ->
+//        val index = noNullUrl.indexOf('?')
+//        val paramsStr = if (index >= 0 && noNullUrl.length > index) {
+//            noNullUrl.substring(index + 1)
+//        } else {
+//            ""
+//        }
+//        if (paramsStr.isNotBlank()) {
+//            // 解决url嵌套问题,严格来讲这已经不是一个合法的url了.
+//            // 例如 http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b
+//            // 所有 ?后面的参数都认为是嵌套的子url,不再做单独解析
+//            val childUrlIndex = paramsStr.indexOf('?')
+//
+//            // 有子url嵌套, ?后面的参数都认为是嵌套的子url,不再做单独解析
+//            if (childUrlIndex > 0) {
+//                val childParamsStr = paramsStr.substring(childUrlIndex)
+//                val array = paramsStr.substring(0, childUrlIndex).split("&")
+//
+//                for (i in array.indices) {
+//                    val kvPair = array[i]
+//                    val idx = kvPair.indexOf("=")
+//                    //  http://therouter.cn/page?hello&world=&a=b
+//                    //  这个url中,hello和world都被认为是只有k没有v的参数
+//                    val key = if (idx > 0) kvPair.substring(0, idx) else kvPair
+//                    val value = if (idx > 0 && kvPair.length > idx + 1) kvPair.substring(idx + 1) else ""
+//                    // 最后一个KV对,要接上子url的参数
+//                    val realValue = if (i == array.size - 1) {
+//                        value + childParamsStr
+//                    } else {
+//                        value
+//                    }
+//                    // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+//                    println("$key=$realValue")
+//                }
+//            } else {
+//                paramsStr.split("&").forEach {
+//                    val idx = it.indexOf("=")
+//                    //  http://therouter.cn/page?hello&world=&a=b
+//                    //  这个url中,hello和world都被认为是只有k没有v的参数
+//                    val key = if (idx > 0) it.substring(0, idx) else it
+//                    val value = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else ""
+//                    // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
+//                    println("$key=$value")
+//                }
+//            }
+//        }
+//    }
+//}
