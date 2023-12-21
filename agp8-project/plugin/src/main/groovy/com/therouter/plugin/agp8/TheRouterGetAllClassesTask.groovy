@@ -31,7 +31,7 @@ import java.util.jar.JarOutputStream
 
 abstract class TheRouterGetAllClassesTask extends DefaultTask {
 
-    private final Set<String> allClass = new HashSet<>()
+    private static final Set<String> allClass = new HashSet<>()
 
     @InputFiles
     abstract ListProperty<RegularFile> getAllJars();
