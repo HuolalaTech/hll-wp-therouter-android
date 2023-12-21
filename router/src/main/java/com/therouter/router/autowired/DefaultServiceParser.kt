@@ -8,7 +8,7 @@ class DefaultServiceParser : AutowiredParser {
     override fun <T> parse(type: String?, target: Any?, item: AutowiredItem?): T? {
         if (item != null && item.id == 0) {
             try {
-                (Class.forName(item.type) as? Class<T>)?.let { return@let TheRouter.get(it) }
+                (Class.forName(item.type) as? Class<T>)?.let { return TheRouter.get(it) }
             } catch (e: Exception) {
             }
         }
