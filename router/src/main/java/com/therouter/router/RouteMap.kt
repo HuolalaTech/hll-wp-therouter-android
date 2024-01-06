@@ -178,7 +178,6 @@ fun addRouteItem(routeItem: RouteItem) {
     if (path.endsWith("/")) {
         path = path.substring(0, path.length - 1)
     }
-    debug("addRouteItem", "add $path")
     ROUTER_MAP[path] = routeItem
     onRouteMapChangedListener?.onChanged(routeItem)
 }
