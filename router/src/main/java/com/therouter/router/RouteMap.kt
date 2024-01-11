@@ -8,6 +8,7 @@ import com.google.gson.reflect.TypeToken
 import com.therouter.ROUTE_MAP_ASSETS_PATH
 import com.therouter.TheRouter
 import com.therouter.debug
+import com.therouter.debugOnly
 import com.therouter.execute
 import com.therouter.executeInMainThread
 import com.therouter.getApplicationContext
@@ -178,6 +179,7 @@ fun addRouteItem(routeItem: RouteItem) {
     if (path.endsWith("/")) {
         path = path.substring(0, path.length - 1)
     }
+    debugOnly("addRouteItem", "add $path")
     ROUTER_MAP[path] = routeItem
     onRouteMapChangedListener?.onChanged(routeItem)
 }

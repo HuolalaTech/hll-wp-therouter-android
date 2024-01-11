@@ -78,12 +78,12 @@ object TheRouter {
         if (!inited) {
             debug("init", "TheRouter init start!")
             addFlowTask(context, digraph)
-            debug("init", "TheRouter.init() method do @FlowTask before task")
+            debugOnly("init", "TheRouter.init() method do @FlowTask before task")
             digraph.beforeSchedule()
             execute {
-                debug("init", "TheRouter.init() method do @FlowTask init")
+                debugOnly("init", "TheRouter.init() method do @FlowTask init")
                 digraph.initSchedule()
-                debug("init", "TheRouter.init() method do @FlowTask schedule")
+                debugOnly("init", "TheRouter.init() method do @FlowTask schedule")
                 runInitFlowTask()
             }
             if (asyncInitRouterInject) {
@@ -200,6 +200,13 @@ object TheRouter {
     @JvmStatic
     fun inject(any: Any?) {
         autowiredInject(any)
+    }
+}
+
+internal fun debugOnly(tag: String, msg: String, block: () -> Unit = {}) {
+    if (TheRouter.isDebug) {
+        Log.d("TheRouter::$tag", msg)
+        block.invoke()
     }
 }
 

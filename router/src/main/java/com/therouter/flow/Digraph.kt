@@ -2,6 +2,7 @@ package com.therouter.flow
 
 import android.text.TextUtils
 import com.therouter.debug
+import com.therouter.debugOnly
 import com.therouter.require
 import java.lang.StringBuilder
 import java.util.*
@@ -31,7 +32,7 @@ class Digraph {
     fun addTask(task: Task?) {
         require(task != null, "FlowTask", "Task is Null")
         require(!TextUtils.isEmpty(task?.taskName), "FlowTask", "Task name is Empty ${task?.javaClass?.name}")
-        debug("FlowTask", "FlowTask addTask ${task?.taskName}")
+        debugOnly("FlowTask", "FlowTask addTask ${task?.taskName}")
 
         task?.taskName?.let {
             if (!tasks.containsKey(it)) {
@@ -127,7 +128,6 @@ class Digraph {
 
                 // 当前task依赖的task全部完成
                 if (allDependenciesDone) {
-                    debug("FlowTask", "do flow task:" + task.taskName)
                     task.run()
                 }
             }
