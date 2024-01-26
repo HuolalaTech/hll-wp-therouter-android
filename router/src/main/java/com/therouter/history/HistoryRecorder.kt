@@ -6,6 +6,10 @@ import com.therouter.inject.RecyclerLruCache
 import java.util.*
 import kotlin.collections.ArrayList
 
+/**
+ * 日志记录类，top-level，用于记录TheRouter的所有操作日志，可方便线上或debug环境导出
+ */
+
 private var counter: Long = 0
 
 var HISTORY_LOG_MAX_SIZE = 30
