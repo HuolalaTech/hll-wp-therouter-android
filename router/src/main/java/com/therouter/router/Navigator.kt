@@ -668,7 +668,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
             callback.onArrival(this)
         } else {
-            callback.onLost(this)
+            callback.onLost(this, requestCode)
         }
     }
 

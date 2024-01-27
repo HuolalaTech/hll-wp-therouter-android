@@ -166,8 +166,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                             }
 
                             @Override
-                            public void onLost(@NotNull Navigator navigator) {
-                                super.onLost(navigator);
+                            public void onLost(@NotNull Navigator navigator, int requestCode) {
+                                super.onLost(navigator, requestCode);
                                 Toast.makeText(v.getContext(), "丢失页面" + navigator.getUrl(), Toast.LENGTH_SHORT).show();
                             }
 
@@ -197,8 +197,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onLost(@NotNull Navigator navigator) {
-                        super.onLost(navigator);
+                    public void onLost(@NotNull Navigator navigator, int requestCode) {
+                        super.onLost(navigator, requestCode);
                         Toast.makeText(v.getContext(), "丢失页面" + navigator.getUrl(), Toast.LENGTH_SHORT).show();
                     }
 
@@ -222,8 +222,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
                     }
 
                     @Override
-                    public void onLost(@NotNull Navigator navigator) {
-                        super.onLost(navigator);
+                    public void onLost(@NotNull Navigator navigator, int requestCode) {
+                        super.onLost(navigator, requestCode);
                         Toast.makeText(v.getContext(), "丢失页面" + navigator.getUrl(), Toast.LENGTH_SHORT).show();
                     }
 
