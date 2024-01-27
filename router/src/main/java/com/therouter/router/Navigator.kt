@@ -38,13 +38,13 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  *
  * TheRouter.build(url).with(k,v)
  * 如果如果没有通过PathFixHandle拦截器修改，且只在build(url)时传入参数，TheRouter会确保参数在getUrlWithParams()导出时完全相同。
- * 如果build(url)时有拼接参数，同时又调用with()传入参数，TheRouter会保证with的参数拼接在url拼接的参数后、且在hash字段之前
+ * 如果build(url)时有拼接参数，同时又调用with()传入参数，TheRouter会保证with的参数拼接在url拼接的参数前且在hash字段之前
  * 如果有冲突时，优先使用with()中的kv，例如：
  * TheRouter.build("http://therouter.cn/page?a=b&k=v").withString("c","d").withString("k","x")
- * 调用getUrlWithParams()导出的url为：http://therouter.cn/page?a=b&k=x&c=d
+ * 调用getUrlWithParams()导出的url为：http://therouter.cn/page?c=d&a=b&k=x
  * 有hash字段时的处理，例如
  * TheRouter.build("https://therouter.cn/page?code=123&a=b#/abc").withString("code","111").withString("k","x")
- * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?code=111&a=b&k=x#/abc
+ * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?k=x&code=111&a=b#/abc
  */
 open class Navigator(var url: String?, val intent: Intent?) {
     val originalUrl = url
@@ -141,56 +141,58 @@ open class Navigator(var url: String?, val intent: Intent?) {
     fun getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
 
     fun getUrlWithParams(handle: (String, String) -> String): String {
-        val uri = Uri.parse(pathFixOriginalUrl)
-        val stringBuilder = StringBuilder()
-        if (TextUtils.isEmpty(uri.encodedQuery)) {
-            if (TextUtils.isEmpty(uri.encodedFragment)) {
-                if (pathFixOriginalUrl.endsWith("?#")) {
-                    // nothing
-                } else if (pathFixOriginalUrl.endsWith('?')) {
-                    // nothing
-                } else if (pathFixOriginalUrl.endsWith('#')) {
-                    stringBuilder.append('&')
-                } else {
-                    stringBuilder.append('?')
-                }
-            } else {
-                if (!pathFixOriginalUrl.contains("?#")) {
-                    stringBuilder.append('&')
-                }
-            }
-        } else {
-            stringBuilder.append(uri.encodedQuery).append('&')
-        }
-
         var isFirst = true
+        val stringBuilder = StringBuilder()
         for (key in extras.keySet()) {
-            if (!TextUtils.isEmpty(uri.encodedQuery)) {
-                if (!kvPair.contains(key)) {
-                    val kv = handle(key, extras.get(key)?.toString() ?: "")
-                    if (!TextUtils.isEmpty(kv)) {
-                        if (isFirst) {
-                            isFirst = false
-                            stringBuilder.append(kv)
-                        } else {
-                            stringBuilder.append('&').append(handle(key, extras.get(key)?.toString() ?: ""))
-                        }
+            if (!kvPair.contains(key)) {
+                val kv = handle(key, extras.get(key)?.toString() ?: "")
+                if (!TextUtils.isEmpty(kv)) {
+                    if (isFirst) {
+                        isFirst = false
+                        stringBuilder.append(kv)
+                    } else {
+                        stringBuilder.append('&').append(handle(key, extras.get(key)?.toString() ?: ""))
                     }
                 }
             }
         }
 
+        val uri = Uri.parse(pathFixOriginalUrl)
         val query = uri.encodedQuery ?: ""
         val fragment = uri.encodedFragment ?: ""
-        return if (!TextUtils.isEmpty(query)) {
+        var newUrl = if (TextUtils.isEmpty(stringBuilder)) {
+            pathFixOriginalUrl
+        } else if (!TextUtils.isEmpty(query)) {
+            if (!query.startsWith('&')) {
+                stringBuilder.append('&')
+            }
+            stringBuilder.append(query)
             pathFixOriginalUrl.replace(query, stringBuilder.toString())
         } else if (!TextUtils.isEmpty(fragment)) {
-            pathFixOriginalUrl.replace("#$fragment", stringBuilder.append('#').append(fragment).toString())
-        } else if (pathFixOriginalUrl.contains('#')) {
-            pathFixOriginalUrl.replace("#", stringBuilder.append('#').toString())
+            val index = pathFixOriginalUrl.indexOf(fragment)
+            if (index > -1) {
+                val temp = pathFixOriginalUrl.substring(0, index)
+                if (temp.contains('?')) {
+                    pathFixOriginalUrl.replace("?", "?$stringBuilder")
+                } else {
+                    pathFixOriginalUrl.replace("#", "?$stringBuilder#")
+                }
+            } else {
+                pathFixOriginalUrl
+            }
+        } else if (pathFixOriginalUrl.contains('?')) {
+            pathFixOriginalUrl.replace("?", "?$stringBuilder")
         } else {
-            pathFixOriginalUrl + stringBuilder.toString()
+            "$pathFixOriginalUrl?$stringBuilder"
         }
+
+        kvPair.keys.forEach {
+            if (extras.containsKey(it)) {
+                newUrl = newUrl.replace("$it=${kvPair[it]}", "$it=${extras.get(it)}")
+            }
+        }
+
+        return newUrl
     }
 
     fun pending(): Navigator {
