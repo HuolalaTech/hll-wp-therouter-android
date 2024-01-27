@@ -12,6 +12,7 @@ public interface HomePathIndex extends BusinessAPathIndex, BusinessBPathIndex {
     String DEMO_OTHER = "http://kymjs.com/therouter/demo_other";
 
     String DEMO_HISTORY = "http://kymjs.com/therouter/demo_history";
+    String TEST_ONLY_NO_UI = "http://kymjs.com/therouter/test_only_no_ui";
 
     String PENDING = "http://kymjs.com/therouter/pending";
     String KOTLIN = "http://kymjs.com/therouter/test";

@@ -29,5 +29,12 @@
             android:layout_height="wrap_content"
             android:text="展示多参ServiceProvider使用"
             android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="非UI测试用例"
+            android:textAllCaps="false" />
     </LinearLayout>
 </ScrollView>

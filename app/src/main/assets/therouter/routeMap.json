@@ -28,6 +28,13 @@
     "params": {}
   },
   {
+    "path": "http://kymjs.com/therouter/test_only_no_ui",
+    "className": "com.therouter.app.test.TestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
     "path": "http://kymjs.com/therouter/pending",
     "className": "com.therouter.app.router.PendingTestActivity",
     "action": "",

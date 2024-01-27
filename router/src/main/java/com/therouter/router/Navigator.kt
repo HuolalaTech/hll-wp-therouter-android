@@ -23,7 +23,9 @@ import com.therouter.router.interceptor.*
 import java.io.Serializable
 import java.lang.ref.SoftReference
 import com.therouter.require
+import java.lang.StringBuilder
 import java.util.*
+import kotlin.collections.HashMap
 
 private val disposableQueue = LinkedList<PendingNavigator>()
 internal val arguments = HashMap<String, SoftReference<Any>>()
@@ -32,10 +34,23 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  * 路由导航器。与RouterItem作用类似，允许互转。
  * RouterItem 用于描述一个静态的路由项
  * Navigator 用于描述一个路由项的跳转动作
+ *
+ *
+ * TheRouter.build(url).with(k,v)
+ * 如果如果没有通过PathFixHandle拦截器修改，且只在build(url)时传入参数，TheRouter会确保参数在getUrlWithParams()导出时完全相同。
+ * 如果build(url)时有拼接参数，同时又调用with()传入参数，TheRouter会保证with的参数拼接在url拼接的参数后、且在hash字段之前
+ * 如果有冲突时，优先使用with()中的kv，例如：
+ * TheRouter.build("http://therouter.cn/page?a=b&k=v").withString("c","d").withString("k","x")
+ * 调用getUrlWithParams()导出的url为：http://therouter.cn/page?a=b&k=x&c=d
+ * 有hash字段时的处理，例如
+ * TheRouter.build("https://therouter.cn/page?code=123&a=b#/abc").withString("code","111").withString("k","x")
+ * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?code=111&a=b&k=x#/abc
  */
 open class Navigator(var url: String?, val intent: Intent?) {
     val originalUrl = url
+    var pathFixOriginalUrl = ""
     val extras = Bundle()
+    val kvPair = HashMap<String, String>()
     private var optionsCompat: Bundle? = null
     private var pending = false
     private var intentIdentifier: String? = null
@@ -53,6 +68,60 @@ open class Navigator(var url: String?, val intent: Intent?) {
     constructor(url: String?) : this(url, null)
 
     init {
+        fun parser(kvPairString: String?, appendValue: String? = "") {
+            if (!kvPairString.isNullOrBlank() && kvPairString.trim() != "=") {
+                val index = kvPairString.indexOf("=")
+                //  http://therouter.cn/page?a&b=&=c
+                //  这个url中,a和b都被认为是只有k没有v的参数,c被认为只有v没有k的参数
+                var key = ""
+                var value = ""
+                when (index) {
+                    -1 -> {
+                        key = kvPairString
+                    }
+
+                    0 -> {
+                        value = kvPairString.substring(1)
+                    }
+
+                    else -> {
+                        key = kvPairString.substring(0, index)
+                        value = kvPairString.substring(index + 1)
+                    }
+                }
+                if (!TextUtils.isEmpty(appendValue?.trim())) {
+                    value += appendValue
+                }
+                if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)) {
+                    kvPair[key] = value
+                }
+            }
+        }
+
+        fun parserString(url: String?) {
+            if (url?.contains('?') == true) {
+                val index = url.indexOf('?')
+                if (index > -1) {
+                    val item1 = url.substring(0, index)
+                    // ?后面的部分都作为当前url的参数直接拼接
+                    val appendValue = url.substring(index + 1)
+                    val list = item1.split('&')
+                    if (list.isNotEmpty()) {
+                        for (i in list.indices) {
+                            if (i == list.size - 1) {
+                                parser(list[i], appendValue)
+                            } else {
+                                parser(list[i])
+                            }
+                        }
+                    }
+                }
+            } else {
+                url?.split("&")?.forEach { str ->
+                    parser(str)
+                }
+            }
+        }
         require(!TextUtils.isEmpty(url), "Navigator", "Navigator constructor parameter url is empty")
         for (handle in fixHandles) {
             handle?.let {
@@ -61,60 +130,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 }
             }
         }
-//        uri = Uri.parse(url ?: "")
-//        for (key in uri.queryParameterNames) {
-//            // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-//            extras.putString(key, uri.getQueryParameter(key))
-//        }
-        // queryParameterNames() 会自动decode，造成外部逻辑错误，所以这里需要根据&手动截取k=v
-        // encodedQuery() 无法解析带#的url，例如 https://kymjs.com/#/index?k=v，会造成k=v丢失
-        url?.let { noNullUrl ->
-            val index = noNullUrl.indexOf('?')
-            val paramsStr = if (index >= 0 && noNullUrl.length > index) {
-                noNullUrl.substring(index + 1)
-            } else {
-                ""
-            }
-            if (!TextUtils.isEmpty(paramsStr)) {
-                // 解决url嵌套问题,严格来讲这已经不是一个合法的url了.
-                // 例如 http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b
-                // 所有 ?后面的参数都认为是嵌套的子url,不再做单独解析
-                val childUrlIndex = paramsStr.indexOf('?')
-
-                // 有子url嵌套, ?后面的参数都认为是嵌套的子url,不再做单独解析
-                if (childUrlIndex > 0) {
-                    val childParamsStr = paramsStr.substring(childUrlIndex)
-                    val array = paramsStr.substring(0, childUrlIndex).split("&")
-
-                    for (i in array.indices) {
-                        val kvPair = array[i]
-                        val idx = kvPair.indexOf("=")
-                        //  http://therouter.cn/page?hello&world=&a=b
-                        //  这个url中,hello和world都被认为是只有k没有v的参数
-                        val key = if (idx > 0) kvPair.substring(0, idx) else kvPair
-                        val value = if (idx > 0 && kvPair.length > idx + 1) kvPair.substring(idx + 1) else ""
-                        // 最后一个KV对,要接上子url的参数
-                        val realValue = if (i == array.size - 1) {
-                            value + childParamsStr
-                        } else {
-                            value
-                        }
-                        // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-                        extras.putString(key, realValue)
-                    }
-                } else {
-                    paramsStr.split("&").forEach {
-                        val idx = it.indexOf("=")
-                        //  http://therouter.cn/page?hello&world=&a=b
-                        //  这个url中,hello和world都被认为是只有k没有v的参数
-                        val key = if (idx > 0) it.substring(0, idx) else it
-                        val value = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else ""
-                        // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-                        extras.putString(key, value)
-                    }
-                }
-            }
-        }
+        pathFixOriginalUrl = url ?: ""
+        val uri = Uri.parse(url ?: "")
+        parserString(uri.encodedQuery)
+        parserString(uri.encodedFragment)
     }
 
     fun getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
@@ -122,18 +141,56 @@ open class Navigator(var url: String?, val intent: Intent?) {
     fun getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
 
     fun getUrlWithParams(handle: (String, String) -> String): String {
-        val stringBuilder = StringBuilder(simpleUrl)
+        val uri = Uri.parse(pathFixOriginalUrl)
+        val stringBuilder = StringBuilder()
+        if (TextUtils.isEmpty(uri.encodedQuery)) {
+            if (TextUtils.isEmpty(uri.encodedFragment)) {
+                if (pathFixOriginalUrl.endsWith("?#")) {
+                    // nothing
+                } else if (pathFixOriginalUrl.endsWith('?')) {
+                    // nothing
+                } else if (pathFixOriginalUrl.endsWith('#')) {
+                    stringBuilder.append('&')
+                } else {
+                    stringBuilder.append('?')
+                }
+            } else {
+                if (!pathFixOriginalUrl.contains("?#")) {
+                    stringBuilder.append('&')
+                }
+            }
+        } else {
+            stringBuilder.append(uri.encodedQuery).append('&')
+        }
+
         var isFirst = true
         for (key in extras.keySet()) {
-            if (isFirst) {
-                stringBuilder.append("?")
-                isFirst = false
-            } else {
-                stringBuilder.append("&")
+            if (!TextUtils.isEmpty(uri.encodedQuery)) {
+                if (!kvPair.contains(key)) {
+                    val kv = handle(key, extras.get(key)?.toString() ?: "")
+                    if (!TextUtils.isEmpty(kv)) {
+                        if (isFirst) {
+                            isFirst = false
+                            stringBuilder.append(kv)
+                        } else {
+                            stringBuilder.append('&').append(handle(key, extras.get(key)?.toString() ?: ""))
+                        }
+                    }
+                }
             }
-            stringBuilder.append(handle(key, extras.get(key)?.toString() ?: ""))
         }
-        return stringBuilder.toString()
+
+        val query = uri.encodedQuery ?: ""
+        val fragment = uri.encodedFragment ?: ""
+        return if (!TextUtils.isEmpty(query)) {
+            pathFixOriginalUrl.replace(query, stringBuilder.toString())
+        } else if (!TextUtils.isEmpty(fragment)) {
+            pathFixOriginalUrl.replace("#$fragment", stringBuilder.append('#').append(fragment).toString())
+        } else if (pathFixOriginalUrl.contains('#')) {
+            pathFixOriginalUrl.replace("#", stringBuilder.append('#').toString())
+        } else {
+            pathFixOriginalUrl + stringBuilder.toString()
+        }
     }
 
     fun pending(): Navigator {
@@ -289,7 +346,14 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         var match = matchRouteMap(matchUrl)
-        match?.getExtras()?.putAll(extras)
+        match?.getExtras()?.let { b ->
+            b.putAll(extras)
+            kvPair.keys.forEach {
+                if (!b.containsKey(it)) {
+                    b.putString(it, kvPair[it])
+                }
+            }
+        }
         match?.let {
             debug("Navigator::createIntent", "match route $it")
         }
@@ -395,7 +459,14 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         debug("Navigator::navigationFragment", "path replace to $matchUrl")
         var match = matchRouteMap(matchUrl)
-        match?.getExtras()?.putAll(extras)
+        match?.getExtras()?.let { b ->
+            b.putAll(extras)
+            kvPair.keys.forEach {
+                if (!b.containsKey(it)) {
+                    b.putString(it, kvPair[it])
+                }
+            }
+        }
         match?.let {
             debug("Navigator::navigationFragment", "match route $it")
         }
@@ -490,7 +561,15 @@ open class Navigator(var url: String?, val intent: Intent?) {
             return
         }
 
-        match?.getExtras()?.putAll(extras)
+        match?.getExtras()?.let { b ->
+            b.putAll(extras)
+            kvPair.keys.forEach {
+                if (!b.containsKey(it)) {
+                    b.putString(it, kvPair[it])
+                }
+            }
+        }
+
         match?.let {
             debug("Navigator::navigation", "match route $it")
         }
@@ -747,58 +826,3 @@ fun sendPendingNavigator() {
     disposableQueue.forEach { it.action() }
     disposableQueue.clear()
 }
-
-//fun main() {
-////    val url = "http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b"
-////    val url = "http://therouter.cn/page?hello&world=&a=b"
-////    val url = "http://therouter.cn/page?"
-//    val url = "http://therouter.cn/page?hello&world=&a=b&path=/HLSignContractPage?k=v&id=0&a=b"
-//
-//    url.let { noNullUrl ->
-//        val index = noNullUrl.indexOf('?')
-//        val paramsStr = if (index >= 0 && noNullUrl.length > index) {
-//            noNullUrl.substring(index + 1)
-//        } else {
-//            ""
-//        }
-//        if (paramsStr.isNotBlank()) {
-//            // 解决url嵌套问题,严格来讲这已经不是一个合法的url了.
-//            // 例如 http://therouter.cn/page?hello=world&path=/HLSignContractPage?k=v&id=0&a=b
-//            // 所有 ?后面的参数都认为是嵌套的子url,不再做单独解析
-//            val childUrlIndex = paramsStr.indexOf('?')
-//
-//            // 有子url嵌套, ?后面的参数都认为是嵌套的子url,不再做单独解析
-//            if (childUrlIndex > 0) {
-//                val childParamsStr = paramsStr.substring(childUrlIndex)
-//                val array = paramsStr.substring(0, childUrlIndex).split("&")
-//
-//                for (i in array.indices) {
-//                    val kvPair = array[i]
-//                    val idx = kvPair.indexOf("=")
-//                    //  http://therouter.cn/page?hello&world=&a=b
-//                    //  这个url中,hello和world都被认为是只有k没有v的参数
-//                    val key = if (idx > 0) kvPair.substring(0, idx) else kvPair
-//                    val value = if (idx > 0 && kvPair.length > idx + 1) kvPair.substring(idx + 1) else ""
-//                    // 最后一个KV对,要接上子url的参数
-//                    val realValue = if (i == array.size - 1) {
-//                        value + childParamsStr
-//                    } else {
-//                        value
-//                    }
-//                    // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-//                    println("$key=$realValue")
-//                }
-//            } else {
-//                paramsStr.split("&").forEach {
-//                    val idx = it.indexOf("=")
-//                    //  http://therouter.cn/page?hello&world=&a=b
-//                    //  这个url中,hello和world都被认为是只有k没有v的参数
-//                    val key = if (idx > 0) it.substring(0, idx) else it
-//                    val value = if (idx > 0 && it.length > idx + 1) it.substring(idx + 1) else ""
-//                    // 通过url取到的value，都认为是string，autowired解析的时候会做兼容
-//                    println("$key=$value")
-//                }
-//            }
-//        }
-//    }
-//}

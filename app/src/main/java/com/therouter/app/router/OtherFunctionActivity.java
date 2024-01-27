@@ -31,5 +31,11 @@ public class OtherFunctionActivity extends AppCompatActivity {
                 TheRouter.get(IKotlinSerivce.class, v.getContext(), "hello").hello();
             }
         });
+        findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TheRouter.build(HomePathIndex.TEST_ONLY_NO_UI).navigation();
+            }
+        });
     }
 }
