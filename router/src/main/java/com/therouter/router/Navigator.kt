@@ -36,15 +36,15 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  * Navigator 用于描述一个路由项的跳转动作
  *
  *
- * TheRouter.build(url).with(k,v)
- * 如果如果没有通过PathFixHandle拦截器修改，且只在build(url)时传入参数，TheRouter会确保参数在getUrlWithParams()导出时完全相同。
- * 如果build(url)时有拼接参数，同时又调用with()传入参数，TheRouter会保证with的参数拼接在url拼接的参数前且在hash字段之前
- * 如果有冲突时，优先使用with()中的kv，例如：
- * TheRouter.build("http://therouter.cn/page?a=b&k=v").withString("c","d").withString("k","x")
- * 调用getUrlWithParams()导出的url为：http://therouter.cn/page?c=d&a=b&k=x
- * 有hash字段时的处理，例如
- * TheRouter.build("https://therouter.cn/page?code=123&a=b#/abc").withString("code","111").withString("k","x")
- * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?k=x&code=111&a=b#/abc
+ * TheRouter.build(url).with(k,v)<br>
+ * 如果如果没有通过PathFixHandle拦截器修改，且只在build(url)时传入参数，TheRouter会确保参数在getUrlWithParams()导出时完全相同。<br>
+ * 如果build(url)时有拼接参数，同时又调用with()传入参数，TheRouter会保证with的参数拼接在url拼接的参数前且在hash字段之前<br>
+ * 如果有冲突时，优先使用with()中的kv，例如：<br>
+ * TheRouter.build("http://therouter.cn/page?a=b&k=v").withString("c","d").withString("k","x")<br>
+ * 调用getUrlWithParams()导出的url为：http://therouter.cn/page?c=d&a=b&k=x<br>
+ * 有hash字段时的处理，例如<br>
+ * TheRouter.build("https://therouter.cn/page?code=123&a=b#/abc").withString("code","111").withString("k","x")<br>
+ * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?k=x&code=111&a=b#/abc<br>
  */
 open class Navigator(var url: String?, val intent: Intent?) {
     val originalUrl = url
