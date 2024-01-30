@@ -45,6 +45,16 @@ internal val arguments = HashMap<String, SoftReference<Any>>()
  * 有hash字段时的处理，例如<br>
  * TheRouter.build("https://therouter.cn/page?code=123&a=b#/abc").withString("code","111").withString("k","x")<br>
  * 调用getUrlWithParams()导出的url为：https://therouter.cn/page?k=x&code=111&a=b#/abc<br>
+ *
+ * <br>
+ * 如果url的hash部分包含有参数时，TheRouter也会将参数直接解析出来作为页面跳转参数传递出去，<br>
+ * 但如果hash的参数与url的参数出现冲突，会优先取url的参数，例如：<br>
+ * TheRouter.build("http://therouter.cn/page?a=b&k=v#/abc&c=d&k=a").navigation()<br>
+ * 此时页面参数获取到的将是：a=b、k=v、c=d（k=a被k=v替代）<br>
+ * 如果url的hash部分包含有参数但同时又包含有问号时，将会认为hash部分是一个整体，是一个完整的子url，此时不会解析hash部分的参数，例如：<br>
+ * TheRouter.build("http://therouter.cn/page?a=b&k=v#/abc?c=d&k=a").navigation()<br>
+ * 此时页面参数获取到的将是：a=b、k=v，子串部分不会解析<br>
+ *
  */
 open class Navigator(var url: String?, val intent: Intent?) {
     val originalUrl = url
@@ -132,8 +142,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         pathFixOriginalUrl = url ?: ""
         val uri = Uri.parse(url ?: "")
-        parserString(uri.encodedQuery)
         parserString(uri.encodedFragment)
+        parserString(uri.encodedQuery)
     }
 
     fun getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
