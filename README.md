@@ -5,7 +5,7 @@ TheRouter: *Android componentization solution*
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
 [![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://github.com/HuolalaTech/hll-wp-therouter-android/wiki)  
 
-HomePage | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios) | [中文官网](https://therouter.cn)  
+Android | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios) | [中文官网](https://therouter.cn) | [英文官网](https://en.therouter.cn)   
 
 ### A. Features
 

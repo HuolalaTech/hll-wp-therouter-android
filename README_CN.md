@@ -5,7 +5,7 @@ Android 动态路由框架：TheRouter
 [![Language](https://img.shields.io/badge/Language-Kotlin-green)](https://kotlinlang.org/)
 [![Wiki](https://img.shields.io/badge/Wiki-open-green)](https://therouter.cn/doc)
 
-TheRouter Android | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios)
+TheRouter Android | [iOS](https://github.com/HuolalaTech/hll-wp-therouter-ios) | [英文官网](https://en.therouter.cn) 
 
 ### 一、功能介绍
 
