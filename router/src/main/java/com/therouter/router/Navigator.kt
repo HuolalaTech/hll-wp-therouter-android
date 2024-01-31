@@ -102,7 +102,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 if (!TextUtils.isEmpty(appendValue?.trim())) {
                     value += appendValue
                 }
-                if (!TextUtils.isEmpty(key) && !TextUtils.isEmpty(value)) {
+                if (!TextUtils.isEmpty(key) || !TextUtils.isEmpty(value)) {
                     kvPair[key] = value
                 }
             }
