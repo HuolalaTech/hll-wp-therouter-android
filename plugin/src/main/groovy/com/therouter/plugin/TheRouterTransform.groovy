@@ -5,7 +5,6 @@ import com.android.build.gradle.internal.pipeline.TransformManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
 
@@ -50,7 +49,7 @@ public class TheRouterTransform extends Transform {
                    Collection<TransformInput> referencedInputs,
                    TransformOutputProvider outputProvider,
                    boolean isIncremental)
-            throws IOException, javax.xml.crypto.dsig.TransformException, InterruptedException {
+            throws IOException, TransformException, InterruptedException {
         theRouterTransform(isIncremental, inputs, outputProvider)
     }
 

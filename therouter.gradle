@@ -18,20 +18,10 @@ def getLocalProperties() {
     }
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleKapt(String compileStr) {
     moduleKapt(compileStr, {})
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleKapt(String compileStr, Closure configureClosure) {
     String[] temp = compileStr.split(":")
     String group = temp[0]
@@ -53,20 +43,10 @@ def moduleKapt(String compileStr, Closure configureClosure) {
     }
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleApi(String compileStr) {
     moduleApi(compileStr, {})
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleApi(String compileStr, Closure configureClosure) {
     String[] temp = compileStr.split(":")
     String group = temp[0]
@@ -88,20 +68,10 @@ def moduleApi(String compileStr, Closure configureClosure) {
     }
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleImplementation(String compileStr) {
     moduleImplementation(compileStr, {})
 }
 
-/**
- * 如果工程中有源码，则依赖源码，
- * 否则依赖当前 baseVersion 对应的最新版本
- * 如果传入version是SNAPSHOT，则依赖最新的SNAPSHOT，否则，依赖最新的release
- */
 def moduleImplementation(String compileStr, Closure configureClosure) {
     String[] temp = compileStr.split(":")
     String group = temp[0]
