@@ -101,16 +101,7 @@ public class AddCodeVisitor extends ClassVisitor {
                             Label labelCatch = new Label();
                             mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
 
-//                            Label labelIf = new Label();
-//                            mv.visitLabel(labelIf);
-//                            mv.visitLdcInsn(autowiredClassName);
-//                            mv.visitVarInsn(ALOAD, 0);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z", false);
-
                             Label labelInvoke = new Label();
-//                            mv.visitJumpInsn(IFEQ, labelInvoke);
                             mv.visitLabel(tryStart);
                             mv.visitVarInsn(ALOAD, 0);
                             mv.visitMethodInsn(INVOKESTATIC, autowiredClassName.replace('.', '/'), methodName, "(Ljava/lang/Object;)V", false);
