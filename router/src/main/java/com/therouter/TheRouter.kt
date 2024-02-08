@@ -5,6 +5,7 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.apple.eawt.Application
 import com.therouter.TheRouter.logCat
 import com.therouter.flow.Digraph
 import com.therouter.flow.runInitFlowTask
@@ -94,7 +95,8 @@ object TheRouter {
             asyncInitRouteMap()
             execute {
                 context?.apply {
-                    (applicationContext as Application).registerActivityLifecycleCallbacks(TheRouterLifecycleCallback)
+                    val application = (this as? Application) ?: (applicationContext as? Application)
+                    application?.registerActivityLifecycleCallbacks(TheRouterLifecycleCallback)
                 }
                 parserList.addFirst(DefaultObjectParser())
                 parserList.addFirst(DefaultServiceParser())
