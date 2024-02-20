@@ -107,7 +107,9 @@ class TheRouterSymbolProcessor(
                         }
                     }
                 }
-                list.add(routeItem)
+                if (routeItem.path.isNotEmpty() && !routeItem.className.isNullOrEmpty()) {
+                    list.add(routeItem)
+                }
             }
         }
     }
