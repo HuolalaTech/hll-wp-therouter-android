@@ -35,6 +35,13 @@
     "params": {}
   },
   {
+    "path": "http://kymjs.com/therouter/test_autowired",
+    "className": "com.therouter.app.test.Test2Activity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
     "path": "http://kymjs.com/therouter/pending",
     "className": "com.therouter.app.router.PendingTestActivity",
     "action": "",
@@ -50,13 +57,6 @@
   },
   {
     "path": "http://kymjs.com/therouter/demo_history",
-    "className": "com.therouter.app.router.HistoryLogActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
-    "path": "",
     "className": "com.therouter.app.router.HistoryLogActivity",
     "action": "",
     "description": "",

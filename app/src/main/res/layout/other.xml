@@ -36,5 +36,12 @@
             android:layout_height="wrap_content"
             android:text="非UI测试用例"
             android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/button4"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="测试KSP用例"
+            android:textAllCaps="false" />
     </LinearLayout>
 </ScrollView>

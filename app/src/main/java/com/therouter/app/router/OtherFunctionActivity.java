@@ -37,5 +37,11 @@ public class OtherFunctionActivity extends AppCompatActivity {
                 TheRouter.build(HomePathIndex.TEST_ONLY_NO_UI).navigation();
             }
         });
+        findViewById(R.id.button4).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TheRouter.build(HomePathIndex.TEST_AUTOWIRED).withString("test", "test ksp").navigation();
+            }
+        });
     }
 }

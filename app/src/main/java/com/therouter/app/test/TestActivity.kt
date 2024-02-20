@@ -1,8 +1,6 @@
 package com.therouter.app.test
 
-import android.net.Uri
 import android.os.Bundle
-import android.text.TextUtils
 import androidx.appcompat.app.AppCompatActivity
 import com.therouter.TheRouter
 import com.therouter.app.HomePathIndex

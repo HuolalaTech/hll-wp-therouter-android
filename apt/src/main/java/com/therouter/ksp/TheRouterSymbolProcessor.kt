@@ -185,10 +185,8 @@ class TheRouterSymbolProcessor(
             property.annotations.forEach { annotation ->
                 val autowiredItem = AutowiredItem()
                 autowiredItem.fieldName = property.simpleName.asString()
-                autowiredItem.className =
-                    property.qualifiedName?.asString()?.replace("." + property.simpleName.asString(), "") ?: ""
+                autowiredItem.className = property.parentDeclaration?.qualifiedName?.asString() ?: ""
                 autowiredItem.classNameAndTypeParameters = autowiredItem.className
-
                 property.parentDeclaration?.typeParameters?.size?.let { size ->
                     if (size > 0) {
                         val classNameBuilder = StringBuilder(autowiredItem.className).append("<")
