@@ -417,8 +417,7 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val serviceProviderItem = ServiceProviderItem(true)
                 serviceProviderItem.methodName = function.simpleName.asString()
-                serviceProviderItem.className = function.qualifiedName?.asString()
-                    ?.replace("." + function.simpleName.asString(), "") ?: ""
+                serviceProviderItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: ""
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -513,8 +512,7 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val flowTaskItem = FlowTaskItem()
                 flowTaskItem.methodName = function.simpleName.asString()
-                flowTaskItem.className = function.qualifiedName?.asString()
-                    ?.replace("." + function.simpleName.asString(), "") ?: ""
+                flowTaskItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: ""
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "taskName" -> flowTaskItem.taskName = "${arg.value}"
