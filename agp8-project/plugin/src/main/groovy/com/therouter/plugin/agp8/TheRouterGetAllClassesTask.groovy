@@ -127,7 +127,10 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                         .relativize(file.toURI())
                         .getPath()
                         .replace(File.separatorChar, '/' as char)
-                jarOutput.putNextEntry(new JarEntry(relativePath))
+                try {
+                    jarOutput.putNextEntry(new JarEntry(relativePath))
+                } catch (Exception e) {
+                }
                 tag(relativePath)
                 new FileInputStream(file).withCloseable { inputStream ->
                     if (isRouterMap(relativePath)) {
