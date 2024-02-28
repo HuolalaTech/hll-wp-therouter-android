@@ -12,6 +12,8 @@ class ServiceProviderItem(val isMethod: Boolean) : Comparable<ServiceProviderIte
 
     var methodName = ""
 
+    var description = ""
+
     var params = ArrayList<String>()
 
     override fun toString(): String {

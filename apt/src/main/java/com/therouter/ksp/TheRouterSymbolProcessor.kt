@@ -185,7 +185,7 @@ class TheRouterSymbolProcessor(
             property.annotations.forEach { annotation ->
                 val autowiredItem = AutowiredItem()
                 autowiredItem.fieldName = property.simpleName.asString()
-                autowiredItem.className = property.parentDeclaration?.qualifiedName?.asString() ?: ""
+                autowiredItem.className = property.parentDeclaration?.qualifiedName?.asString() ?: property.packageName.asString()
                 autowiredItem.classNameAndTypeParameters = autowiredItem.className
                 property.parentDeclaration?.typeParameters?.size?.let { size ->
                     if (size > 0) {
@@ -417,7 +417,8 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val serviceProviderItem = ServiceProviderItem(true)
                 serviceProviderItem.methodName = function.simpleName.asString()
-                serviceProviderItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: ""
+                serviceProviderItem.className =
+                    function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -512,7 +513,7 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val flowTaskItem = FlowTaskItem()
                 flowTaskItem.methodName = function.simpleName.asString()
-                flowTaskItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: ""
+                flowTaskItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "taskName" -> flowTaskItem.taskName = "${arg.value}"
@@ -657,10 +658,11 @@ class TheRouterSymbolProcessor(
                     }
                 }
                 ps.println(") {")
+                ps.println("//////////" + serviceProviderItem.isMethod + serviceProviderItem.className + "-" + serviceProviderItem.description)
                 if (serviceProviderItem.isMethod) {
                     ps.print(
                         String.format(
-                            "\t\t\tval retyrnType: %s = %s.%s(",
+                            "\t\t\tval returnType: %s = %s.%s(",
                             serviceProviderItem.returnType,
                             serviceProviderItem.className,
                             serviceProviderItem.methodName
@@ -669,7 +671,7 @@ class TheRouterSymbolProcessor(
                 } else {
                     ps.print(
                         String.format(
-                            "\t\t\tval retyrnType: %s = %s(",
+                            "\t\t\tval returnType: %s = %s(",
                             serviceProviderItem.returnType,
                             serviceProviderItem.className
                         )
@@ -693,7 +695,7 @@ class TheRouterSymbolProcessor(
                     }
                 }
                 ps.println(")")
-                ps.println("\t\t\tobj = retyrnType as T?")
+                ps.println("\t\t\tobj = returnType as T?")
                 ps.print("\t\t} else ")
             }
             ps.println("{\n")
