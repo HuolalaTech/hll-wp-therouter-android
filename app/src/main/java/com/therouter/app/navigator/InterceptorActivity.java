@@ -12,7 +12,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.therouter.app.R;
 import com.therouter.router.NavigatorKt;
 import com.therouter.router.Route;
-import com.therouter.router.RouteItem;
 import com.therouter.router.RouteItemKt;
 import com.therouter.router.interceptor.NavigatorPathFixHandle;
 import com.therouter.router.interceptor.PathReplaceInterceptor;

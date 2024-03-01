@@ -1,12 +1,11 @@
 package com.therouter.router
 
 import android.os.Bundle
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.annotation.Keep
-import androidx.core.app.NotificationCompat.getExtras
 import com.therouter.router.interceptor.NavigatorParamsFixHandle
 import java.io.Serializable
-import java.io.UnsupportedEncodingException
-import java.net.URLEncoder
 import java.util.*
 
 /**
@@ -18,22 +17,36 @@ import java.util.*
  * @param description 当前路由的注释
  * @param params 仅用于RouteMap.json文件被gson转换时存储，外部不可访问，会被合并到extras中
  * @param extras extras存储运行期的路由表参数
- *
  */
 @Keep
-class RouteItem : Serializable {
+class RouteItem : Parcelable, Serializable {
+
     var path = ""
     var className = ""
     var action = ""
     var description = ""
 
     // 仅用于RouteMap.json文件被gson转换时存储，外部不可访问
-    val params = HashMap<String, String>()
+    var params = HashMap<String, String>()
 
     // extras存储运行期的路由表参数
-    private val extras = Bundle()
+    private var extras = Bundle()
 
     constructor()
+
+    constructor(p: Parcel) {
+        path = p.readString() ?: ""
+        className = p.readString() ?: ""
+        action = p.readString() ?: ""
+        description = p.readString() ?: ""
+        val obj = p.readSerializable()
+        params = if (obj is HashMap<*, *>) {
+            obj as HashMap<String, String>
+        } else {
+            HashMap<String, String>()
+        }
+        extras = p.readBundle(ClassLoader.getSystemClassLoader()) ?: Bundle()
+    }
 
     constructor(path: String, className: String, action: String, description: String) {
         this.path = path
@@ -71,6 +84,43 @@ class RouteItem : Serializable {
         item.className = className
         item.path = path
         return item
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    override fun writeToParcel(dest: Parcel, flags: Int) {
+        dest.writeString(path)
+        dest.writeString(className)
+        dest.writeString(action)
+        dest.writeString(description)
+        dest.writeSerializable(params)
+        dest.writeBundle(extras)
+    }
+
+    fun readFromParcel(source: Parcel) {
+        path = source.readString()!!
+        className = source.readString()!!
+        action = source.readString()!!
+        description = source.readString()!!
+        val obj = source.readSerializable()
+        params = if (obj is HashMap<*, *>) {
+            obj as HashMap<String, String>
+        } else {
+            HashMap<String, String>()
+        }
+        extras = source.readBundle(this::class.java.classLoader) ?: Bundle()
+    }
+
+    companion object CREATOR : Parcelable.Creator<RouteItem> {
+        override fun createFromParcel(parcel: Parcel): RouteItem {
+            return RouteItem(parcel)
+        }
+
+        override fun newArray(size: Int): Array<RouteItem?> {
+            return arrayOfNulls(size)
+        }
     }
 }
 
