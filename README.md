@@ -32,14 +32,14 @@ TheRouter core functions have four functionalities:
 
 ```
 // root build.gradle 
-classpath 'cn.therouter:plugin:1.2.1'
+classpath 'cn.therouter:plugin:1.2.2'
 
 // app module 
 apply plugin: 'therouter'
 
 // dependencies
-kapt "cn.therouter:apt:1.2.1"
-implementation "cn.therouter:router:1.2.1"
+kapt "cn.therouter:apt:1.2.2"
+implementation "cn.therouter:router:1.2.2"
 ```
 
 #### B2. initialization library
