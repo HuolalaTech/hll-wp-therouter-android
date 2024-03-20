@@ -35,8 +35,9 @@ public class NavigatorTestActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.navigator);
-        setTitle("导航测试用例");
+        setTitle("页面导航跳转测试用例");
         // @Autowired 注入，这一行应该写在BaseActivity中更好
+        // 如果用到了onNewIntent()，也需要调用这一行，并且在调用前需要将新intent 重新set一遍
         TheRouter.inject(this);
 
         InternalBeanTest.RowBean bean = new InternalBeanTest.RowBean();

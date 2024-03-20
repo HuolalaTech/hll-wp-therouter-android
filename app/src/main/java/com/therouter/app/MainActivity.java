@@ -14,8 +14,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        setTitle("功能介绍");
+        setTitle("TheRouter功能介绍");
         // 如果用到了 @Autowired 注解，需要加这一行，这一行直接写在BaseActivity中更好
+        // 如果用到了onNewIntent()，也需要调用这一行，并且在调用前需要将新intent 重新set一遍
 //        TheRouter.inject(this);
 
         TextView textView = findViewById(R.id.content_version);

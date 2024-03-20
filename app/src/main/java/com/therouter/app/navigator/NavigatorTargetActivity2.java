@@ -1,5 +1,6 @@
 package com.therouter.app.navigator;
 
+import static com.therouter.ExtensionKt.require;
 import static com.therouter.app.KotlinPathIndex.Test.HOME2;
 
 import android.os.Bundle;
@@ -29,6 +30,7 @@ public class NavigatorTargetActivity2 extends NavigatorTargetActivity<String> {
         textView.setText("子类 @Autowired 数据：" + stringChildClassField);
         if (stringChildClassFields != null) {
             textView.append("\n stringChildClassFields: " + stringChildClassFields.get(0).get(0));
+            require("stringChildClassFields".equals(stringChildClassFields.get(0).get(0)), "NavigatorTargetActivity", "stringChildClassFields数值不对");
         }
     }
 }
