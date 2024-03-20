@@ -116,7 +116,7 @@
     "params": {}
   },
   {
-    "path": "http://kymjs.com/therouter/test_fragment2",
+    "path": "/therouter/test_fragment2",
     "className": "com.therouter.app.navigator.NavigatorFragment2",
     "action": "",
     "description": "Fragment测试页",
