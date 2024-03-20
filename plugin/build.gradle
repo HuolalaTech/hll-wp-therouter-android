@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'maven-publish'
 
 dependencies {
     implementation gradleApi()
@@ -14,6 +15,14 @@ dependencies {
 repositories {
     mavenCentral()
     google()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+        }
+    }
 }
 
 task sourcesJar(type: Jar) {
