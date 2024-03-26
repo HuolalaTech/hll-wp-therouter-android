@@ -265,7 +265,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
         return this
     }
 
-    fun with(value: Bundle?): Navigator = withBundle(KEY_BUNDLE, value)
+    fun with(value: Bundle?): Navigator {
+        extras.putAll(value)
+        return this
+    }
 
     fun fillParams(action: (Bundle) -> Unit): Navigator {
         action(extras)
@@ -408,14 +411,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 navigationIntent.putExtra(KEY_ACTION, routeItem.action)
                 navigationIntent.putExtra(KEY_PATH, getUrlWithParams())
                 navigationIntent.putExtra(KEY_DESCRIPTION, routeItem.description)
-                with(routeItem.getExtras()) {
-                    val bundle: Bundle? = getBundle(KEY_BUNDLE)
-                    if (bundle != null) {
-                        remove(KEY_BUNDLE)
-                        navigationIntent.putExtra(KEY_BUNDLE, bundle)
-                    }
-                    navigationIntent.putExtras(this)
-                }
+                navigationIntent.putExtras(routeItem.getExtras())
                 navigationIntent.addFlags(routeItem.getExtras().getInt(KEY_INTENT_FLAGS))
                 val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
                 val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
@@ -627,14 +623,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 intent.putExtra(KEY_ACTION, routeItem.action)
                 intent.putExtra(KEY_PATH, getUrlWithParams())
                 intent.putExtra(KEY_DESCRIPTION, routeItem.description)
-                with(routeItem.getExtras()) {
-                    val bundle: Bundle? = getBundle(KEY_BUNDLE)
-                    if (bundle != null) {
-                        remove(KEY_BUNDLE)
-                        intent.putExtra(KEY_BUNDLE, bundle)
-                    }
-                    intent.putExtras(this)
-                }
+                intent.putExtras(routeItem.getExtras())
                 intent.addFlags(routeItem.getExtras().getInt(KEY_INTENT_FLAGS))
                 if (requestCode == DEFAULT_REQUEST_CODE) {
                     if (fragment != null) {
@@ -702,7 +691,6 @@ open class Navigator(var url: String?, val intent: Intent?) {
 const val KEY_ACTION = "therouter_action"
 const val KEY_PATH = "therouter_path"
 const val KEY_DESCRIPTION = "therouter_description"
-const val KEY_BUNDLE = "therouter_bundle"
 const val KEY_INTENT_FLAGS = "therouter_intent_flags"
 const val KEY_ANIM_IN = "therouter_intent_animation_in"
 const val KEY_ANIM_OUT = "therouter_intent_animation_out"
