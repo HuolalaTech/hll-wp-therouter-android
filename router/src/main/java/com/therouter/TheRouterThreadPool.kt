@@ -134,10 +134,10 @@ private class BufferExecutor : ExecutorService, Executor {
     private fun checkTask(trace: String) {
         if (TheRouter.isDebug) {
             if (System.currentTimeMillis() - prevCheckAliveTime > KEEP_ALIVE_MILLISECOND) {
-                flightTaskMap.forEach { k, v ->
-                    if (System.currentTimeMillis() - v.createTime > KEEP_ALIVE_MILLISECOND) {
-                        v.resetTime()
-                        debug("ThreadPool", "该任务耗时过久，请判断是否需要优化代码\n${v.trace}")
+                flightTaskMap.forEach { _, v ->
+                    if (System.currentTimeMillis() - (v?.createTime ?: 0) > KEEP_ALIVE_MILLISECOND) {
+                        v?.resetTime()
+                        debug("ThreadPool", "该任务耗时过久，请判断是否需要优化代码\n${v?.trace}")
                     }
                 }
                 prevCheckAliveTime = System.currentTimeMillis()
@@ -186,7 +186,11 @@ private class BufferExecutor : ExecutorService, Executor {
         if (queueSize <= MAX_QUEUE_SIZE && activeCount < threadPoolExecutor.corePoolSize) {
             //从二级队列中取任务
             if (taskQueue.poll().also { activeTask = it } != null) {
-                activeTask?.let { flightTaskMap.put(it.r.hashCode(), FlightTaskInfo(it.trace)) }
+                activeTask?.let {
+                    if (TheRouter.isDebug) {
+                        flightTaskMap.put(it.r.hashCode(), FlightTaskInfo(it.trace))
+                    }
+                }
                 //将任务加入一级队列，或有可能直接被线程池执行(Executor内部逻辑)
                 threadPoolExecutor.execute(activeTask)
                 activeTask = null
@@ -277,7 +281,7 @@ private fun getTrace(trace: Array<StackTraceElement>): String {
     return str.toString()
 }
 
-private inline fun <T> SparseArray<T>.forEach(action: (key: Int, value: T) -> Unit) {
+private inline fun <T> SparseArray<T>.forEach(action: (key: Int, value: T?) -> Unit) {
     for (index in 0 until size()) {
         action(keyAt(index), valueAt(index))
     }
