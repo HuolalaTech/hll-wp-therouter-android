@@ -636,6 +636,26 @@ open class Navigator(var url: String?, val intent: Intent?) {
                     intent.putExtras(this)
                 }
                 intent.addFlags(routeItem.getExtras().getInt(KEY_INTENT_FLAGS))
+                val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
+                val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                if (inAnimId != 0 || outAnimId != 0) {
+                    if (context is Activity) {
+                        debug("Navigator::navigation", "overridePendingTransition ${routeItem.className}")
+                        context.overridePendingTransition(
+                            routeItem.getExtras().getInt(KEY_ANIM_IN),
+                            routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                        )
+                    } else if (fragment != null) {
+                        fragment.activity?.overridePendingTransition(
+                            routeItem.getExtras().getInt(KEY_ANIM_IN),
+                            routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                        )
+                    } else {
+                        if (TheRouter.isDebug) {
+                            throw RuntimeException("TheRouter::Navigator context is not Activity, ignore animation")
+                        }
+                    }
+                }
                 if (requestCode == DEFAULT_REQUEST_CODE) {
                     if (fragment != null) {
                         debug("Navigator::navigation", "fragment.startActivity ${routeItem.className}")
@@ -643,21 +663,6 @@ open class Navigator(var url: String?, val intent: Intent?) {
                     } else {
                         debug("Navigator::navigation", "startActivity ${routeItem.className}")
                         context.startActivity(intent, optionsCompat)
-                    }
-                    val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
-                    val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
-                    if (inAnimId != 0 || outAnimId != 0) {
-                        if (context is Activity) {
-                            debug("Navigator::navigation", "overridePendingTransition ${routeItem.className}")
-                            context.overridePendingTransition(
-                                routeItem.getExtras().getInt(KEY_ANIM_IN),
-                                routeItem.getExtras().getInt(KEY_ANIM_OUT)
-                            )
-                        } else {
-                            if (TheRouter.isDebug) {
-                                throw RuntimeException("TheRouter::Navigator context is not Activity, ignore animation")
-                            }
-                        }
                     }
                 } else {
                     if (fragment != null) {
