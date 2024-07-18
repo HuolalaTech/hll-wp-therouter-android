@@ -30,13 +30,13 @@ enum LogUI {
     //end
     E_NORMAL("\033[0m");
 
-    private final String value
+    private final String value;
 
     LogUI(String value) {
-        this.value = value
+        this.value = value;
     }
 
     String getValue() {
-        return this.value
+        return this.value;
     }
 }
