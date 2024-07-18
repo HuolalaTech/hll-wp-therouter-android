@@ -189,14 +189,14 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             }.getType()))
         }
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
-        File assetRouteMap = new File(TheRouterPlugin.mProject.projectDir, "src/main/assets/therouter/routeMap.json")
+        File assetRouteMap = new File(project.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            if (TheRouterPlugin.DELETE.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
                 println("---------TheRouter delete route map------------------------------------------")
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
             } else {
-                String assetString = FileUtils.readFileToString(assetRouteMap)
+                String assetString = FileUtils.readFileToString(assetRouteMap, "UTF-8")
                 println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
                 try {
                     List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
@@ -244,7 +244,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 } else if (className != routeItem.className) {
                     throw new RuntimeException("Multiple Activity to single Url: $className and ${routeItem.className}")
                 }
-                if (!TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_ROUTE_MAP).isEmpty()) {
+                if (!TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP).isEmpty()) {
                     boolean classNotFound = true
                     for (String item : allClass) {
                         if (item.contains(routeItem.className)) {
@@ -253,9 +253,9 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                         }
                     }
                     if (classNotFound) {
-                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
                             throw new ClassNotFoundException(routeItem.className + " in /assets/therouter/routeMap.json")
-                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
                             println("${LogUI.C_WARN.value}[${routeItem.className} in /assets/therouter/routeMap.json]${LogUI.E_NORMAL.value}")
                         }
                     }
@@ -287,16 +287,16 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             flowTaskDependMap.put(it, value)
         }
 
-        if (!TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND).isEmpty()) {
+        if (!TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND).isEmpty()) {
             flowTaskDependMap.values().each { taskName ->
                 flowTaskDependMap[taskName].each {
                     if (!flowTaskDependMap.containsKey(it)) {
-                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
+                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
                             throw new RuntimeException("\n\n==========================================" +
                                     "\nTheRouter:: FlowTask::   " +
                                     "\nCan not found Task: [$it] from $taskName dependsOn" +
                                     "\n==========================================\n\n")
-                        } else if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(TheRouterPlugin.mProject, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
+                        } else if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
                             println()
                             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
                             println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::   " + "${LogUI.E_NORMAL.value}")

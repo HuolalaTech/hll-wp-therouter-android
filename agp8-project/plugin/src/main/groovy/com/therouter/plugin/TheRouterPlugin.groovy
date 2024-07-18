@@ -39,11 +39,20 @@ class TheRouterPlugin implements Plugin<Project> {
     public static final Set<String> autowiredSet = new HashSet<>()
     public static final Set<String> routeSet = new HashSet<>()
 
-    public static Project mProject = null
-
     @Override
     void apply(Project project) {
-        mProject = project
+        project.extensions.create('TheRouter', TheRouterExtension)
+        TheRouterExtension theRouterExtension = new TheRouterExtension();
+        if (project.TheRouter) {
+            theRouterExtension.sourceOnly = Boolean.valueOf(project.TheRouter.sourceOnly)
+            theRouterExtension.debug = Boolean.valueOf(project.TheRouter.debug)
+            theRouterExtension.checkRouteMap = project.TheRouter.checkRouteMap
+            theRouterExtension.checkFlowDepend = project.TheRouter.checkFlowDepend
+            theRouterExtension.showFlowDepend = project.TheRouter.showFlowDepend
+            theRouterExtension.scan = project.TheRouter.scan
+            theRouterExtension.ignore = project.TheRouter.ignore
+        }
+
         def isLibrary = project.plugins.hasPlugin("com.android.library")
         if (!isLibrary) {
             println("欢迎使用 TheRouter 编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
