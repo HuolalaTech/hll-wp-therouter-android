@@ -1,0 +1,3 @@
+androidx.core.app.CoreComponentFactory.class
+com.therouter.App.class
+androidx.multidex.MultiDexApplication.class
