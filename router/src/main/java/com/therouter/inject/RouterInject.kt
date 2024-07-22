@@ -95,31 +95,31 @@ class RouterInject {
         } catch (e: Exception) {
         }
 
-        //正常情况都会有创建器，如果没有，则使用默认创建器
-        if (tClass.isInterface) {
-            routerInjectDebugLog("$tClass is interface, but do not have @ServiceProvider")
-        } else if (isNumberClass(tClass.name)) {
-            routerInjectDebugLog("$tClass is primitive data types, but do not have @ServiceProvider")
-        } else {
-            val paramsClass = if (params.isNotEmpty()) {
-                val temp = arrayOfNulls<Class<*>?>(params.size)
-                for (i in params.indices) {
-                    temp[i] = params[i]?.javaClass
-                }
-                temp
-            } else arrayOfNulls<Class<*>?>(0)
-            try {
-                val constructor: Constructor<*> = tClass.getDeclaredConstructor(*paramsClass)
-                if (!constructor.isAccessible) {
-                    constructor.isAccessible = true
-                }
-                t = constructor.newInstance(*params) as T
-            } catch (e: Exception) {
-                routerInjectDebugLog(tClass.toString() + " do not have @ServiceProvider class. And constructor error::" + e.message) {
-                    e.printStackTrace()
-                }
-            }
-        }
+//        //正常情况都会有创建器，如果没有，则使用默认创建器
+//        if (tClass.isInterface) {
+//            routerInjectDebugLog("$tClass is interface, but do not have @ServiceProvider")
+//        } else if (isNumberClass(tClass.name)) {
+//            routerInjectDebugLog("$tClass is primitive data types, but do not have @ServiceProvider")
+//        } else {
+//            val paramsClass = if (params.isNotEmpty()) {
+//                val temp = arrayOfNulls<Class<*>?>(params.size)
+//                for (i in params.indices) {
+//                    temp[i] = params[i]?.javaClass
+//                }
+//                temp
+//            } else arrayOfNulls<Class<*>?>(0)
+//            try {
+//                val constructor: Constructor<*> = tClass.getDeclaredConstructor(*paramsClass)
+//                if (!constructor.isAccessible) {
+//                    constructor.isAccessible = true
+//                }
+//                t = constructor.newInstance(*params) as T
+//            } catch (e: Exception) {
+//                routerInjectDebugLog(tClass.toString() + " do not have @ServiceProvider class. And constructor error::" + e.message) {
+//                    e.printStackTrace()
+//                }
+//            }
+//        }
         return t
     }
 
