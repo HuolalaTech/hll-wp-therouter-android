@@ -7,7 +7,7 @@ buildscript {
         maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
     }
     dependencies {
-//        classpath "cn.therouter:plugin:1.2.3-beta12"
+        classpath "cn.therouter:plugin:$TheRouterVersion"
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.9.21-1.0.16"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
