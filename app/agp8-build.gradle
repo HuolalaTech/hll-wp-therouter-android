@@ -46,7 +46,7 @@ android {
 dependencies {
     implementation 'androidx.multidex:multidex:2.0.1'
     implementation 'androidx.appcompat:appcompat:1.5.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.23"
 
     moduleKapt "cn.therouter:apt:$TheRouterVersion"
     moduleImplementation "cn.therouter:router:$TheRouterVersion"

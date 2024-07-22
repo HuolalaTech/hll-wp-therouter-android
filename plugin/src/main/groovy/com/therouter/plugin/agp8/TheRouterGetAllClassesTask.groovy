@@ -268,7 +268,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                                     "\nTheRouter:: FlowTask::   " +
                                     "\nCan not found Task: [$it] from $taskName dependsOn" +
                                     "\n==========================================\n\n")
-                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
+                        } else if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
                             println()
                             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
                             println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::   " + "${LogUI.E_NORMAL.value}")

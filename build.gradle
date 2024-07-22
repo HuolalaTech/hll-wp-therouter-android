@@ -3,7 +3,6 @@ buildscript {
     ext.kotlin_version = '1.9.21'
     repositories {
         google()
-        maven { url 'https://maven.huolala.work/repository/maven-public/' }
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
     }
@@ -12,14 +11,13 @@ buildscript {
         classpath 'com.android.tools.build:gradle:7.4.2'
         classpath "com.google.devtools.ksp:symbol-processing-gradle-plugin:1.9.21-1.0.16"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.6.0"
+        classpath "org.jetbrains.dokka:dokka-gradle-plugin:1.9.20"
     }
 }
 
 allprojects {
     apply from: "${project.getRootDir()}/therouter.gradle"
     repositories {
-        maven { url 'https://maven.huolala.work/repository/maven-public/' }
         google()
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }

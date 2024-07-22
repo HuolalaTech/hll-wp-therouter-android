@@ -1,6 +1,7 @@
 package com.therouter.plugin
 
 import com.google.gson.Gson
+import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
@@ -16,7 +17,7 @@ import java.util.zip.ZipEntry
  * Created by ZhangTao on 18/2/24.
  */
 
-class TheRouterInjects {
+public class TheRouterInjects {
 
     private static Map<String, String> serviceProvideMap = new HashMap<>()
     private static Set<String> autowiredSet = new HashSet<>()
@@ -33,6 +34,17 @@ class TheRouterInjects {
     private static final UNKNOWN_VERSION = "unspecified"
     private static final NOT_FOUND_VERSION = "0.0.0"
     private static final DOT_CLASS = ".class"
+
+    public static JarInfo fromCache(File cacheFile) {
+        String json = FileUtils.readFileToString(cacheFile, "UTF-8")
+        JarInfo jarInfo = gson.fromJson(json, JarInfo.class)
+        return jarInfo;
+    }
+
+    public static void toCache(File cacheFile, JarInfo jarInfo) {
+        String json = gson.toJson(jarInfo);
+        FileUtils.write(cacheFile, json, "UTF-8")
+    }
 
     /**
      * 标记当前jar中是否有要处理的类，生成类总共三种：RouterMap、ServiceProvider、Autowired
@@ -73,14 +85,14 @@ class TheRouterInjects {
                             serviceProvideMap.put(className, aptVersion)
                         }
                     }
+                } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter")) {
+                    jarInfo.isTheRouterJar = true;
                 } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
                     String className = jarEntry.name
                             .replace(DOT_CLASS, "")
                             .replace('\\', '.')
                             .replace('/', '.')
                     autowiredSet.add(className)
-                } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter")) {
-                    jarInfo.isTheRouterJar = true
                 } else if (jarEntry.name.contains(PREFIX_ROUTER_MAP)) {
                     routeSet.add(jarEntry.name)
                     InputStream inputStream = file.getInputStream(jarEntry)
@@ -171,7 +183,7 @@ class TheRouterInjects {
     /**
      * 开始修改 TheRouterServiceProvideInjecter 类
      */
-    static void injectClassCode(File inputJarFile, boolean isIncremental) {
+    static void injectClassCode(File inputJarFile) {
         long start = System.currentTimeMillis()
         def optJarFile = new File(inputJarFile.getParent(), inputJarFile.name + ".opt")
         def inputJar = new JarFile(inputJarFile)
@@ -187,7 +199,7 @@ class TheRouterInjects {
             if (entryName.contains("TheRouterServiceProvideInjecter")) {
                 ClassReader cr = new ClassReader(inputStream)
                 ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
-                AddCodeVisitor cv = new AddCodeVisitor(cw, serviceProvideMap, autowiredSet, routeSet, isIncremental)
+                AddCodeVisitor cv = new AddCodeVisitor(cw, serviceProvideMap, autowiredSet, routeSet, false)
                 cr.accept(cv, ClassReader.SKIP_DEBUG)
                 bytes = cw.toByteArray()
             } else {

@@ -12,7 +12,6 @@ dependencies {
 }
 
 repositories {
-    maven { url 'https://maven.huolala.work/repository/maven-public/' }
     mavenCentral()
     google()
 }

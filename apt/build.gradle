@@ -7,8 +7,8 @@ targetCompatibility = "1.8"
 
 dependencies {
     implementation 'com.google.code.gson:gson:2.9.1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21"
-    implementation "com.google.devtools.ksp:symbol-processing-api:1.6.21-1.0.6"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.21"
+    implementation "com.google.devtools.ksp:symbol-processing-api:1.9.21-1.0.16"
 }
 
 task sourcesJar(type: Jar) {
