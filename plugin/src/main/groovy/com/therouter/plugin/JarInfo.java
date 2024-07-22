@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class JarInfo implements Serializable {
+    public long lastModified = 0;
     public boolean isTheRouterJar;
     public final Set<String> allJarClass = new HashSet<>();
     public final Set<String> routeMapStringFromJar = new HashSet<>();
