@@ -24,6 +24,8 @@ package com.therouter.plugin;
  */
 enum LogUI {
     //color
+    C_INFO("\033[40;37m"),
+    C_HIGH("\033[40;46m"),
     C_ERROR("\033[40;31m"),
     C_WARN("\033[40;33m"),
     C_BLACK_GREEN("\033[40;32m"),

@@ -69,7 +69,7 @@ public class TheRouterTransform extends Transform {
     }
 
     private void theRouterTransform(Collection<TransformInput> inputs, TransformOutputProvider outputProvider) {
-        def theRouterClassOutputFile
+        File theRouterClassOutputFile
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
         outputProvider.deleteAll()
@@ -256,7 +256,7 @@ public class TheRouterTransform extends Transform {
                                     "\nTheRouter:: FlowTask::   " +
                                     "\nCan not found Task: [$it] from $taskName dependsOn" +
                                     "\n==========================================\n\n")
-                        } else if (TheRouterPlugin.ERROR.equalsIgnoreCase(theRouterExtension.checkFlowDepend)) {
+                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(theRouterExtension.checkFlowDepend)) {
                             println()
                             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
                             println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::   " + "${LogUI.E_NORMAL.value}")

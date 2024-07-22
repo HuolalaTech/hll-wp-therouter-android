@@ -17,6 +17,19 @@ public class TheRouterPlugin implements Plugin<Project> {
             def android = project.extensions.getByType(AppExtension)
             def therouterTransform = new TheRouterTransform(project)
             android.registerTransform(therouterTransform)
+
+//            def android = project.extensions.getByType(AndroidComponentsExtension.class)
+//            android.onVariants(android.selector().all(), new Action<Variant>() {
+//                @Override
+//                void execute(Variant variant) {
+//                    TaskProvider<TheRouterGetAllClassesTask> getAllClassesTask = project.tasks.register("${variant.name}TheRouter", TheRouterGetAllClassesTask.class)
+//                    variant.artifacts
+//                            .forScope(ScopedArtifacts.Scope.ALL)
+//                            .use(getAllClassesTask)
+//                            .toTransform(ScopedArtifact.CLASSES.INSTANCE, { it.getAllJars() }, { it.getAllDirectories() }, { it.getOutput() })
+//                }
+//            })
+
         } else {
             throw new RuntimeException("`apply plugin: 'therouter'` must call in app module! You need remove at ${project.name} module.")
         }

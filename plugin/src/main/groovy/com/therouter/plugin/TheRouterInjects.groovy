@@ -17,7 +17,7 @@ import java.util.zip.ZipEntry
  * Created by ZhangTao on 18/2/24.
  */
 
-class TheRouterInjects {
+public class TheRouterInjects {
 
     private static Map<String, String> serviceProvideMap = new HashMap<>()
     private static Set<String> autowiredSet = new HashSet<>()

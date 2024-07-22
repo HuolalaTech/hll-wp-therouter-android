@@ -43,9 +43,7 @@ public class AddCodeVisitor extends ClassVisitor {
                 if (!"<init>".equals(methodName)) {
                     if ("trojan".equals(methodName)) {
                         for (String serviceProviderClassName : serviceProvideList) {
-                            if (!serviceProviderClassName.startsWith("a/")) {
-                                serviceProviderClassName = "a/" + serviceProviderClassName;
-                            }
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             Label tryStart = new Label();
                             Label tryEnd = new Label();
                             Label labelCatch = new Label();
@@ -72,13 +70,8 @@ public class AddCodeVisitor extends ClassVisitor {
                     }
                     if ("addFlowTask".equals(methodName)) {
                         for (String serviceProviderClassName : serviceProvideList) {
-                            if (!serviceProviderClassName.startsWith("a/")) {
-                                serviceProviderClassName = "a/" + serviceProviderClassName;
-                            }
+                            serviceProviderClassName = "a/" + serviceProviderClassName;
                             String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
-                            if (aptVersion == null) {
-                                aptVersion = serviceProvideMap.get(serviceProviderClassName);
-                            }
                             // FlowTask 功能是从1.0.13开始引入的，
                             // 没有版本号的都是老版本，不能插入字节码，但源码引用的例外，需要插入字节码
                             if (aptVersion != null && !aptVersion.equals("0.0.0")) {
@@ -108,16 +101,7 @@ public class AddCodeVisitor extends ClassVisitor {
                             Label labelCatch = new Label();
                             mv.visitTryCatchBlock(tryStart, tryEnd, labelCatch, "java/lang/Throwable");
 
-//                            Label labelIf = new Label();
-//                            mv.visitLabel(labelIf);
-//                            mv.visitLdcInsn(autowiredClassName.replace('/', '.'));
-//                            mv.visitVarInsn(ALOAD, 0);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "getName", "()Ljava/lang/String;", false);
-//                            mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/String", "contains", "(Ljava/lang/CharSequence;)Z", false);
-
                             Label labelInvoke = new Label();
-//                            mv.visitJumpInsn(IFEQ, labelInvoke);
                             mv.visitLabel(tryStart);
                             mv.visitVarInsn(ALOAD, 0);
                             mv.visitMethodInsn(INVOKESTATIC, autowiredClassName.replace('.', '/'), methodName, "(Ljava/lang/Object;)V", false);
