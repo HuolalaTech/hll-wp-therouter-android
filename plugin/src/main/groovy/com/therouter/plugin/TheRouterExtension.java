@@ -7,6 +7,6 @@ public class TheRouterExtension {
     public String checkRouteMap = "";
     // 检查 FlowTask 是否有循环引用，可选参数 warning(仅打印日志)/error(编译期抛异常)，不配置则不校验
     public String checkFlowDepend = "";
-    // 图形化展示当前的 FlowTask 依赖图，不配置则不展示
-    public String showFlowDepend = "";
+    // 图形化展示当前的 FlowTask 依赖图
+    public boolean showFlowDepend = false;
 }

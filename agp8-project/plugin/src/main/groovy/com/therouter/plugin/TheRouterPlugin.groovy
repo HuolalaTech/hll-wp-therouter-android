@@ -4,8 +4,11 @@ import com.android.build.api.artifact.ScopedArtifact
 import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.api.variant.Variant
-import com.android.build.gradle.AppExtension
+
+//import com.android.build.gradle.AppExtension
+
 import com.therouter.plugin.agp8.TheRouterGetAllClassesTask
+
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -33,7 +36,10 @@ public class TheRouterPlugin implements Plugin<Project> {
                     variant.artifacts
                             .forScope(ScopedArtifacts.Scope.ALL)
                             .use(getAllClassesTask)
-                            .toTransform(ScopedArtifact.CLASSES.INSTANCE, { it.getAllJars() }, { it.getAllDirectories() }, { it.getOutput() })
+                            .toTransform(ScopedArtifact.CLASSES.INSTANCE,
+                                    { it.getAllJars() },
+                                    { it.getAllDirectories() },
+                                    { it.getOutputDirectory() })
                 }
             })
 
