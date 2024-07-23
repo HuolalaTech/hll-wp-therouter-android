@@ -74,6 +74,9 @@ public class TheRouterTransform extends Transform {
         Map<String, String> flowTaskMap = new HashMap<>();
         outputProvider.deleteAll()
         File folder = new File(mProject.buildDir, "therouter")
+        if (!theRouterExtension.debug) {
+            folder.deleteDir()
+        }
         folder.mkdirs()
         inputs.each { TransformInput input ->
             // 遍历jar包
@@ -82,15 +85,15 @@ public class TheRouterTransform extends Transform {
                 String cacheName = jarName
                 String logInfo = "---------TheRouter handle jar " + jarName + "  "
                 if (jarInput.scopes.contains(QualifiedContent.Scope.SUB_PROJECTS)) {
-                    cacheName = jarInput.name
+                    cacheName = "classes-" + Math.abs(jarInput.file.absolutePath.hashCode()) + ".jar"
                 }
                 File cacheFile = new File(folder, cacheName)
                 if (cacheFile.exists()) {
                     if (jarInput.getStatus() == Status.NOTCHANGED) {
-                        logInfo = logInfo + LogUI.C_INFO.value + jarInput.getStatus() + LogUI.E_NORMAL.value
+                        logInfo = logInfo + "UP-TO-DATE"
                     } else {
                         cacheFile.delete()
-                        logInfo = logInfo + LogUI.C_WARN.value + jarInput.getStatus() + LogUI.E_NORMAL.value
+                        logInfo = logInfo + LogUI.C_INFO.value + jarInput.getStatus() + LogUI.E_NORMAL.value
                     }
                 } else {
                     logInfo = logInfo + LogUI.C_WARN.value + "EMPTY_CACHE" + LogUI.E_NORMAL.value
@@ -137,7 +140,7 @@ public class TheRouterTransform extends Transform {
         }
 
         if (theRouterClassOutputFile) {
-            println("---------TheRouter ASM, spend：----------------------")
+            println("---------TheRouter ASM finish----------------------")
             TheRouterInjects.injectClassCode(theRouterClassOutputFile)
         }
 

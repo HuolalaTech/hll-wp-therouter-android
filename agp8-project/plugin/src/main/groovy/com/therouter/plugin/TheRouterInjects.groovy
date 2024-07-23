@@ -19,21 +19,22 @@ import java.util.zip.ZipEntry
 
 public class TheRouterInjects {
 
-    private static Map<String, String> serviceProvideMap = new HashMap<>()
-    private static Set<String> autowiredSet = new HashSet<>()
-    private static Set<String> routeSet = new HashSet<>()
+    public static Map<String, String> serviceProvideMap = new HashMap<>()
+    public static Set<String> autowiredSet = new HashSet<>()
+    public static Set<String> routeSet = new HashSet<>()
 
-    private static final Gson gson = new Gson()
+    public static final Gson gson = new Gson()
 
-    private static final PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
-    private static final PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
-    private static final SUFFIX_AUTOWIRED_DOT_CLASS = "__TheRouter__Autowired.class"
-    private static final FIELD_FLOW_TASK_JSON = "FLOW_TASK_JSON"
-    private static final FIELD_APT_VERSION = "THEROUTER_APT_VERSION"
-    private static final FIELD_ROUTER_MAP = "ROUTERMAP"
-    private static final UNKNOWN_VERSION = "unspecified"
-    private static final NOT_FOUND_VERSION = "0.0.0"
-    private static final DOT_CLASS = ".class"
+    public static final PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
+    public static final PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
+    public static final SUFFIX_AUTOWIRED_DOT_CLASS = "__TheRouter__Autowired.class"
+    public static final SUFFIX_AUTOWIRED = "__TheRouter__Autowired"
+    public static final FIELD_FLOW_TASK_JSON = "FLOW_TASK_JSON"
+    public static final FIELD_APT_VERSION = "THEROUTER_APT_VERSION"
+    public static final FIELD_ROUTER_MAP = "ROUTERMAP"
+    public static final UNKNOWN_VERSION = "unspecified"
+    public static final NOT_FOUND_VERSION = "0.0.0"
+    public static final DOT_CLASS = ".class"
 
     public static JarInfo fromCache(File cacheFile) {
         String json = FileUtils.readFileToString(cacheFile, "UTF-8")
@@ -87,6 +88,7 @@ public class TheRouterInjects {
                     }
                 } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter")) {
                     jarInfo.isTheRouterJar = true;
+                    jarInfo.theRouterInjectEntryName = jarEntry.name;
                 } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
                     String className = jarEntry.name
                             .replace(DOT_CLASS, "")

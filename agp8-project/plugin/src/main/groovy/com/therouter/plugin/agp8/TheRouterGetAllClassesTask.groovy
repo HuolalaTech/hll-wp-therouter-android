@@ -19,8 +19,6 @@ import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
 import org.objectweb.asm.tree.FieldNode
 
-import java.nio.file.Files
-import java.nio.file.StandardCopyOption
 import java.util.jar.JarEntry
 import java.util.jar.JarFile
 import java.util.jar.JarOutputStream
@@ -28,7 +26,8 @@ import java.util.jar.JarOutputStream
 abstract class TheRouterGetAllClassesTask extends DefaultTask {
 
     private static final Set<String> allClass = new HashSet<>()
-    private TheRouterExtension theRouterExtension = new TheRouterExtension();
+    private static final Set<String> mergeClass = new HashSet<>()
+    private static final TheRouterExtension theRouterExtension = new TheRouterExtension();
 
     @InputFiles
     abstract ListProperty<RegularFile> getAllJars();
@@ -37,7 +36,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
     abstract ListProperty<Directory> getAllDirectories();
 
     @OutputFiles
-    abstract RegularFileProperty getOutput();
+    abstract RegularFileProperty getOutputDirectory();
 
     @TaskAction
     void taskAction() {
@@ -54,49 +53,65 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
     }
 
     void theRouterTransform() {
-        File theRouterClassOutputFile = null;
-        JarEntry theRouterServiceProvideInjecter = null;
+        String theRouterInjectEntryName = null;
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
-        File folder = new File(project.buildDir, "therouter")
-        folder.mkdirs()
 
-        File dest = getOutput().get().getAsFile()
-        OutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(dest)))
+        File dest = getOutputDirectory().get().asFile
+        dest.delete()
+
+        Set<File> changedJarHighLevel = new HashSet<>();
+        Set<File> changedJarMiddleLevel = new HashSet<>();
+        Set<File> changedJarLowLevel = new HashSet<>();
+        File theRouterCacheFolder = new File(project.buildDir, "therouter")
+        theRouterCacheFolder.mkdirs()
+        File theRouterDest = new File(theRouterCacheFolder, "therouter-dest-cache.jar")
+        if (!theRouterDest.exists() || !theRouterExtension.debug) {
+            theRouterCacheFolder.deleteDir()
+            theRouterCacheFolder.mkdirs()
+            theRouterDest.delete()
+            mergeClass.clear()
+        } else {
+            changedJarLowLevel.add(theRouterDest)
+        }
+
         allJars.get().each { file ->
             File jar = file.asFile
             String jarName = jar.name.toLowerCase()
             String cacheName = jarName
             if ("classes.jar".equals(jarName)) {
-                cacheName = "" + jar.absolutePath.hashCode()
+                cacheName = "classes-" + Math.abs(jar.absolutePath.hashCode()) + ".jar"
             }
-            File cacheFile = new File(folder, cacheName)
+            File cacheFile = new File(theRouterCacheFolder, cacheName)
             JarInfo jarInfo;
             String logInfo = "---------TheRouter handle jar " + jarName + "  "
             if (cacheFile.exists()) {
                 jarInfo = TheRouterInjects.fromCache(cacheFile)
-                if (jar.lastModified() != jarInfo.lastModified) {
+                if (jar.length() != jarInfo.lastModified) {
                     debugLog(logInfo + LogUI.C_INFO.value + "CHANGED" + LogUI.E_NORMAL.value)
                     cacheFile.delete()
                     jarInfo = TheRouterInjects.tagJar(jar)
-                    jarInfo.lastModified = jar.lastModified()
+                    jarInfo.lastModified = jar.length()
                     TheRouterInjects.toCache(cacheFile, jarInfo)
+                    changedJarHighLevel.add(jar)
                 } else {
-                    debugLog(logInfo + LogUI.C_INFO.value + "NOTCHANGED" + LogUI.E_NORMAL.value)
+                    debugLog(logInfo + "UP-TO-DATE")
                 }
             } else {
                 debugLog(logInfo + LogUI.C_WARN.value + "EMPTY_CACHE" + LogUI.E_NORMAL.value)
                 jarInfo = TheRouterInjects.tagJar(jar)
-                jarInfo.lastModified = jar.lastModified()
+                jarInfo.lastModified = jar.length()
                 TheRouterInjects.toCache(cacheFile, jarInfo)
+                changedJarHighLevel.add(jar)
             }
             if (jarInfo.isTheRouterJar) {
-                theRouterClassOutputFile = dest
-                debugLog("---------TheRouter jar path is " + dest.absolutePath)
+                changedJarMiddleLevel.add(jar)
+                theRouterInjectEntryName = jarInfo.theRouterInjectEntryName
+                debugLog("---------TheRouter jar path is " + jar.absolutePath)
             }
-            FileUtils.copyFile(jar, dest)
         }
 
+        OutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(dest)))
         getAllDirectories().get().each { directory ->
             directory.asFile.traverse(type: groovy.io.FileType.FILES) { file ->
                 String relativePath = directory.asFile.toURI()
@@ -108,6 +123,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 } catch (Exception e) {
                 }
                 tag(relativePath)
+                mergeClass.add(relativePath)
                 new FileInputStream(file).withCloseable { inputStream ->
                     if (isRouterMap(relativePath)) {
                         ClassReader reader = new ClassReader(new FileInputStream(file.absolutePath))
@@ -115,7 +131,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                         reader.accept(cn, 0)
                         List<FieldNode> fieldList = cn.fields
                         for (FieldNode fieldNode : fieldList) {
-                            if (TheRouterPlugin.FIELD_ROUTER_MAP == fieldNode.name) {
+                            if (TheRouterInjects.FIELD_ROUTER_MAP == fieldNode.name) {
                                 println("---------TheRouter in jar get route map from: ${relativePath}-------------------------------")
                                 routeMapStringSet.add(fieldNode.value)
                             }
@@ -126,9 +142,9 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                         reader.accept(cn, 0)
                         List<FieldNode> fieldList = cn.fields
                         for (FieldNode fieldNode : fieldList) {
-                            if (TheRouterPlugin.FIELD_FLOW_TASK_JSON == fieldNode.name) {
+                            if (TheRouterInjects.FIELD_FLOW_TASK_JSON == fieldNode.name) {
                                 println("---------TheRouter in jar get flow task json from: ${relativePath}-------------------------------")
-                                Map<String, String> map = TheRouterPlugin.gson.fromJson(fieldNode.value, HashMap.class);
+                                Map<String, String> map = TheRouterInjects.gson.fromJson(fieldNode.value, HashMap.class);
                                 flowTaskMap.putAll(map)
                             }
                         }
@@ -138,23 +154,13 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 jarOutput.closeEntry()
             }
         }
-
-        if (theRouterClassOutputFile != null && theRouterServiceProvideInjecter != null) {
-            JarFile jarFile = new JarFile(theRouterClassOutputFile)
-            jarOutput.putNextEntry(new JarEntry(theRouterServiceProvideInjecter.name))
-            jarFile.getInputStream(theRouterServiceProvideInjecter).withCloseable {
-                ClassReader cr = new ClassReader(it)
-                ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
-                AddCodeVisitor cv = new AddCodeVisitor(cw, TheRouterPlugin.serviceProvideMap, TheRouterPlugin.autowiredSet, TheRouterPlugin.routeSet, false)
-                cr.accept(cv, ClassReader.SKIP_DEBUG)
-                byte[] bytes = cw.toByteArray()
-                jarOutput.write(bytes)
-            }
-            jarOutput.closeEntry()
-        }
+        mergeJar(jarOutput, changedJarHighLevel, theRouterInjectEntryName)
+        mergeJar(jarOutput, changedJarMiddleLevel, theRouterInjectEntryName)
+        mergeJar(jarOutput, changedJarLowLevel, theRouterInjectEntryName)
         jarOutput.close()
-        println("---------TheRouter ASM----------------------")
-
+        FileUtils.copyFile(dest, theRouterDest)
+        mergeClass.clear()
+        println("---------TheRouter ASM finish----------------------")
 
         Set<RouteItem> pageSet = new HashSet<>()
         Gson gson = new GsonBuilder().setPrettyPrinting().create()
@@ -165,7 +171,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(project.projectDir, "src/main/assets/therouter/routeMap.json")
         if (assetRouteMap.exists()) {
-            if (TheRouterPlugin.DELETE.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+            if (TheRouterPlugin.DELETE.equalsIgnoreCase(theRouterExtension.checkRouteMap)) {
                 println("---------TheRouter delete route map------------------------------------------")
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
@@ -218,7 +224,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 } else if (className != routeItem.className) {
                     throw new RuntimeException("Multiple Activity to single Url: $className and ${routeItem.className}")
                 }
-                if (!TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP).isEmpty()) {
+                if (!theRouterExtension.checkRouteMap.isEmpty()) {
                     boolean classNotFound = true
                     for (String item : allClass) {
                         if (item.contains(routeItem.className)) {
@@ -227,9 +233,9 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                         }
                     }
                     if (classNotFound) {
-                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(theRouterExtension.checkRouteMap)) {
                             throw new ClassNotFoundException(routeItem.className + " in /assets/therouter/routeMap.json")
-                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_ROUTE_MAP))) {
+                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(theRouterExtension.checkRouteMap)) {
                             println("${LogUI.C_WARN.value}[${routeItem.className} in /assets/therouter/routeMap.json]${LogUI.E_NORMAL.value}")
                         }
                     }
@@ -259,16 +265,16 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             flowTaskDependMap.put(it, value)
         }
 
-        if (!TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND).isEmpty()) {
+        if (!theRouterExtension.checkFlowDepend.isEmpty()) {
             flowTaskDependMap.values().each { taskName ->
                 flowTaskDependMap[taskName].each {
                     if (!flowTaskDependMap.containsKey(it)) {
-                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
+                        if (TheRouterPlugin.ERROR.equalsIgnoreCase(theRouterExtension.checkFlowDepend)) {
                             throw new RuntimeException("\n\n==========================================" +
                                     "\nTheRouter:: FlowTask::   " +
                                     "\nCan not found Task: [$it] from $taskName dependsOn" +
                                     "\n==========================================\n\n")
-                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.CHECK_FLOW_UNKNOW_DEPEND))) {
+                        } else if (TheRouterPlugin.WARNING.equalsIgnoreCase(theRouterExtension.checkFlowDepend)) {
                             println()
                             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
                             println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::   " + "${LogUI.E_NORMAL.value}")
@@ -285,7 +291,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             TheRouterPluginUtils.fillTodoList(flowTaskDependMap, it)
         }
 
-        if (Boolean.valueOf(TheRouterPluginUtils.getLocalProperty(project, TheRouterPlugin.SHOW_FLOW_DEPEND))) {
+        if (Boolean.valueOf(theRouterExtension.showFlowDepend)) {
             flowTaskDependMap.keySet().each {
                 TheRouterPluginUtils.fillNode(TheRouterPluginUtils.createNode(flowTaskDependMap, it), null)
             }
@@ -298,43 +304,73 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
             }
             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
             println()
-
         }
 
         println("---------TheRouter check flow task map--------------")
     }
 
-    void debugLog(String log) {
+    static void debugLog(String log) {
         if (theRouterExtension.debug) {
             println(log)
+        }
+    }
+
+    static void mergeJar(JarOutputStream jos, Set<File> jarFiles, String theRouterInjectEntryName) throws IOException {
+        for (File jar : jarFiles) {
+            debugLog("---------TheRouter merge jar " + jar.name)
+            JarFile jarFile = new JarFile(jar)
+            Enumeration<JarEntry> e = jarFile.entries()
+            while (e.hasMoreElements()) {
+                try {
+                    JarEntry entry = e.nextElement();
+                    if (!mergeClass.contains(entry.name)) {
+                        jos.putNextEntry(new JarEntry(entry.getName()));
+                        jarFile.getInputStream(entry).withCloseable { inputStream ->
+                            if (entry.getName().equals(theRouterInjectEntryName)) {
+                                ClassReader cr = new ClassReader(inputStream)
+                                ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
+                                AddCodeVisitor cv = new AddCodeVisitor(cw, TheRouterInjects.serviceProvideMap, TheRouterInjects.autowiredSet, TheRouterInjects.routeSet, false)
+                                cr.accept(cv, ClassReader.SKIP_DEBUG)
+                                byte[] bytes = cw.toByteArray()
+                                jos.write(bytes)
+                            } else {
+                                jos << inputStream
+                            }
+                        }
+                        mergeClass.add(entry.name)
+                    }
+                } catch (Exception exc) {
+                }
+                jos.closeEntry();
+            }
         }
     }
 
     void tag(String className) {
         className = className.replaceAll(TheRouterInjects.DOT_CLASS, "")
         if (isAutowired(className)) {
-            TheRouterPlugin.autowiredSet.add(className)
+            TheRouterInjects.autowiredSet.add(className)
         } else if (isRouterMap(className)) {
-            TheRouterPlugin.routeSet.add(className)
+            TheRouterInjects.routeSet.add(className)
         } else if (isServiceProvider(className)) {
-            TheRouterPlugin.serviceProvideMap.put(className, BuildConfig.VERSION)
+            TheRouterInjects.serviceProvideMap.put(className, BuildConfig.VERSION)
         }
         allClass.add(className.replaceAll("/", "."))
     }
 
     static boolean isAutowired(String className) {
-        return className.endsWith(TheRouterPlugin.SUFFIX_AUTOWIRED)
+        return className.endsWith(TheRouterInjects.SUFFIX_AUTOWIRED)
     }
 
     static boolean isRouterMap(String className) {
-        return (className.startsWith(TheRouterPlugin.PREFIX_ROUTER_MAP)
-                || className.startsWith("a/" + TheRouterPlugin.PREFIX_ROUTER_MAP))
+        return (className.startsWith(TheRouterInjects.PREFIX_ROUTER_MAP)
+                || className.startsWith("a/" + TheRouterInjects.PREFIX_ROUTER_MAP))
                 && !className.contains("\$")
     }
 
     static boolean isServiceProvider(String className) {
-        return (className.startsWith(TheRouterPlugin.PREFIX_SERVICE_PROVIDER)
-                || className.startsWith("a/" + TheRouterPlugin.PREFIX_SERVICE_PROVIDER))
+        return (className.startsWith(TheRouterInjects.PREFIX_SERVICE_PROVIDER)
+                || className.startsWith("a/" + TheRouterInjects.PREFIX_SERVICE_PROVIDER))
                 && !className.contains("\$")
     }
 }
