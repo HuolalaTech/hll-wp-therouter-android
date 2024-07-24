@@ -40,14 +40,19 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
 
     @TaskAction
     void taskAction() {
-        println("----------------------TheRouter build start------------------------------")
         if (project.TheRouter) {
             theRouterExtension.debug = Boolean.valueOf(project.TheRouter.debug)
             theRouterExtension.checkRouteMap = project.TheRouter.checkRouteMap
             theRouterExtension.checkFlowDepend = project.TheRouter.checkFlowDepend
             theRouterExtension.showFlowDepend = project.TheRouter.showFlowDepend
         }
+        println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
+        println "JDK Version::" + System.getProperty("java.version")
+        println "Gradle Version::${project.gradle.gradleVersion}"
+        println "checkRouteMap::${theRouterExtension.checkRouteMap}"
+        println "checkFlowDepend::${theRouterExtension.checkFlowDepend}"
 
+        println("----------------------TheRouter build start------------------------------")
         theRouterTransform()
         println("----------------------TheRouter build finish-----------------------------")
     }
@@ -122,10 +127,12 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                     jarOutput.putNextEntry(new JarEntry(relativePath))
                 } catch (Exception e) {
                 }
+                // a/ServiceProvider__TheRouter__737372.class
+                // a/ServiceProvider__TheRouter__737372$Companion$addFlowTask$8.class
                 tag(relativePath)
                 mergeClass.add(relativePath)
                 new FileInputStream(file).withCloseable { inputStream ->
-                    if (isRouterMap(relativePath)) {
+                    if (isRouterMap(relativePath)) { // RouterMap__TheRouter__
                         ClassReader reader = new ClassReader(new FileInputStream(file.absolutePath))
                         ClassNode cn = new ClassNode()
                         reader.accept(cn, 0)
@@ -136,7 +143,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                                 routeMapStringSet.add(fieldNode.value)
                             }
                         }
-                    } else if (isServiceProvider(relativePath)) {
+                    } else if (isServiceProvider(relativePath)) {  // ServiceProvider__TheRouter__
                         ClassReader reader = new ClassReader(new FileInputStream(file.absolutePath))
                         ClassNode cn = new ClassNode()
                         reader.accept(cn, 0)
@@ -226,8 +233,10 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
                 }
                 if (!theRouterExtension.checkRouteMap.isEmpty()) {
                     boolean classNotFound = true
-                    for (String item : allClass) {
-                        if (item.contains(routeItem.className)) {
+                    for (String item : mergeClass) {
+                        // routeItem.className 格式为 com.therouter.demo.shell.TestActivity
+                        // item 格式为  com/therouter/demo/shell/TestActivity.class
+                        if (item.contains(routeItem.className.replaceAll(".", "/"))) {
                             classNotFound = false
                             break
                         }
@@ -317,7 +326,6 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
 
     static void mergeJar(JarOutputStream jos, Set<File> jarFiles, String theRouterInjectEntryName) throws IOException {
         for (File jar : jarFiles) {
-            debugLog("---------TheRouter merge jar " + jar.name)
             JarFile jarFile = new JarFile(jar)
             Enumeration<JarEntry> e = jarFile.entries()
             while (e.hasMoreElements()) {
@@ -347,6 +355,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
     }
 
     void tag(String className) {
+        // a/ServiceProvider__TheRouter__737372.class
         className = className.replaceAll(TheRouterInjects.DOT_CLASS, "")
         if (isAutowired(className)) {
             TheRouterInjects.autowiredSet.add(className)
@@ -355,7 +364,6 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         } else if (isServiceProvider(className)) {
             TheRouterInjects.serviceProvideMap.put(className, BuildConfig.VERSION)
         }
-        allClass.add(className.replaceAll("/", "."))
     }
 
     static boolean isAutowired(String className) {
