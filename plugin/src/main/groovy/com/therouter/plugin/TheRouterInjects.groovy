@@ -114,6 +114,9 @@ public class TheRouterInjects {
         return jarInfo
     }
 
+    /**
+     * 本方法仅 Transform API 会用到
+     */
     public static SourceInfo tagClass(String path) {
         SourceInfo sourceInfo = new SourceInfo();
         File dir = new File(path)

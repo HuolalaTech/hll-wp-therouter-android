@@ -686,7 +686,6 @@ class TheRouterSymbolProcessor(
                     }
                 }
                 ps.println(") {")
-                ps.println("//////////" + serviceProviderItem.isMethod + serviceProviderItem.className + "-" + serviceProviderItem.description)
                 if (serviceProviderItem.isMethod) {
                     ps.print(
                         String.format(
