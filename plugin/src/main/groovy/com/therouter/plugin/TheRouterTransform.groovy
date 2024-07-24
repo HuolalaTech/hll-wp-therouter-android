@@ -49,6 +49,12 @@ public class TheRouterTransform extends Transform {
                    TransformOutputProvider outputProvider,
                    boolean isIncremental)
             throws IOException, TransformException, InterruptedException {
+        if (mProject.TheRouter) {
+            theRouterExtension.debug = Boolean.valueOf(mProject.TheRouter.debug)
+            theRouterExtension.checkRouteMap = mProject.TheRouter.checkRouteMap
+            theRouterExtension.checkFlowDepend = mProject.TheRouter.checkFlowDepend
+            theRouterExtension.showFlowDepend = mProject.TheRouter.showFlowDepend
+        }
         println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
         println "JDK Version::" + System.getProperty("java.version")
         println "Gradle Version::${mProject.gradle.gradleVersion}"
@@ -56,14 +62,6 @@ public class TheRouterTransform extends Transform {
         println "checkFlowDepend::${theRouterExtension.checkFlowDepend}"
 
         println("----------------------TheRouter build start------------------------------")
-
-        if (mProject.TheRouter) {
-            theRouterExtension.debug = Boolean.valueOf(mProject.TheRouter.debug)
-            theRouterExtension.checkRouteMap = mProject.TheRouter.checkRouteMap
-            theRouterExtension.checkFlowDepend = mProject.TheRouter.checkFlowDepend
-            theRouterExtension.showFlowDepend = mProject.TheRouter.showFlowDepend
-        }
-
         theRouterTransform(inputs, outputProvider)
         println("----------------------TheRouter build finish-----------------------------")
     }
