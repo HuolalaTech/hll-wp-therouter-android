@@ -52,6 +52,7 @@ class RouterInject {
         mInterceptors.add(factory)
     }
 
+    @Synchronized
     operator fun <T> get(clazz: Class<T>, vararg params: Any?): T? {
         var strArgs = ""
         params.forEach { strArgs += "$it, " }
