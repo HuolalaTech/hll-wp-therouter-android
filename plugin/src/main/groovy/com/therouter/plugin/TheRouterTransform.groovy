@@ -282,7 +282,7 @@ public class TheRouterTransform extends Transform {
             println()
             println("${LogUI.C_WARN.value}" + "TheRouter:: FlowTask::dependency   " + "${LogUI.E_NORMAL.value}")
             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
-            dependStack.sort().each {
+            TheRouterPluginUtils.dependStack.sort().each {
                 println("${LogUI.C_WARN.value}" + "[Root --> $it]" + "${LogUI.E_NORMAL.value}")
             }
             println("${LogUI.C_WARN.value}" + "==========================================" + "${LogUI.E_NORMAL.value}")
