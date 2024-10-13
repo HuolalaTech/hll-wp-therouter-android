@@ -1,5 +1,6 @@
 package com.therouter.demo.b;
 
+import com.therouter.demo.di.IPushService;
 import com.therouter.demo.di.IUserService;
 import com.therouter.inject.ServiceProvider;
 
@@ -16,6 +17,28 @@ public class Test {
             @Override
             public String getUserInfo() {
                 return "这是用户信息";
+            }
+        };
+    }
+
+    @ServiceProvider(path =  "/push/demo")
+    public static IPushService demo() {
+        return new IPushService() {
+
+            @Override
+            public void onPush(String jsonStr) {
+
+            }
+        };
+    }
+
+    @ServiceProvider(path =  "/push/str")
+    public static IPushService demo(String str) {
+        return new IPushService() {
+
+            @Override
+            public void onPush(String jsonStr) {
+
             }
         };
     }

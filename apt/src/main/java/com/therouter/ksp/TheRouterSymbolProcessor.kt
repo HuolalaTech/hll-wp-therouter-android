@@ -374,7 +374,9 @@ class TheRouterSymbolProcessor(
                                 }
                             }
                         }
-
+                        "path" -> {
+                            serviceProviderItem.path = arg.value.toString()
+                        }
                         "params" -> {
                             val params = ArrayList<String>()
                             for (kv in arg.value as List<*>) {
@@ -452,7 +454,9 @@ class TheRouterSymbolProcessor(
                                 }
                             }
                         }
-
+                        "path" -> {
+                            serviceProviderItem.path = arg.value.toString()
+                        }
                         "params" -> {
                             val params = ArrayList<String>()
                             for (kv in arg.value as List<*>) {
@@ -645,8 +649,11 @@ class TheRouterSymbolProcessor(
             } catch (e: Exception) {
             }
             for (serviceProviderItem in pageList) {
-                //处理 USE_EXTEND 开关
-                if (STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                val isPathService = serviceProviderItem.path.isNotBlank()
+                if (isPathService) {
+                    ps.print(String.format("if (clazz === Any::class.java && params.size >0 && \"%s\" == params[0]", serviceProviderItem.path.replace("\"","\\\"")))
+                } else if (STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                    //处理 USE_EXTEND 开关
                     ps.print(
                         String.format(
                             "if (%s::class.javaObjectType.isAssignableFrom(clazz)",
@@ -663,14 +670,15 @@ class TheRouterSymbolProcessor(
                 }
                 // 多参数判断
                 ps.print(" && params.size == ")
+                val offsetCount = if (isPathService) 1 else 0
                 if (serviceProviderItem.params.size == 1) {
                     if (serviceProviderItem.params[0].trim { it <= ' ' }.isEmpty()) {
-                        ps.print(0)
+                        ps.print(0 + offsetCount)
                     } else {
-                        ps.print(1)
+                        ps.print(1 + offsetCount)
                     }
                 } else {
-                    ps.print(serviceProviderItem.params.size)
+                    ps.print(serviceProviderItem.params.size + offsetCount)
                 }
                 //参数类型判断
                 for (count in serviceProviderItem.params.indices) {
@@ -679,7 +687,7 @@ class TheRouterSymbolProcessor(
                             String.format(
                                 Locale.getDefault(),
                                 "\n\t\t\t\t&& params[%d] is %s",
-                                count,
+                                count + offsetCount,
                                 serviceProviderItem.params[count]
                             )
                         )
@@ -712,7 +720,7 @@ class TheRouterSymbolProcessor(
                             String.format(
                                 Locale.getDefault(),
                                 "params[%d] as %s",
-                                count,
+                                count + offsetCount,
                                 serviceProviderItem.params[count]
                             )
                         )

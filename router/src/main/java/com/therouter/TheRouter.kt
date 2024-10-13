@@ -179,6 +179,14 @@ object TheRouter {
     }
 
     /**
+     * 通过路由path获取跨模块依赖的服务
+     */
+    @JvmStatic
+    @Suppress("UNCHECKED_CAST")
+    fun <T> get(path:String,vararg params: Any?): T? {
+        return routerInject.get(Any::class.java, path, *params) as T
+    }
+    /**
      * 通过Path构建路由导航器
      */
     @JvmStatic

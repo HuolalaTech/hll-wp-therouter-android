@@ -14,4 +14,4 @@ import kotlin.reflect.KClass
     AnnotationTarget.PROPERTY_GETTER,
     AnnotationTarget.PROPERTY_SETTER
 )
-annotation class ServiceProvider(val returnType: KClass<*> = ServiceProvider::class, val params: Array<KClass<*>> = [])
+annotation class ServiceProvider(val returnType: KClass<*> = ServiceProvider::class, val path: String = "", val params: Array<KClass<*>> = [])

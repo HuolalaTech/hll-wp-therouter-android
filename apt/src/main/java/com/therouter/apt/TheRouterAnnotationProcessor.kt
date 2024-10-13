@@ -252,7 +252,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         val annotation = element.getAnnotation(ServiceProvider::class.java)
         serviceProviderItem.className = element.toString()
         serviceProviderItem.methodName = ""
-
+        serviceProviderItem.path = annotation.path
         val annotationStr = annotation.toString()
         val matcher = Pattern.compile("(returnType|params)=([\\w\\.]+[\\w\\.,]*)").matcher(annotationStr)
         while (matcher.find()) {
@@ -324,7 +324,9 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 serviceProviderItem.params = params
             }
         }
-        val annotationStr = element.getAnnotation(ServiceProvider::class.java).toString()
+        val annotation = element.getAnnotation(ServiceProvider::class.java)
+        serviceProviderItem.path = annotation.path
+        val annotationStr = annotation.toString()
         val matcher = Pattern.compile("(returnType|params)=([\\w\\.]+[\\w\\.,]*)").matcher(annotationStr)
         while (matcher.find()) {
             val key = matcher.group(1)
@@ -545,22 +547,26 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             } catch (e: Exception) {
             }
             for (serviceProviderItem in pageList) {
-                //处理 USE_EXTEND 开关
-                if (STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                val isPathService = serviceProviderItem.path.isNotBlank()
+                if (isPathService) {
+                    ps.print(String.format("if (clazz == Object.class && null != params && params.length >0 && \"%s\".equals(params[0])",  serviceProviderItem.path.replace("\"","\\\"")))
+                } else if (STR_TRUE.equals(prop.getProperty(KEY_USE_EXTEND), ignoreCase = true)) {
+                    //处理 USE_EXTEND 开关
                     ps.print(String.format("if (%s.class.isAssignableFrom(clazz)", serviceProviderItem.returnType))
                 } else {
                     ps.print(String.format("if (%s.class.equals(clazz)", serviceProviderItem.returnType))
                 }
                 // 多参数判断
                 ps.print(" && params.length == ")
+                val offsetCount = if (isPathService) 1 else 0
                 if (serviceProviderItem.params.size == 1) {
                     if (serviceProviderItem.params[0].trim { it <= ' ' }.isEmpty()) {
-                        ps.print(0)
+                        ps.print(0 + offsetCount)
                     } else {
-                        ps.print(1)
+                        ps.print(1 + offsetCount)
                     }
                 } else {
-                    ps.print(serviceProviderItem.params.size)
+                    ps.print(serviceProviderItem.params.size + offsetCount)
                 }
                 //参数类型判断
                 for (count in serviceProviderItem.params.indices) {
@@ -569,7 +575,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                             String.format(
                                 Locale.getDefault(),
                                 "\n\t\t\t\t&& params[%d] instanceof %s",
-                                count,
+                                count + offsetCount,
                                 serviceProviderItem.params[count]
                             )
                         )
@@ -605,7 +611,7 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                                 Locale.getDefault(),
                                 "(%s) params[%d]",
                                 serviceProviderItem.params[count],
-                                count
+                                count + offsetCount
                             )
                         )
                         if (count != serviceProviderItem.params.size - 1) {
