@@ -1,6 +1,7 @@
 apply plugin: 'groovy'
 
 repositories {
+    maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
     mavenCentral()
     google()
     gradlePluginPortal()

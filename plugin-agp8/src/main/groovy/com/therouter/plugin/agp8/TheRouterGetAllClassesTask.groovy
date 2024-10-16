@@ -12,6 +12,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.tasks.InputFiles
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.OutputFiles
 import org.gradle.api.tasks.TaskAction
 import org.objectweb.asm.ClassReader
@@ -35,8 +36,8 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
     @InputFiles
     abstract ListProperty<Directory> getAllDirectories();
 
-    @OutputFiles
-    abstract RegularFileProperty getOutputDirectory();
+    @OutputFile
+    abstract RegularFileProperty getOutput();
 
     @TaskAction
     void taskAction() {
@@ -62,7 +63,7 @@ abstract class TheRouterGetAllClassesTask extends DefaultTask {
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
 
-        File dest = getOutputDirectory().get().asFile
+        File dest = getOutput().get().asFile
         dest.delete()
 
         Set<File> changedJarHighLevel = new HashSet<>();

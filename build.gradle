@@ -2,6 +2,7 @@
 buildscript {
     ext.kotlin_version = '1.9.21'
     repositories {
+        maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
         google()
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
@@ -18,6 +19,7 @@ buildscript {
 allprojects {
     apply from: "${project.getRootDir()}/therouter.gradle"
     repositories {
+        maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
         google()
         mavenCentral()
         maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }

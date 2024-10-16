@@ -1,6 +1,29 @@
 rootProject.name = "TheRouter"
 
 apply from: "${rootDir}/therouter.gradle"
+if (Boolean.valueOf(agp8)) {
+    rootProject.buildFileName = "agp8-build.gradle"
+    pluginManagement {
+        repositories {
+            maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
+            gradlePluginPortal()
+            google()
+            mavenCentral()
+            maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
+            maven { url 'https://plugins.gradle.org/m2/' }
+        }
+    }
+    dependencyResolutionManagement {
+        repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+        repositories {
+            maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
+            google()
+            mavenCentral()
+            maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
+        }
+    }
+}
+
 getLocalProperties().entrySet().each { entry ->
     def prefix = ""
 //    if (entry.key.startsWith(prefix) && Boolean.valueOf(entry.value)) {
@@ -10,7 +33,11 @@ getLocalProperties().entrySet().each { entry ->
             def file = file(moduleName)
             if (file.exists()) {
                 include ":$moduleName"
-                project(":$moduleName").projectDir = file
+                def moduleProject = project(":$moduleName")
+                moduleProject.projectDir = file
+                if (Boolean.valueOf(agp8)) {
+                    moduleProject.buildFileName = "agp8-build.gradle"
+                }
             }
         }
     }
