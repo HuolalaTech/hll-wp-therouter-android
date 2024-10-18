@@ -22,7 +22,7 @@ package com.therouter.plugin;
  * 033[30m   --   \033[37m   设置前景色
  * 033[40m   --   \033[47m   设置背景色
  */
-enum LogUI {
+public enum LogUI {
     //color
     C_INFO("\033[40;37m"),
     C_HIGH("\033[40;46m"),
@@ -38,7 +38,7 @@ enum LogUI {
         this.value = value;
     }
 
-    String getValue() {
+    public String getValue() {
         return this.value;
     }
 }

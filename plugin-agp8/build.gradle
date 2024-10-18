@@ -1,4 +1,16 @@
-apply plugin: 'groovy'
+plugins {
+    id 'groovy'
+    id 'java-gradle-plugin'
+}
+
+gradlePlugin {
+    plugins {
+        greeting {
+            id = 'cn.therouter.agp8' //这里是插件的ID
+            implementationClass = 'com.therouter.plugin.TheRouterPlugin' //这里是包名+类名
+        }
+    }
+}
 
 repositories {
     maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }

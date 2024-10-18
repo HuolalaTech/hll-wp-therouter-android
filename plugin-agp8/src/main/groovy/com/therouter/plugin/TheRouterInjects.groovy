@@ -25,16 +25,16 @@ public class TheRouterInjects {
 
     public static final Gson gson = new Gson()
 
-    public static final PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
-    public static final PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
-    public static final SUFFIX_AUTOWIRED_DOT_CLASS = "__TheRouter__Autowired.class"
-    public static final SUFFIX_AUTOWIRED = "__TheRouter__Autowired"
-    public static final FIELD_FLOW_TASK_JSON = "FLOW_TASK_JSON"
-    public static final FIELD_APT_VERSION = "THEROUTER_APT_VERSION"
-    public static final FIELD_ROUTER_MAP = "ROUTERMAP"
-    public static final UNKNOWN_VERSION = "unspecified"
-    public static final NOT_FOUND_VERSION = "0.0.0"
-    public static final DOT_CLASS = ".class"
+    public static final String PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
+    public static final String PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
+    public static final String SUFFIX_AUTOWIRED_DOT_CLASS = "__TheRouter__Autowired.class"
+    public static final String SUFFIX_AUTOWIRED = "__TheRouter__Autowired"
+    public static final String FIELD_FLOW_TASK_JSON = "FLOW_TASK_JSON"
+    public static final String FIELD_APT_VERSION = "THEROUTER_APT_VERSION"
+    public static final String FIELD_ROUTER_MAP = "ROUTERMAP"
+    public static final String UNKNOWN_VERSION = "unspecified"
+    public static final String NOT_FOUND_VERSION = "0.0.0"
+    public static final String DOT_CLASS = ".class"
 
     public static JarInfo fromCache(File cacheFile) {
         String json = FileUtils.readFileToString(cacheFile, "UTF-8")

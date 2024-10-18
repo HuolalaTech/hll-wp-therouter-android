@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class RouteItem implements Comparable<RouteItem> {
-    String path = "";
-    String className = "";
-    String action = "";
-    String description = "";
-    HashMap<String, String> params = new HashMap<>();
+    public String path = "";
+    public String className = "";
+    public String action = "";
+    public String description = "";
+    public HashMap<String, String> params = new HashMap<>();
 
     @Override
     public boolean equals(Object o) {
