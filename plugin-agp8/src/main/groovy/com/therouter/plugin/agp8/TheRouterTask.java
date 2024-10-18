@@ -76,7 +76,6 @@ public abstract class TheRouterTask extends DefaultTask {
         Map<String, String> flowTaskMap = new HashMap<>();
 
         File dest = getOutputFile().get().getAsFile();
-        System.out.println("========dest:" + dest.getAbsolutePath());
         FileUtils.forceDelete(dest);
 
         File buildDir = getProject().getLayout().getBuildDirectory().getAsFile().get();
