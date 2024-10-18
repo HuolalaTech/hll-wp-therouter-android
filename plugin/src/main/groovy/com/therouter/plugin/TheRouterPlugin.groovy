@@ -1,13 +1,11 @@
 package com.therouter.plugin
 
 import com.android.build.api.artifact.ScopedArtifact
-import com.android.build.api.variant.AndroidComponentsExtension
 import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.api.variant.Variant
 
 import com.android.build.gradle.AppExtension
-
-import com.therouter.plugin.agp8.TheRouterGetAllClassesTask
+import com.therouter.plugin.agp8.TheRouterTask
 import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -20,7 +18,7 @@ public class TheRouterPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
-        project.extensions.create('TheRouter', TheRouterExtension)
+        TheRouterExtension theRouterExtension = project.extensions.create('TheRouter', TheRouterExtension)
         boolean isLibrary = project.getPlugins().hasPlugin("com.android.library")
         if (!isLibrary) {
             boolean useAGP8 = project.TheRouter.agp8
@@ -31,18 +29,19 @@ public class TheRouterPlugin implements Plugin<Project> {
                 def therouterTransform = new TheRouterTransform(project)
                 android.registerTransform(therouterTransform)
             } else {
-                def android = project.extensions.getByType(AndroidComponentsExtension.class)
                 android.onVariants(android.selector().all(), new Action<Variant>() {
                     @Override
                     void execute(Variant variant) {
-                        TaskProvider<TheRouterGetAllClassesTask> getAllClassesTask = project.tasks.register("${variant.name}TheRouter", TheRouterGetAllClassesTask.class)
+                        TaskProvider<TheRouterTask> getAllClassesTask = project.tasks.register("${variant.name}TheRouter", TheRouterTask.class, task -> {
+                            task.setTheRouterExtension(theRouterExtension);
+                        })
                         variant.artifacts
                                 .forScope(ScopedArtifacts.Scope.ALL)
                                 .use(getAllClassesTask)
                                 .toTransform(ScopedArtifact.CLASSES.INSTANCE,
                                         { it.getAllJars() },
                                         { it.getAllDirectories() },
-                                        { it.getOutputDirectory() })
+                                        { it.getOutputFile() })
                     }
                 })
             }

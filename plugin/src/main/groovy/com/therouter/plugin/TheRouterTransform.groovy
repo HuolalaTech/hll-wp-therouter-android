@@ -71,7 +71,8 @@ public class TheRouterTransform extends Transform {
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
         outputProvider.deleteAll()
-        File folder = new File(mProject.buildDir, "therouter")
+        File buildDir = mProject.getLayout().getBuildDirectory().getAsFile().get()
+        File folder = new File(buildDir, "therouter")
         if (!theRouterExtension.debug) {
             folder.deleteDir()
         }
@@ -114,7 +115,10 @@ public class TheRouterTransform extends Transform {
                 flowTaskMap.putAll(jarInfo.flowTaskMapFromJar)
                 allClass.addAll(jarInfo.allJarClass)
                 if (jarInput.getStatus() != Status.NOTCHANGED && dest.exists()) {
-                    FileUtils.forceDelete(dest)
+                    try {
+                        FileUtils.forceDelete(dest)
+                    } catch (Exception e) {
+                    }
                 }
                 if (jarInput.getStatus() != Status.REMOVED) {
                     FileUtils.copyFile(jarInput.file, dest)
@@ -131,7 +135,10 @@ public class TheRouterTransform extends Transform {
                 routeMapStringSet.addAll(sourceInfo.routeMapStringFromSource)
                 flowTaskMap.putAll(sourceInfo.flowTaskMapFromSource)
                 if (dest.exists()) {
-                    FileUtils.forceDelete(dest)
+                    try {
+                        FileUtils.forceDelete(dest)
+                    } catch (Exception e) {
+                    }
                 }
                 FileUtils.copyDirectory(directoryInput.file, dest)
             }
