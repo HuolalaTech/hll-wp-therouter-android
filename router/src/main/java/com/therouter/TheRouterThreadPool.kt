@@ -111,7 +111,7 @@ private class BufferExecutor : ExecutorService, Executor {
     var activeTask: Task? = null
     val flightTaskMap = SparseArray<FlightTaskInfo>()
     var prevCheckAliveTime = 0L
-    val taskTraceCountMap = HashMap<String, Int>()
+    val taskTraceCountMap = ConcurrentHashMap<String, Int>()
     var prevCheckRepeatTime = 0L
 
     @Synchronized
@@ -131,6 +131,7 @@ private class BufferExecutor : ExecutorService, Executor {
     /**
      * 检查是否有频繁添加任务，或有轮询任务的情况
      */
+    @Synchronized
     private fun checkTask(trace: String) {
         if (TheRouter.isDebug) {
             if (System.currentTimeMillis() - prevCheckAliveTime > KEEP_ALIVE_MILLISECOND) {
@@ -198,54 +199,66 @@ private class BufferExecutor : ExecutorService, Executor {
         }
     }
 
+    @Synchronized
     override fun shutdown() {
         threadPoolExecutor.shutdown()
     }
 
+    @Synchronized
     override fun shutdownNow(): List<Runnable> {
         return threadPoolExecutor.shutdownNow()
     }
 
+    @Synchronized
     override fun isShutdown(): Boolean {
         return threadPoolExecutor.isShutdown
     }
 
+    @Synchronized
     override fun isTerminated(): Boolean {
         return threadPoolExecutor.isTerminated
     }
 
+    @Synchronized
     @Throws(InterruptedException::class)
     override fun awaitTermination(timeout: Long, unit: TimeUnit): Boolean {
         return threadPoolExecutor.awaitTermination(timeout, unit)
     }
 
+    @Synchronized
     override fun <T> submit(task: Callable<T>): Future<T> {
         return threadPoolExecutor.submit(task)
     }
 
+    @Synchronized
     override fun <T> submit(task: Runnable, result: T): Future<T> {
         return threadPoolExecutor.submit(task, result)
     }
 
+    @Synchronized
     override fun submit(task: Runnable): Future<*> {
         return threadPoolExecutor.submit(task)
     }
 
+    @Synchronized
     @Throws(InterruptedException::class)
     override fun <T> invokeAll(tasks: Collection<Callable<T>?>): List<Future<T>> {
         return threadPoolExecutor.invokeAll(tasks)
     }
 
+    @Synchronized
     @Throws(InterruptedException::class)
     override fun <T> invokeAll(tasks: Collection<Callable<T>?>, timeout: Long, unit: TimeUnit): List<Future<T>> {
         return threadPoolExecutor.invokeAll(tasks, timeout, unit)
     }
 
+    @Synchronized
     @Throws(ExecutionException::class, InterruptedException::class)
     override fun <T> invokeAny(tasks: Collection<Callable<T>?>): T {
         return threadPoolExecutor.invokeAny(tasks)
     }
 
+    @Synchronized
     @Throws(ExecutionException::class, InterruptedException::class, TimeoutException::class)
     override fun <T> invokeAny(tasks: Collection<Callable<T>?>, timeout: Long, unit: TimeUnit): T {
         return threadPoolExecutor.invokeAny(tasks, timeout, unit)
