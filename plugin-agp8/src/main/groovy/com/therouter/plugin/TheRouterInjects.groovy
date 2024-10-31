@@ -3,6 +3,7 @@ package com.therouter.plugin
 import com.google.gson.Gson
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
+import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -22,6 +23,9 @@ public class TheRouterInjects {
     public static Map<String, String> serviceProvideMap = new HashMap<>()
     public static Set<String> autowiredSet = new HashSet<>()
     public static Set<String> routeSet = new HashSet<>()
+
+    public static Set<String> routeMapStringSet = new HashSet<>();
+    public static Map<String, String> flowTaskMap = new HashMap<>();
 
     public static final Gson gson = new Gson()
 
@@ -220,5 +224,33 @@ public class TheRouterInjects {
         optJarFile.delete()
         long time = System.currentTimeMillis() - start
         println("---------TheRouter inject TheRouterServiceProvideInjecter.class, spend：${time}ms----------------------")
+    }
+
+    static void writeBuildCacheFile(Project project) {
+        StringBuilder newContent = new StringBuilder()
+        ArrayList<String> list1 = new ArrayList<>(serviceProvideMap.keySet())
+        ArrayList<String> list2 = new ArrayList<>(autowiredSet)
+        ArrayList<String> list3 = new ArrayList<>(routeSet)
+        Collections.sort(list1)
+        Collections.sort(list2)
+        Collections.sort(list3)
+        for (String item : list1) {
+            newContent.append(item).append("\n")
+        }
+        for (String item : list2) {
+            newContent.append(item).append("\n")
+        }
+        for (String item : list3) {
+            newContent.append(item).append("\n")
+        }
+
+        File buildCacheFile = new File(project.getProjectDir(), "src/main/assets/therouter/build.cache");
+        if (!buildCacheFile.exists()) {
+            buildCacheFile.createNewFile();
+        }
+        if (newContent.toString() != buildCacheFile.getText("UTF-8")) {
+            buildCacheFile.setText(newContent.toString(), "UTF-8")
+            throw new RuntimeException("\n\n\nTheRouter 构建产物有新增，请重新编译一次。\n\n\n")
+        }
     }
 }

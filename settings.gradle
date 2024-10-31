@@ -6,9 +6,9 @@ if (Boolean.valueOf(agp8)) {
     pluginManagement {
         repositories {
             maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
-            gradlePluginPortal()
-            google()
-            mavenCentral()
+//            gradlePluginPortal()
+//            google()
+//            mavenCentral()
             maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
             maven { url 'https://plugins.gradle.org/m2/' }
         }
@@ -17,8 +17,8 @@ if (Boolean.valueOf(agp8)) {
         repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
         repositories {
             maven { url 'https://nas.therouter.cn:8443/repository/maven-public/' }
-            google()
-            mavenCentral()
+//            google()
+//            mavenCentral()
             maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
         }
     }

@@ -6,6 +6,10 @@ plugins {
     id "com.google.devtools.ksp"
 }
 
+TheRouter {
+    debug = true
+}
+
 android {
     namespace = "com.therouter.app"
     compileSdk 33
