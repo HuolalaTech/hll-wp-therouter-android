@@ -394,7 +394,7 @@ public abstract class TheRouterTask extends DefaultTask {
             }
             if (!dataStringBuilder.toString().equals(buildDataText)) {
                 ResourceGroovyMethods.write(buildDataFile, dataStringBuilder.toString(), StandardCharsets.UTF_8.displayName());
-                throw new RuntimeException("\n\n\nTheRouter 有模块增减，请再构建一次。\n\n\n");
+                throw new RuntimeException("\nTheRouter 有模块增减，请再构建一次。\n可访问链接查看详细原因：\nhttps://kymjs.com/code/2024/10/31/01/\n\n\n");
             }
         }
     }
