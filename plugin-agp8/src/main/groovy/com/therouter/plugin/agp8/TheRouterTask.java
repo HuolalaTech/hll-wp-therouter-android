@@ -406,13 +406,15 @@ public abstract class TheRouterTask extends DefaultTask {
     }
 
     private void tag(String className) {
-        // a/ServiceProvider__TheRouter__737372.class
-        className = className.replaceAll(TheRouterInjects.DOT_CLASS, "");
-        if (isAutowired(className) || isRouterMap(className) || isServiceProvider(className)) {
-            try {
-                ResourceGroovyMethods.append(buildCacheFile, className + "\n", StandardCharsets.UTF_8.displayName());
-            } catch (IOException e) {
-                e.printStackTrace();
+        if (!className.contains("$")) {
+            // a/ServiceProvider__TheRouter__737372.class
+            className = className.replaceAll(TheRouterInjects.DOT_CLASS, "");
+            if (isAutowired(className) || isRouterMap(className) || isServiceProvider(className)) {
+                try {
+                    ResourceGroovyMethods.append(buildCacheFile, className + "\n", StandardCharsets.UTF_8.displayName());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
