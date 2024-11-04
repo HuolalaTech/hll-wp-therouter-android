@@ -1,7 +1,7 @@
 rootProject.name = "TheRouter"
 
 apply from: "${rootDir}/therouter.gradle"
-if (Boolean.valueOf(agp8)) {
+if (Boolean.valueOf(gradle8)) {
     rootProject.buildFileName = "agp8-build.gradle"
     pluginManagement {
         repositories {
@@ -35,7 +35,7 @@ getLocalProperties().entrySet().each { entry ->
                 include ":$moduleName"
                 def moduleProject = project(":$moduleName")
                 moduleProject.projectDir = file
-                if (Boolean.valueOf(agp8)) {
+                if (Boolean.valueOf(gradle8)) {
                     moduleProject.buildFileName = "agp8-build.gradle"
                 }
             }

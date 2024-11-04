@@ -107,7 +107,7 @@ ext {
             "distributionPath=wrapper/dists\n" +
             "zipStoreBase=GRADLE_USER_HOME\n" +
             "zipStorePath=wrapper/dists\n"
-    if (Boolean.valueOf(agp8)) {
+    if (Boolean.valueOf(gradle8)) {
         text += "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.7-all.zip\n"
     } else {
         text += "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.1-all.zip\n"
