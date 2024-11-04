@@ -2,7 +2,13 @@ package com.therouter.plugin.utils;
 
 import com.therouter.plugin.Node;
 
+import org.codehaus.groovy.runtime.ResourceGroovyMethods;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -74,5 +80,41 @@ public class TheRouterPluginUtils {
         }
         node.setChildren(childrenNode);
         return node;
+    }
+
+    public static String getTextFromFile(File buildCacheFile) {
+        StringBuilder dataStringBuilder = new StringBuilder();
+        if (buildCacheFile.exists()) {
+            try {
+                String[] array = ResourceGroovyMethods.getText(buildCacheFile, StandardCharsets.UTF_8.displayName()).split("\n");
+                HashSet<String> set = new HashSet<>();
+                for (String item : array) {
+                    if (!item.trim().isBlank()) {
+                        set.add(item.trim());
+                    }
+                }
+                ArrayList<String> list = new ArrayList<>(set);
+                Collections.sort(list);
+                for (String item : list) {
+                    dataStringBuilder.append(item).append("\n");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + buildCacheFile.getName() + " file", e);
+            }
+        }
+        return dataStringBuilder.toString();
+    }
+
+    public static void addTextToFile(File buildCacheFile, String line, boolean debug) {
+        if (!line.contains("$")) {
+            if (debug) {
+                System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
+            }
+            try {
+                ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.therouter.plugin.AddCodeVisitor;
 import com.therouter.plugin.BuildConfig;
 import com.therouter.plugin.TheRouterInjects;
+import com.therouter.plugin.utils.TheRouterPluginUtils;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.objectweb.asm.ClassVisitor;
@@ -61,15 +62,9 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
         if (className.contains(TheRouterInjects.PREFIX_ROUTER_MAP)
                 || className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)
                 || className.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
-            if (getParameters().get().getDebugValue().get()) {
-                System.out.println("TheRouter::build.cache -> " + className);
-            }
             File buildCacheFile = getParameters().get().getBuildCacheFile().get();
-            try {
-                ResourceGroovyMethods.append(buildCacheFile, className + "\n", StandardCharsets.UTF_8.displayName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            boolean isDebug = getParameters().get().getDebugValue().get();
+            TheRouterPluginUtils.addTextToFile(buildCacheFile, className, isDebug);
             // 需要读取路由表或FlowTask
             return className.contains(TheRouterInjects.PREFIX_ROUTER_MAP)
                     || className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER);

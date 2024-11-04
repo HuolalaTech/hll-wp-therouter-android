@@ -375,33 +375,15 @@ public abstract class TheRouterTask extends DefaultTask {
 
     private void checkBuildCache() throws IOException {
         if (buildCacheFile.exists()) {
-            StringBuilder dataStringBuilder = new StringBuilder();
-            try {
-                String[] array = ResourceGroovyMethods.getText(buildCacheFile, StandardCharsets.UTF_8.displayName()).split("\n");
-                HashSet<String> set = new HashSet<>();
-                for (String item : array) {
-                    if (!item.trim().isBlank()) {
-                        set.add(item.trim());
-                    }
+            String text = TheRouterPluginUtils.getTextFromFile(buildCacheFile);
+            if (!text.equals(buildDataText)) {
+                ResourceGroovyMethods.write(buildDataFile, text, StandardCharsets.UTF_8.displayName());
+                if (theRouterExtension.lang.equals("en")) {
+                    throw new RuntimeException("\nTheRouter has module additions or removals; please rebuild it again. \nYou can visit the link for more details：\nhttps://kymjs.com/code/2024/10/31/01/\n\n\n");
+                } else {
+                    throw new RuntimeException("\nTheRouter 有模块增减，请再构建一次。\n可访问链接查看详细原因：\nhttps://kymjs.com/code/2024/10/31/01/\n\n\n");
                 }
-                ArrayList<String> list = new ArrayList<>(set);
-                Collections.sort(list);
-                for (String item : list) {
-                    dataStringBuilder.append(item).append("\n");
-                }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read build.cache file", e);
             }
-            if (!dataStringBuilder.toString().equals(buildDataText)) {
-                ResourceGroovyMethods.write(buildDataFile, dataStringBuilder.toString(), StandardCharsets.UTF_8.displayName());
-                throw new RuntimeException("\nTheRouter 有模块增减，请再构建一次。\n可访问链接查看详细原因：\nhttps://kymjs.com/code/2024/10/31/01/\n\n\n");
-            }
-        }
-    }
-
-    private void debugLog(String log) {
-        if (theRouterExtension.debug) {
-            System.out.println(log);
         }
     }
 
@@ -410,11 +392,7 @@ public abstract class TheRouterTask extends DefaultTask {
             // a/ServiceProvider__TheRouter__737372.class
             className = className.replaceAll(TheRouterInjects.DOT_CLASS, "");
             if (isAutowired(className) || isRouterMap(className) || isServiceProvider(className)) {
-                try {
-                    ResourceGroovyMethods.append(buildCacheFile, className + "\n", StandardCharsets.UTF_8.displayName());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                TheRouterPluginUtils.addTextToFile(buildCacheFile, className, theRouterExtension.debug);
             }
         }
     }

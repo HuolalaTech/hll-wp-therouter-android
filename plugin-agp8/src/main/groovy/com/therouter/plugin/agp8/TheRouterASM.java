@@ -7,9 +7,9 @@ import com.google.gson.reflect.TypeToken;
 import com.therouter.plugin.AddCodeVisitor;
 import com.therouter.plugin.BuildConfig;
 import com.therouter.plugin.TheRouterInjects;
+import com.therouter.plugin.utils.TheRouterPluginUtils;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.ClassVisitor;
 
 import java.io.File;
@@ -23,9 +23,8 @@ import java.util.Set;
 public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParameters> {
     public static final String INJECTER_FULL_CLASSNAME = "a.TheRouterServiceProvideInjecter";
 
-    @NotNull
     @Override
-    public ClassVisitor createClassVisitor(@NotNull ClassContext classContext, @NotNull ClassVisitor classVisitor) {
+    public ClassVisitor createClassVisitor(ClassContext classContext, ClassVisitor classVisitor) {
         String currentClassName = classContext.getCurrentClassData().getClassName();
         if (INJECTER_FULL_CLASSNAME.equals(currentClassName)) {
             String buildDataText = getParameters().get().getBuildDataText().get();
@@ -55,7 +54,7 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
     }
 
     @Override
-    public boolean isInstrumentable(@NotNull ClassData classData) {
+    public boolean isInstrumentable(ClassData classData) {
         if (classData.getClassName().contains("$")) {
             return false;
         }
@@ -63,15 +62,9 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
         if (className.contains(TheRouterInjects.PREFIX_ROUTER_MAP)
                 || className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)
                 || className.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
-            if (getParameters().get().getDebugValue().get()) {
-                System.out.println("TheRouter::build.cache -> " + className);
-            }
             File buildCacheFile = getParameters().get().getBuildCacheFile().get();
-            try {
-                ResourceGroovyMethods.append(buildCacheFile, className + "\n", StandardCharsets.UTF_8.displayName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            boolean isDebug = getParameters().get().getDebugValue().get();
+            TheRouterPluginUtils.addTextToFile(buildCacheFile, className, isDebug);
             // 需要读取路由表或FlowTask
             return className.contains(TheRouterInjects.PREFIX_ROUTER_MAP)
                     || className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER);

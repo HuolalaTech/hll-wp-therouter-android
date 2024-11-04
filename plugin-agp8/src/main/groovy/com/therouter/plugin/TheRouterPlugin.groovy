@@ -1,6 +1,7 @@
 package com.therouter.plugin;
 
 import com.android.build.api.variant.*
+import com.therouter.plugin.utils.TheRouterPluginUtils
 import com.android.build.api.artifact.ScopedArtifact
 import com.therouter.plugin.agp8.TextParameters
 import com.therouter.plugin.agp8.TheRouterTask
@@ -11,7 +12,6 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 
-import java.nio.charset.StandardCharsets
 import com.android.build.api.instrumentation.InstrumentationScope
 import com.therouter.plugin.agp8.TheRouterASM
 
@@ -31,26 +31,7 @@ public class TheRouterPlugin implements Plugin<Project> {
                 cacheFile.createNewFile()
             }
             final File dataFile = new File(project.getProjectDir(), "src/main/assets/therouter/build.data");
-            StringBuilder dataStringBuilder = new StringBuilder();
-            if (dataFile.exists()) {
-                try {
-                    String[] array = dataFile.getText(StandardCharsets.UTF_8.displayName()).split("\n")
-                    ArrayList<String> list = new ArrayList<>()
-                    for (String item : array) {
-                        list.add(item.trim())
-                    }
-                    Collections.sort(list)
-                    for (String item : list) {
-                        if (!item.isBlank()) {
-                            dataStringBuilder.append(item).append("\n")
-                        }
-                    }
-                } catch (IOException e) {
-                    throw new RuntimeException("Failed to read build.data file", e);
-                }
-            }
-
-            final buildDataText = dataStringBuilder.toString();
+            final String buildDataText = TheRouterPluginUtils.getTextFromFile(dataFile);
             cacheFile.write("")
 
             def android = project.getExtensions().getByType(AndroidComponentsExtension.class);
