@@ -378,6 +378,17 @@ public abstract class TheRouterTask extends DefaultTask {
             String text = TheRouterPluginUtils.getTextFromFile(buildCacheFile);
             if (!text.equals(buildDataText)) {
                 ResourceGroovyMethods.write(buildDataFile, text, StandardCharsets.UTF_8.displayName());
+                if (theRouterExtension.debug) {
+                    final File debugFile = new File(buildCacheFile.getParentFile(), "previousBuildData.debug");
+                    if (debugFile.exists()) {
+                        debugFile.delete();
+                    }
+                    try {
+                        debugFile.createNewFile();
+                    } catch (Exception e) {
+                    }
+                    ResourceGroovyMethods.write(debugFile, buildDataText, StandardCharsets.UTF_8.displayName());
+                }
                 if (theRouterExtension.lang.equals("en")) {
                     throw new RuntimeException("\nTheRouter has module additions or removals; please rebuild it again. \nYou can visit the link for more details：\nhttps://kymjs.com/code/2024/10/31/01/\n\n\n");
                 } else {
