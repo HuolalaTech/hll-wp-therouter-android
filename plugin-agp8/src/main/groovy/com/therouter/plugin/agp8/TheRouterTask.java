@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.therouter.plugin.BuildConfig;
-import com.therouter.plugin.JarInfo;
 import com.therouter.plugin.LogUI;
 import com.therouter.plugin.RouteItem;
 import com.therouter.plugin.TheRouterExtension;
@@ -12,21 +11,15 @@ import com.therouter.plugin.TheRouterInjects;
 import com.therouter.plugin.TheRouterPlugin;
 import com.therouter.plugin.utils.TheRouterPluginUtils;
 
-import org.apache.commons.io.FileUtils;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.ClassNode;
-import org.objectweb.asm.tree.FieldNode;
 
 import java.io.*;
 import java.net.URI;
@@ -39,7 +32,6 @@ import java.util.jar.JarOutputStream;
 
 public abstract class TheRouterTask extends DefaultTask {
 
-    private static final Set<String> allClass = new HashSet<>();
     private TheRouterExtension theRouterExtension;
 
     private String buildDataText;
@@ -112,9 +104,8 @@ public abstract class TheRouterTask extends DefaultTask {
         for (Directory directory : getAllDirectories().get()) {
             directory.getAsFileTree().forEach(file -> {
                 String relativePath = directory.getAsFile().toURI().relativize(file.toURI()).getPath().replace(File.separatorChar, '/');
-                try {
+                try (FileInputStream inputStream = new FileInputStream(file)) {
                     jarOutput.putNextEntry(new JarEntry(relativePath));
-                    FileInputStream inputStream = new FileInputStream(file);
                     // 将 InputStream 的内容写入 JarOutputStream
                     byte[] buffer = new byte[1024];
                     int bytesRead;
@@ -123,38 +114,6 @@ public abstract class TheRouterTask extends DefaultTask {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                }
-                tag(relativePath);
-                if (isRouterMap(relativePath)) {
-                    try {
-                        ClassReader reader = new ClassReader(new FileInputStream(file.getAbsolutePath()));
-                        ClassNode cn = new ClassNode();
-                        reader.accept(cn, 0);
-                        for (FieldNode fieldNode : cn.fields) {
-                            if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                System.out.println("---------TheRouter in source get route map from: " + relativePath + "-------------------------------");
-                                TheRouterInjects.routeMapStringSet.add((String) fieldNode.value);
-                            }
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                } else if (isServiceProvider(relativePath)) {
-                    try {
-                        ClassReader reader = new ClassReader(new FileInputStream(file.getAbsolutePath()));
-                        ClassNode cn = new ClassNode();
-                        reader.accept(cn, 0);
-                        for (FieldNode fieldNode : cn.fields) {
-                            if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                System.out.println("---------TheRouter in source get flow task json from: " + relativePath + "-------------------------------");
-                                Map<String, String> map = TheRouterInjects.gson.fromJson((String) fieldNode.value, new TypeToken<Map<String, String>>() {
-                                }.getType());
-                                TheRouterInjects.flowTaskMap.putAll(map);
-                            }
-                        }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
                 try {
                     jarOutput.closeEntry();
@@ -192,7 +151,7 @@ public abstract class TheRouterTask extends DefaultTask {
                 // 读取 JSON 文件内容
                 String assetString = null;
                 try {
-                    assetString = FileUtils.readFileToString(assetRouteMap, StandardCharsets.UTF_8);
+                    assetString = ResourceGroovyMethods.getText(assetRouteMap, StandardCharsets.UTF_8.displayName());
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -276,7 +235,7 @@ public abstract class TheRouterTask extends DefaultTask {
                     boolean classNotFound = true;
 
                     // 遍历 mergeClass 以检查 routeItem.className
-                    for (String item : allClass) {
+                    for (String item : TheRouterInjects.allClass) {
                         // routeItem.className 格式为 com.therouter.demo.shell.TestActivity
                         // item 格式为 com/therouter/demo/shell/TestActivity.class
                         if (item.contains(routeItem.className.replace(".", "/"))) {
@@ -297,7 +256,7 @@ public abstract class TheRouterTask extends DefaultTask {
         List<RouteItem> pageList = new ArrayList<>(pageSet);
         Collections.sort(pageList);
         String json = gson.toJson(pageList);
-        FileUtils.write(assetRouteMap, json, false);
+        ResourceGroovyMethods.write(assetRouteMap, json, StandardCharsets.UTF_8.displayName());
         System.out.println("---------TheRouter create new route map--------------");
 
         Map<String, Set<String>> flowTaskDependMap = new HashMap<>();
@@ -350,7 +309,7 @@ public abstract class TheRouterTask extends DefaultTask {
             TheRouterPluginUtils.fillTodoList(flowTaskDependMap, key);
         }
 
-        if (Boolean.valueOf(theRouterExtension.showFlowDepend)) {
+        if (theRouterExtension.showFlowDepend) {
             // 再次遍历 flowTaskDependMap 的 keySet 并调用 fillNode
             for (String key : flowTaskDependMap.keySet()) {
                 TheRouterPluginUtils.fillNode(TheRouterPluginUtils.createNode(flowTaskDependMap, key), null);
@@ -396,32 +355,6 @@ public abstract class TheRouterTask extends DefaultTask {
                 }
             }
         }
-    }
-
-    private void tag(String className) {
-        if (!className.contains("$")) {
-            // a/ServiceProvider__TheRouter__737372.class
-            className = className.replaceAll(TheRouterInjects.DOT_CLASS, "");
-            if (isAutowired(className) || isRouterMap(className) || isServiceProvider(className)) {
-                TheRouterPluginUtils.addTextToFile(buildCacheFile, className, theRouterExtension.debug);
-            }
-        }
-    }
-
-    static boolean isAutowired(String className) {
-        return className.endsWith(TheRouterInjects.SUFFIX_AUTOWIRED);
-    }
-
-    static boolean isRouterMap(String className) {
-        return (className.startsWith(TheRouterInjects.PREFIX_ROUTER_MAP)
-                || className.startsWith("a/" + TheRouterInjects.PREFIX_ROUTER_MAP))
-                && !className.contains("\\$");
-    }
-
-    static boolean isServiceProvider(String className) {
-        return (className.startsWith(TheRouterInjects.PREFIX_SERVICE_PROVIDER)
-                || className.startsWith("a/" + TheRouterInjects.PREFIX_SERVICE_PROVIDER))
-                && !className.contains("\\$");
     }
 
     // 一个辅助方法，用来从 URI 中提取查询参数

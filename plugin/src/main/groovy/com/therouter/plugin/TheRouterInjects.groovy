@@ -23,8 +23,9 @@ public class TheRouterInjects {
     public static Set<String> autowiredSet = new HashSet<>()
     public static Set<String> routeSet = new HashSet<>()
 
-    public static Set<String> routeMapStringSet = new HashSet<>();
-    public static Map<String, String> flowTaskMap = new HashMap<>();
+    public static final Set<String> routeMapStringSet = new HashSet<>();
+    public static final Map<String, String> flowTaskMap = new HashMap<>();
+    public static final Set<String> allClass = new HashSet<>();
 
     public static final Gson gson = new Gson()
 

@@ -55,10 +55,11 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
 
     @Override
     public boolean isInstrumentable(ClassData classData) {
-        if (classData.getClassName().contains("$")) {
+        String className = classData.getClassName().replaceAll("\\.", "/");
+        TheRouterInjects.allClass.add(className);
+        if (className.contains("$")) {
             return false;
         }
-        String className = classData.getClassName().replaceAll("\\.", "/");
         if (className.contains(TheRouterInjects.PREFIX_ROUTER_MAP)
                 || className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)
                 || className.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
