@@ -27,7 +27,7 @@ public class TheRouterPlugin implements Plugin<Project> {
         boolean isLibrary = project.getPlugins().hasPlugin("com.android.library")
         if (!isLibrary) {
             // 默认开启
-            boolean useAGP8 = !"false".equalsIgnoreCase(getGradleProperty(project, "agp8"))
+            boolean useAGP8 = Boolean.valueOf(getGradleProperty(project, "agp8"))
             String gradleVersion = project.gradle.gradleVersion
             int v = gradleVersion.tokenize('.')[0].toInteger()
             if (v < 7 || !useAGP8) {
