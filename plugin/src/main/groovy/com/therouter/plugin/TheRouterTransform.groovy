@@ -6,8 +6,8 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.therouter.plugin.utils.TheRouterPluginUtils
-import org.apache.commons.io.FileUtils
 import org.gradle.api.Project
+import com.therouter.plugin.utils.FileUtils;
 
 /**
  * Created by ZhangTao on 18/2/24.
@@ -163,7 +163,7 @@ public class TheRouterTransform extends Transform {
                 assetRouteMap.delete()
                 assetRouteMap.createNewFile()
             } else {
-                String assetString = FileUtils.readFileToString(assetRouteMap, "UTF-8")
+                String assetString = assetRouteMap.getText("UTF-8")
                 println("---------TheRouter get route map from: /assets/therouter/routeMap.json-------")
                 try {
                     List<RouteItem> assetsList = (List<RouteItem>) gson.fromJson(assetString, new TypeToken<List<RouteItem>>() {
@@ -234,7 +234,7 @@ public class TheRouterTransform extends Transform {
         List<RouteItem> pageList = new ArrayList<>(pageSet)
         Collections.sort(pageList)
         String json = gson.toJson(pageList)
-        FileUtils.write(assetRouteMap, json, false)
+        assetRouteMap.write(json, "UTF-8")
 
         println("---------TheRouter create new route map--------------------")
 

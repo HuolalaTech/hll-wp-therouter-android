@@ -1,8 +1,6 @@
 package com.therouter.plugin
 
 import com.google.gson.Gson
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassWriter
 import org.objectweb.asm.tree.ClassNode
@@ -41,14 +39,14 @@ public class TheRouterInjects {
     public static final String DOT_CLASS = ".class"
 
     public static JarInfo fromCache(File cacheFile) {
-        String json = FileUtils.readFileToString(cacheFile, "UTF-8")
+        String json = cacheFile.getText("UTF-8")
         JarInfo jarInfo = gson.fromJson(json, JarInfo.class)
         return jarInfo;
     }
 
     public static void toCache(File cacheFile, JarInfo jarInfo) {
         String json = gson.toJson(jarInfo);
-        FileUtils.write(cacheFile, json, "UTF-8")
+        cacheFile.write(json, "UTF-8")
     }
 
     /**
@@ -212,7 +210,7 @@ public class TheRouterInjects {
                 cr.accept(cv, ClassReader.SKIP_DEBUG)
                 bytes = cw.toByteArray()
             } else {
-                bytes = IOUtils.toByteArray(inputStream)
+                bytes = inputStream.getBytes()
             }
             jarOutputStream.write(bytes)
             jarOutputStream.closeEntry()
