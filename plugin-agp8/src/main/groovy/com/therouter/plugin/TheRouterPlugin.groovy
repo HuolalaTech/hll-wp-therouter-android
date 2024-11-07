@@ -30,7 +30,7 @@ public class TheRouterPlugin implements Plugin<Project> {
                 cacheFile.getParentFile().mkdirs()
                 cacheFile.createNewFile()
             }
-            final File dataFile = new File(project.getProjectDir(), "src/main/assets/therouter/build.data");
+            final File dataFile = new File(project.getProjectDir(), "therouter.data");
             final String buildDataText = TheRouterPluginUtils.getTextFromFile(dataFile);
             cacheFile.write("")
 
