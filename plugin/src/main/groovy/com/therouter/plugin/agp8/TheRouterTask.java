@@ -120,43 +120,44 @@ public abstract class TheRouterTask extends DefaultTask {
                     if (isFirst && name.contains("TheRouterServiceProvideInjecter")) {
                         theRouterJar = jar;
                         theRouterServiceProvideInjecter = jarEntry;
-                    } else if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
-                        if (!asmTargetText.contains(name)) {
-                            TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
-                        }
-                        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
-                            ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                            ClassNode cn = new ClassNode();
-                            reader.accept(cn, 0);
-                            List<FieldNode> fieldList = cn.fields;
-                            for (FieldNode fieldNode : fieldList) {
-                                if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                    TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, fieldNode.value.toString());
+                    } else {
+
+                        if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
+                            if (!asmTargetText.contains(name)) {
+                                TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
+                            }
+                            if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+                                ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                                ClassNode cn = new ClassNode();
+                                reader.accept(cn, 0);
+                                List<FieldNode> fieldList = cn.fields;
+                                for (FieldNode fieldNode : fieldList) {
+                                    if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
+                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, fieldNode.value.toString());
+                                    }
                                 }
                             }
-                        }
-                    } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
-                        if (!asmTargetText.contains(name)) {
-                            TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
-                        }
-                        if (!theRouterExtension.checkFlowDepend.isEmpty()) {
-                            ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                            ClassNode cn = new ClassNode();
-                            reader.accept(cn, 0);
-                            List<FieldNode> fieldList = cn.fields;
-                            for (FieldNode fieldNode : fieldList) {
-                                if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                    TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, fieldNode.value.toString());
+                        } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
+                            if (!asmTargetText.contains(name)) {
+                                TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
+                            }
+                            if (!theRouterExtension.checkFlowDepend.isEmpty()) {
+                                ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                                ClassNode cn = new ClassNode();
+                                reader.accept(cn, 0);
+                                List<FieldNode> fieldList = cn.fields;
+                                for (FieldNode fieldNode : fieldList) {
+                                    if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
+                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, fieldNode.value.toString());
+                                    }
                                 }
                             }
-                        }
-                    } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
-                        if (!asmTargetText.contains(name)) {
-                            TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
+                        } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
+                            if (!asmTargetText.contains(name)) {
+                                TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
+                            }
                         }
                     }
-                }
-                if (jarEntry != theRouterServiceProvideInjecter) {
                     try {
                         jarOutput.putNextEntry(new JarEntry(name));
                         InputStream inputStream = jarFile.getInputStream(jarEntry);
@@ -241,10 +242,6 @@ public abstract class TheRouterTask extends DefaultTask {
         }
 
         if (isFirst && theRouterJar != null && theRouterServiceProvideInjecter != null) {
-            JarFile jarFile = new JarFile(theRouterJar);
-            jarOutput.putNextEntry(theRouterServiceProvideInjecter);
-            ClassReader cr = new ClassReader(jarFile.getInputStream(theRouterServiceProvideInjecter));
-            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             Map<String, String> serviceProvideMap = new HashMap<>();
             Set<String> autowiredSet = new HashSet<>();
             Set<String> routeSet = new HashSet<>();
@@ -257,11 +254,17 @@ public abstract class TheRouterTask extends DefaultTask {
                     autowiredSet.add(name.trim());
                 }
             }
+
+            JarFile jarFile = new JarFile(theRouterJar);
+            jarOutput.putNextEntry(new JarEntry(theRouterServiceProvideInjecter.getName()));
+            ClassReader cr = new ClassReader(jarFile.getInputStream(theRouterServiceProvideInjecter));
+            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             AddCodeVisitor cv = new AddCodeVisitor(cw, serviceProvideMap, autowiredSet, routeSet, false);
             cr.accept(cv, ClassReader.SKIP_DEBUG);
             byte[] bytes = cw.toByteArray();
             jarOutput.write(bytes);
             jarOutput.closeEntry();
+            jarFile.close();
         }
 
         jarOutput.close();
