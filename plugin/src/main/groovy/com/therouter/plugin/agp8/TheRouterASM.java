@@ -51,7 +51,8 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
         String className = classData.getClassName().replaceAll("\\.", "/");
         String allClassText = getParameters().get().getAllClassText().get();
         boolean isDebug = getParameters().get().getDebugValue().get();
-        if (!allClassText.contains(className) && !getParameters().get().getCheckRouteMapValue().get().isEmpty()) {
+        String checkRouteMap = getParameters().get().getCheckRouteMapValue().get();
+        if (!allClassText.contains(className) && TheRouterPluginUtils.needTagClass(checkRouteMap)) {
             File allClassFile = getParameters().get().getAllClassFile().get();
             TheRouterPluginUtils.addTextToFile(allClassFile, className, isDebug);
         }
@@ -64,9 +65,8 @@ public abstract class TheRouterASM implements AsmClassVisitorFactory<TextParamet
                 File asmTargetFile = getParameters().get().getAsmTargetFile().get();
                 TheRouterPluginUtils.addTextToFile(asmTargetFile, className, isDebug);
             }
-            String checkRouteMap = getParameters().get().getCheckRouteMapValue().get();
             // 需要读取路由表字段
-            return !checkRouteMap.isEmpty();
+            return TheRouterPluginUtils.needTagClass(checkRouteMap);
         } else if (className.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
             if (!asmTargetText.contains(className)) {
                 File asmTargetFile = getParameters().get().getAsmTargetFile().get();

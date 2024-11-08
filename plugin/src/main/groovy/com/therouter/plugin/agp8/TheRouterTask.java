@@ -97,7 +97,7 @@ public abstract class TheRouterTask extends DefaultTask {
 
     private void theRouterTransform() throws ClassNotFoundException, IOException {
         String tempText = "";
-        if (!theRouterExtension.checkRouteMap.isEmpty()) {
+        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
             tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
         }
         final String allClassText = tempText;
@@ -113,7 +113,7 @@ public abstract class TheRouterTask extends DefaultTask {
             for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                 JarEntry jarEntry = e.nextElement();
                 String name = jarEntry.getName();
-                if (!allClassText.contains(name) && !theRouterExtension.checkRouteMap.isEmpty()) {
+                if (!allClassText.contains(name) && TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
                 if (!name.contains("$")) {
@@ -124,7 +124,7 @@ public abstract class TheRouterTask extends DefaultTask {
                         if (!asmTargetText.contains(name)) {
                             TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
                         }
-                        if (!theRouterExtension.checkRouteMap.isEmpty()) {
+                        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                             ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
                             ClassNode cn = new ClassNode();
                             reader.accept(cn, 0);
@@ -176,7 +176,7 @@ public abstract class TheRouterTask extends DefaultTask {
         for (Directory directory : getAllDirectories().get()) {
             directory.getAsFileTree().forEach(file -> {
                 String name = directory.getAsFile().toURI().relativize(file.toURI()).getPath().replace(File.separatorChar, '/');
-                if (!allClassText.contains(name) && !theRouterExtension.checkRouteMap.isEmpty()) {
+                if (!allClassText.contains(name) && TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
                 if (!name.contains("$")) {
@@ -184,7 +184,7 @@ public abstract class TheRouterTask extends DefaultTask {
                         if (!asmTargetText.contains(name)) {
                             TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
                         }
-                        if (!theRouterExtension.checkRouteMap.isEmpty()) {
+                        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                             try {
                                 ClassReader reader = new ClassReader(new FileInputStream(file));
                                 ClassNode cn = new ClassNode();
@@ -374,7 +374,7 @@ public abstract class TheRouterTask extends DefaultTask {
                 }
 
                 // 检查路由表是否为空
-                if (!theRouterExtension.checkRouteMap.isEmpty()) {
+                if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                     boolean classNotFound = true;
 
                     // 遍历 mergeClass 以检查 routeItem.className

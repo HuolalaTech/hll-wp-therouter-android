@@ -1,23 +1,22 @@
 package com.therouter.plugin.agp8;
 
+import com.android.build.api.variant.*;
 import com.android.build.api.artifact.ScopedArtifact;
-import com.android.build.api.instrumentation.InstrumentationScope;
-import com.android.build.api.variant.AndroidComponentsExtension;
-import com.android.build.api.variant.ScopedArtifacts;
-import com.android.build.api.variant.Variant;
 import com.therouter.plugin.TheRouterExtension;
 import com.therouter.plugin.utils.TheRouterPluginUtils;
+
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
 
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.tasks.TaskProvider;
 
+import com.android.build.api.instrumentation.InstrumentationScope;
+
 import java.io.File;
 import java.io.IOException;
-
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
 
 public abstract class AGP8Plugin implements Plugin<Project> {
     public void applyPlugin(Project project, TheRouterExtension theRouterExtension) {
@@ -45,7 +44,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
         android.onVariants(android.selector().all(), new Action<Variant>() {
             @Override
             public void execute(final Variant variant) {
-                if (!theRouterExtension.checkRouteMap.isEmpty()) {
+                if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                     if (!allClassFile.exists()) {
                         allClassFile.getParentFile().mkdirs();
                         try {
@@ -61,7 +60,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     scope = ScopedArtifacts.Scope.PROJECT;
 
                     String tempText = "";
-                    if (!theRouterExtension.checkRouteMap.isEmpty()) {
+                    if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
                         tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
                     }
                     final String allClassText = tempText;

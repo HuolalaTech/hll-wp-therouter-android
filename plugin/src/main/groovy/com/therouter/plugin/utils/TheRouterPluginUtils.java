@@ -2,6 +2,7 @@ package com.therouter.plugin.utils;
 
 import com.therouter.plugin.Node;
 import com.therouter.plugin.TheRouterInjects;
+import com.therouter.plugin.TheRouterPlugin;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
@@ -146,5 +147,9 @@ public class TheRouterPluginUtils {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean needTagClass(String mode) {
+        return !mode.isEmpty() && !TheRouterPlugin.DELETE.equals(mode);
     }
 }
