@@ -1,6 +1,7 @@
 package com.therouter.plugin.utils;
 
 import com.therouter.plugin.Node;
+import com.therouter.plugin.TheRouterInjects;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
@@ -82,6 +83,23 @@ public class TheRouterPluginUtils {
         return node;
     }
 
+    public static Set<String> getSetFromFile(File buildCacheFile) {
+        HashSet<String> set = new HashSet<>();
+        if (buildCacheFile.exists()) {
+            try {
+                String[] array = ResourceGroovyMethods.getText(buildCacheFile, StandardCharsets.UTF_8.displayName()).split("\n");
+                for (String item : array) {
+                    if (!item.trim().isBlank()) {
+                        set.add(item.trim());
+                    }
+                }
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + buildCacheFile.getName() + " file", e);
+            }
+        }
+        return set;
+    }
+
     public static String getTextFromFile(File buildCacheFile) {
         StringBuilder dataStringBuilder = new StringBuilder();
         if (buildCacheFile.exists()) {
@@ -105,8 +123,20 @@ public class TheRouterPluginUtils {
         return dataStringBuilder.toString();
     }
 
+    public static void addTextToFileIgnoreCheck(File buildCacheFile, String line) {
+        try {
+            ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void addTextToFile(File buildCacheFile, String line, boolean debug) {
         if (!line.contains("$")) {
+            // 从ASMFactory来的是不带.class的，从toTransform来的是带的，还要考虑json的情况，route.data/spi.data都是json
+            if (!line.endsWith(TheRouterInjects.DOT_CLASS) && !line.contains("\"") && !line.contains("[") && !line.contains("{")) {
+                line = line + TheRouterInjects.DOT_CLASS;
+            }
             if (debug) {
                 System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
             }
