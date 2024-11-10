@@ -17,6 +17,11 @@ import com.android.build.api.instrumentation.InstrumentationScope;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public abstract class AGP8Plugin implements Plugin<Project> {
     public void applyPlugin(Project project, TheRouterExtension theRouterExtension) {
@@ -26,15 +31,48 @@ public abstract class AGP8Plugin implements Plugin<Project> {
         final File asmTargetFile = new File(project.getLayout().getBuildDirectory().get().getAsFile(), "therouter/asm.data");
         // all class
         final File allClassFile = new File(project.getLayout().getBuildDirectory().get().getAsFile(), "therouter/all.data");
+        final File tagFile = new File(project.getLayout().getBuildDirectory().get().getAsFile(), "therouter/tag.data");
 
         final boolean isFirst = !asmTargetFile.exists();
         if (isFirst) {
-            if (asmTargetFile.exists()) {
-                asmTargetFile.delete();
-            }
             asmTargetFile.getParentFile().mkdirs();
             try {
+                tagFile.createNewFile();
                 asmTargetFile.createNewFile();
+            } catch (IOException e) {
+            }
+        } else {
+            if (tagFile.exists()) {
+                tagFile.delete();
+                try {
+                    File intermediatesFolder = new File(project.getLayout().getBuildDirectory().get().getAsFile(), "intermediates");
+                    deleteDirectory(intermediatesFolder.toPath());
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        if (!allClassFile.exists()) {
+            allClassFile.getParentFile().mkdirs();
+            try {
+                allClassFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (!routeFile.exists()) {
+            routeFile.getParentFile().mkdirs();
+            try {
+                routeFile.createNewFile();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (!flowTaskFile.exists()) {
+            flowTaskFile.getParentFile().mkdirs();
+            try {
+                flowTaskFile.createNewFile();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -44,23 +82,12 @@ public abstract class AGP8Plugin implements Plugin<Project> {
         android.onVariants(android.selector().all(), new Action<Variant>() {
             @Override
             public void execute(final Variant variant) {
-                if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
-                    if (!allClassFile.exists()) {
-                        allClassFile.getParentFile().mkdirs();
-                        try {
-                            allClassFile.createNewFile();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-
                 ScopedArtifacts.Scope scope = ScopedArtifacts.Scope.ALL;
                 if (!isFirst) {
                     scope = ScopedArtifacts.Scope.PROJECT;
 
                     String tempText = "";
-                    if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                         tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
                     }
                     final String allClassText = tempText;
@@ -102,4 +129,21 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             }
         });
     }
+
+    public static void deleteDirectory(Path path) throws IOException {
+        Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file);
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+    }
+
 }

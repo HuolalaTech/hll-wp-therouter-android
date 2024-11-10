@@ -97,11 +97,13 @@ public abstract class TheRouterTask extends DefaultTask {
 
     private void theRouterTransform() throws ClassNotFoundException, IOException {
         String tempText = "";
-        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+        if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
             tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
         }
         final String allClassText = tempText;
         final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
+        final String routeText = TheRouterPluginUtils.getTextFromFile(routeFile);
+        final String flowTaskText = TheRouterPluginUtils.getTextFromFile(flowTaskFile);
 
         File theRouterJar = null;
         JarEntry theRouterServiceProvideInjecter = null;
@@ -113,27 +115,28 @@ public abstract class TheRouterTask extends DefaultTask {
             for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                 JarEntry jarEntry = e.nextElement();
                 String name = jarEntry.getName();
-                if (!allClassText.contains(name) && TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+                if (!allClassText.contains(name) && TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
-                if (!name.contains("$")) {
-                    if (isFirst && name.contains("TheRouterServiceProvideInjecter")) {
-                        theRouterJar = jar;
-                        theRouterServiceProvideInjecter = jarEntry;
-                    } else {
 
+                if (isFirst && name.contains("TheRouterServiceProvideInjecter")) {
+                    theRouterJar = jar;
+                    theRouterServiceProvideInjecter = jarEntry;
+                } else {
+                    if (!name.contains("$")) {
                         if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
                             if (!asmTargetText.contains(name)) {
                                 TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
                             }
-                            if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
-                                ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                                ClassNode cn = new ClassNode();
-                                reader.accept(cn, 0);
-                                List<FieldNode> fieldList = cn.fields;
-                                for (FieldNode fieldNode : fieldList) {
-                                    if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, fieldNode.value.toString());
+                            ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                            ClassNode cn = new ClassNode();
+                            reader.accept(cn, 0);
+                            List<FieldNode> fieldList = cn.fields;
+                            for (FieldNode fieldNode : fieldList) {
+                                if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
+                                    String v = fieldNode.value.toString();
+                                    if (!routeText.contains(v)) {
+                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, v, theRouterExtension.debug);
                                     }
                                 }
                             }
@@ -148,7 +151,10 @@ public abstract class TheRouterTask extends DefaultTask {
                                 List<FieldNode> fieldList = cn.fields;
                                 for (FieldNode fieldNode : fieldList) {
                                     if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, fieldNode.value.toString());
+                                        String v = fieldNode.value.toString();
+                                        if (!flowTaskText.contains(v)) {
+                                            TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, v, theRouterExtension.debug);
+                                        }
                                     }
                                 }
                             }
@@ -177,7 +183,7 @@ public abstract class TheRouterTask extends DefaultTask {
         for (Directory directory : getAllDirectories().get()) {
             directory.getAsFileTree().forEach(file -> {
                 String name = directory.getAsFile().toURI().relativize(file.toURI()).getPath().replace(File.separatorChar, '/');
-                if (!allClassText.contains(name) && TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+                if (!allClassText.contains(name) && TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
                 if (!name.contains("$")) {
@@ -185,20 +191,21 @@ public abstract class TheRouterTask extends DefaultTask {
                         if (!asmTargetText.contains(name)) {
                             TheRouterPluginUtils.addTextToFile(asmTargetFile, name, theRouterExtension.debug);
                         }
-                        if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
-                            try {
-                                ClassReader reader = new ClassReader(new FileInputStream(file));
-                                ClassNode cn = new ClassNode();
-                                reader.accept(cn, 0);
-                                List<FieldNode> fieldList = cn.fields;
-                                for (FieldNode fieldNode : fieldList) {
-                                    if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, fieldNode.value.toString());
+                        try {
+                            ClassReader reader = new ClassReader(new FileInputStream(file));
+                            ClassNode cn = new ClassNode();
+                            reader.accept(cn, 0);
+                            List<FieldNode> fieldList = cn.fields;
+                            for (FieldNode fieldNode : fieldList) {
+                                if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
+                                    String v = fieldNode.value.toString();
+                                    if (!routeText.contains(v)) {
+                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(routeFile, v, theRouterExtension.debug);
                                     }
                                 }
-                            } catch (Exception e) {
-                                e.printStackTrace();
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
                         if (!asmTargetText.contains(name)) {
@@ -211,7 +218,10 @@ public abstract class TheRouterTask extends DefaultTask {
                             List<FieldNode> fieldList = cn.fields;
                             for (FieldNode fieldNode : fieldList) {
                                 if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                    TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, fieldNode.value.toString());
+                                    String v = fieldNode.value.toString();
+                                    if (!flowTaskText.contains(v)) {
+                                        TheRouterPluginUtils.addTextToFileIgnoreCheck(flowTaskFile, v, theRouterExtension.debug);
+                                    }
                                 }
                             }
                         } catch (Exception e) {
@@ -246,6 +256,7 @@ public abstract class TheRouterTask extends DefaultTask {
             Set<String> autowiredSet = new HashSet<>();
             Set<String> routeSet = new HashSet<>();
             for (String name : TheRouterPluginUtils.getSetFromFile(asmTargetFile)) {
+                name = name.substring(0, name.length() - TheRouterInjects.DOT_CLASS.length());
                 if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
                     routeSet.add(name.trim());
                 } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
@@ -258,7 +269,7 @@ public abstract class TheRouterTask extends DefaultTask {
             JarFile jarFile = new JarFile(theRouterJar);
             jarOutput.putNextEntry(new JarEntry(theRouterServiceProvideInjecter.getName()));
             ClassReader cr = new ClassReader(jarFile.getInputStream(theRouterServiceProvideInjecter));
-            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
             AddCodeVisitor cv = new AddCodeVisitor(cw, serviceProvideMap, autowiredSet, routeSet, false);
             cr.accept(cv, ClassReader.SKIP_DEBUG);
             byte[] bytes = cw.toByteArray();
@@ -377,7 +388,7 @@ public abstract class TheRouterTask extends DefaultTask {
                 }
 
                 // 检查路由表是否为空
-                if (TheRouterPluginUtils.needTagClass(theRouterExtension.checkRouteMap)) {
+                if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                     boolean classNotFound = true;
 
                     // 遍历 mergeClass 以检查 routeItem.className

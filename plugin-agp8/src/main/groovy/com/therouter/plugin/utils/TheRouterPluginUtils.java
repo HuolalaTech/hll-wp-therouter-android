@@ -124,7 +124,10 @@ public class TheRouterPluginUtils {
         return dataStringBuilder.toString();
     }
 
-    public static void addTextToFileIgnoreCheck(File buildCacheFile, String line) {
+    public static void addTextToFileIgnoreCheck(File buildCacheFile, String line, boolean debug) {
+        if (debug) {
+            System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
+        }
         try {
             ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
         } catch (IOException e) {
@@ -149,7 +152,7 @@ public class TheRouterPluginUtils {
         }
     }
 
-    public static boolean needTagClass(String mode) {
+    public static boolean needCheckRouteItemClass(String mode) {
         return !mode.isEmpty() && !TheRouterPlugin.DELETE.equals(mode);
     }
 }
