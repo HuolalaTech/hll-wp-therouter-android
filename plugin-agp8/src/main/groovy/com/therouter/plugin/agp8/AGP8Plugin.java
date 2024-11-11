@@ -38,8 +38,13 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             asmTargetFile.getParentFile().mkdirs();
             try {
                 tagFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
                 asmTargetFile.createNewFile();
             } catch (IOException e) {
+                e.printStackTrace();
             }
         } else {
             if (tagFile.exists()) {

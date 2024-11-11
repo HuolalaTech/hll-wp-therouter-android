@@ -95,7 +95,8 @@ public class TheRouterPluginUtils {
                     }
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Failed to read " + buildCacheFile.getName() + " file", e);
+                System.out.println("Failed to read " + buildCacheFile.getName() + " file.");
+                e.printStackTrace();
             }
         }
         return set;
@@ -105,20 +106,15 @@ public class TheRouterPluginUtils {
         StringBuilder dataStringBuilder = new StringBuilder();
         if (buildCacheFile.exists()) {
             try {
-                String[] array = ResourceGroovyMethods.getText(buildCacheFile, StandardCharsets.UTF_8.displayName()).split("\n");
-                HashSet<String> set = new HashSet<>();
-                for (String item : array) {
-                    if (!item.trim().isBlank()) {
-                        set.add(item.trim());
-                    }
-                }
+                Set<String> set = getSetFromFile(buildCacheFile);
                 ArrayList<String> list = new ArrayList<>(set);
                 Collections.sort(list);
                 for (String item : list) {
                     dataStringBuilder.append(item).append("\n");
                 }
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read " + buildCacheFile.getName() + " file", e);
+            } catch (Exception e) {
+                System.out.println("Failed to parse " + buildCacheFile.getName() + " file.");
+                e.printStackTrace();
             }
         }
         return dataStringBuilder.toString();
@@ -127,6 +123,18 @@ public class TheRouterPluginUtils {
     public static void addTextToFileIgnoreCheck(File buildCacheFile, String line, boolean debug) {
         if (debug) {
             System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
+        }
+        if (!buildCacheFile.exists()) {
+            try {
+                buildCacheFile.getParentFile().mkdirs();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            try {
+                buildCacheFile.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         try {
             ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
@@ -141,14 +149,7 @@ public class TheRouterPluginUtils {
             if (!line.endsWith(TheRouterInjects.DOT_CLASS) && !line.contains("\"") && !line.contains("[") && !line.contains("{")) {
                 line = line + TheRouterInjects.DOT_CLASS;
             }
-            if (debug) {
-                System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
-            }
-            try {
-                ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            addTextToFileIgnoreCheck(buildCacheFile, line, debug);
         }
     }
 
