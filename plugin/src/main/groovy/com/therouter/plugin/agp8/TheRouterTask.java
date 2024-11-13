@@ -15,6 +15,7 @@ import com.therouter.plugin.utils.TheRouterPluginUtils;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
@@ -109,12 +110,18 @@ public abstract class TheRouterTask extends DefaultTask {
         JarEntry theRouterServiceProvideInjecter = null;
 
         JarOutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
+        Set<String> addedEntries = new HashSet<>();
         for (RegularFile file : getAllJars().get()) {
             File jar = file.getAsFile();
             JarFile jarFile = new JarFile(jar);
             for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                 JarEntry jarEntry = e.nextElement();
                 String name = jarEntry.getName();
+                if (name.contains("META-INF/") || !addedEntries.add(name)) {
+                    // 如果已添加该条目，则跳过
+                    continue;
+                }
+
                 if (!allClassText.contains(name) && TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
@@ -164,16 +171,19 @@ public abstract class TheRouterTask extends DefaultTask {
                             }
                         }
                     }
-                    try {
+
+                    try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
                         jarOutput.putNextEntry(new JarEntry(name));
-                        InputStream inputStream = jarFile.getInputStream(jarEntry);
+
                         byte[] buffer = new byte[1024];
                         int bytesRead;
                         while ((bytesRead = inputStream.read(buffer)) != -1) {
                             jarOutput.write(buffer, 0, bytesRead);
                         }
+
                         jarOutput.closeEntry();
-                    } catch (Exception eee) {
+                    } catch (IOException ex) {
+                        ex.printStackTrace();
                     }
                 }
             }
@@ -181,8 +191,12 @@ public abstract class TheRouterTask extends DefaultTask {
         }
 
         for (Directory directory : getAllDirectories().get()) {
-            directory.getAsFileTree().forEach(file -> {
+            for (File file : directory.getAsFileTree()) {
                 String name = directory.getAsFile().toURI().relativize(file.toURI()).getPath().replace(File.separatorChar, '/');
+                if (name.contains("META-INF/") || !addedEntries.add(name)) {
+                    // 如果已添加该条目，则跳过
+                    continue;
+                }
                 if (!allClassText.contains(name) && TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
                     TheRouterPluginUtils.addTextToFile(allClassFile, name, theRouterExtension.debug);
                 }
@@ -240,15 +254,11 @@ public abstract class TheRouterTask extends DefaultTask {
                     while ((bytesRead = inputStream.read(buffer)) != -1) {
                         jarOutput.write(buffer, 0, bytesRead);
                     }
+                    jarOutput.closeEntry();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                try {
-                    jarOutput.closeEntry();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
+            }
         }
 
         if (isFirst && theRouterJar != null && theRouterServiceProvideInjecter != null) {
