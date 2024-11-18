@@ -67,6 +67,7 @@ class RouterInject {
         return temp
     }
 
+    @Synchronized
     private fun <T> createDI(tClass: Class<T>, vararg params: Any?): T? {
         var t: T? = null
         //查找自定义拦截器
