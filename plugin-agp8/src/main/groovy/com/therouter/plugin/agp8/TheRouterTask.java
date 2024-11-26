@@ -14,13 +14,17 @@ import com.therouter.plugin.utils.TheRouterPluginUtils;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.Directory;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.tasks.InputFiles;
+import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.OutputFile;
+import org.gradle.api.tasks.OutputFiles;
 import org.gradle.api.tasks.TaskAction;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
@@ -54,6 +58,18 @@ public abstract class TheRouterTask extends DefaultTask {
 
     @OutputFile
     public abstract RegularFileProperty getOutputFile();
+
+    @InputFiles
+    public abstract ConfigurableFileCollection getJarList();
+
+    @InputFiles
+    public abstract ConfigurableFileCollection getAllDirList();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputJarDir();
+
+    @OutputDirectory
+    public abstract DirectoryProperty getOutputDir();
 
     public void setTheRouterExtension(TheRouterExtension theRouterExtension) {
         this.theRouterExtension = theRouterExtension;

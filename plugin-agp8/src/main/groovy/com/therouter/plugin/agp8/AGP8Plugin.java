@@ -1,5 +1,6 @@
 package com.therouter.plugin.agp8;
 
+import com.android.build.api.artifact.impl.ScopedArtifactsImpl;
 import com.android.build.api.variant.*;
 import com.android.build.api.artifact.ScopedArtifact;
 import com.therouter.plugin.TheRouterExtension;
@@ -11,12 +12,15 @@ import kotlin.jvm.functions.Function1;
 import org.gradle.api.Action;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.file.ConfigurableFileCollection;
+import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.tasks.TaskProvider;
 
 import com.android.build.api.instrumentation.InstrumentationScope;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -124,13 +128,58 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     task.setRouteFile(routeFile);
                     task.setFirst(isFirst);
                 });
-                variant.getArtifacts()
+                ScopedArtifactsOperation<TheRouterTask> artifactsOperation = variant.getArtifacts()
                         .forScope(scope)
-                        .use(theRouterTask)
-                        .toTransform(ScopedArtifact.CLASSES.INSTANCE,
+                        .use(theRouterTask);
+                if (artifactsOperation instanceof ScopedArtifactsImpl.ScopedArtifactsOperationImpl<TheRouterTask>) {
+                    try {
+                        Class<?> implClazz = ScopedArtifactsImpl.ScopedArtifactsOperationImpl.class;
+                        Method method = implClazz.getDeclaredMethod("toTransform",
+                                ScopedArtifact.class, Function1.class, Function1.class, Function1.class, Function1.class);
+                        method.setAccessible(true);
+                        Function1<TheRouterTask, ConfigurableFileCollection> callback1 = new Function1<TheRouterTask, ConfigurableFileCollection>() {
+                            @Override
+                            public ConfigurableFileCollection invoke(TheRouterTask task) {
+                                return task.getJarList();
+                            }
+                        };
+                        Function1<TheRouterTask, ConfigurableFileCollection> callback2 = new Function1<TheRouterTask, ConfigurableFileCollection>() {
+                            @Override
+                            public ConfigurableFileCollection invoke(TheRouterTask task) {
+                                return task.getAllDirList();
+                            }
+                        };
+                        Function1<TheRouterTask, DirectoryProperty> callback3 = new Function1<TheRouterTask, DirectoryProperty>() {
+                            @Override
+                            public DirectoryProperty invoke(TheRouterTask task) {
+                                return task.getOutputJarDir();
+                            }
+                        };
+                        Function1<TheRouterTask, DirectoryProperty> callback4 = new Function1<TheRouterTask, DirectoryProperty>() {
+                            @Override
+                            public DirectoryProperty invoke(TheRouterTask task) {
+                                return task.getOutputDir();
+                            }
+                        };
+
+                        method.invoke(artifactsOperation,
+                                ScopedArtifact.CLASSES.INSTANCE,
+                                callback1,
+                                callback2,
+                                callback3,
+                                callback4);
+                    } catch (Exception e) {
+                        artifactsOperation.toTransform(ScopedArtifact.CLASSES.INSTANCE,
                                 TheRouterTask::getAllJars,
                                 TheRouterTask::getAllDirectories,
                                 TheRouterTask::getOutputFile);
+                    }
+                } else {
+                    artifactsOperation.toTransform(ScopedArtifact.CLASSES.INSTANCE,
+                            TheRouterTask::getAllJars,
+                            TheRouterTask::getAllDirectories,
+                            TheRouterTask::getOutputFile);
+                }
             }
         });
     }
