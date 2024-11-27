@@ -10,7 +10,7 @@ def getLocalProperties() {
         } catch (Exception e) {
             localPropertiesFile = new File("../local.properties")
         }
-        println("localPropertiesFile===:" + localPropertiesFile.absolutePath)
+        println("localPropertiesFile:" + localPropertiesFile.absolutePath)
         properties.load(new FileInputStream(localPropertiesFile))
         return properties
     } catch (Exception e) {
@@ -34,11 +34,11 @@ def moduleKapt(String compileStr, Closure configureClosure) {
     }
 
     if (includeModule.contains(artifactid)) {
-        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        println(project.name + "源码依赖：project(\":$artifactid\")")
         projects.project.dependencies.add(Boolean.valueOf(USE_KAPT) ? "kapt" : "ksp", project(':' + artifactid), configureClosure)
 //        projects.project.configurations { compile.exclude group: group, module: artifactid }
     } else {
-        println(project.name + "依赖：=======$group:$artifactid:$version")
+        println(project.name + "依赖：$group:$artifactid:$version")
         projects.project.dependencies.add(Boolean.valueOf(USE_KAPT) ? "kapt" : "ksp", "$group:$artifactid:$version", configureClosure)
     }
 }
@@ -59,11 +59,11 @@ def moduleApi(String compileStr, Closure configureClosure) {
     }
 
     if (includeModule.contains(artifactid)) {
-        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        println(project.name + "源码依赖：project(\":$artifactid\")")
         projects.project.dependencies.add("api", project(':' + artifactid), configureClosure)
 //        projects.project.configurations { compile.exclude group: group, module: artifactid }
     } else {
-        println(project.name + "依赖：=======$group:$artifactid:$version")
+        println(project.name + "依赖：$group:$artifactid:$version")
         projects.project.dependencies.add("api", "$group:$artifactid:$version", configureClosure)
     }
 }
@@ -84,11 +84,11 @@ def moduleImplementation(String compileStr, Closure configureClosure) {
     }
 
     if (includeModule.contains(artifactid)) {
-        println(project.name + "源码依赖：===project(\":$artifactid\")")
+        println(project.name + "源码依赖：project(\":$artifactid\")")
         projects.project.dependencies.add("implementation", project(':' + artifactid), configureClosure)
 //        projects.project.configurations { compile.exclude group: group, module: artifactid }
     } else {
-        println(project.name + "依赖：=======$group:$artifactid:$version")
+        println(project.name + "依赖：$group:$artifactid:$version")
         projects.project.dependencies.add("implementation", "$group:$artifactid:$version", configureClosure)
     }
 }
@@ -98,4 +98,21 @@ ext {
     moduleApi = this.&moduleApi
     moduleImplementation = this.&moduleImplementation
     getLocalProperties = this.&getLocalProperties
+
+    def wrapperDir = file("${rootProject.projectDir}/gradle/wrapper")
+    def targetWrapperFile = new File(wrapperDir, "gradle-wrapper.properties")
+    FileWriter stream = new FileWriter(targetWrapperFile)
+    String text = "#Tue Jun 22 08:02:06 CST 2021\n" +
+            "distributionBase=GRADLE_USER_HOME\n" +
+            "distributionPath=wrapper/dists\n" +
+            "zipStoreBase=GRADLE_USER_HOME\n" +
+            "zipStorePath=wrapper/dists\n"
+    if (Boolean.valueOf(gradle8)) {
+        text += "distributionUrl=https\\://services.gradle.org/distributions/gradle-8.0.2-all.zip\n"
+    } else {
+        text += "distributionUrl=https\\://services.gradle.org/distributions/gradle-7.6.1-all.zip\n"
+    }
+    stream.write(text)
+    stream.flush()
+    stream.close()
 }

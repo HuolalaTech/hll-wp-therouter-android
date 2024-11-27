@@ -1,5 +1,6 @@
 package com.therouter.ksp
 
+import com.google.devtools.ksp.containingFile
 import com.google.devtools.ksp.processing.CodeGenerator
 import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
@@ -9,6 +10,7 @@ import com.google.devtools.ksp.symbol.FunctionKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSDeclaration
+import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSPropertyDeclaration
 import com.google.devtools.ksp.symbol.KSType
@@ -49,7 +51,15 @@ class TheRouterSymbolProcessor(
 ) : SymbolProcessor {
     private var sourcePath = ""
 
+    private val routeDependencies = mutableSetOf<KSFile>()
+    private val autoWiredDependencies = mutableSetOf<KSFile>()
+    private val serviceProviderDependencies = mutableSetOf<KSFile>()
+
     override fun process(resolver: Resolver): List<KSAnnotated> {
+        routeDependencies.clear()
+        autoWiredDependencies.clear()
+        serviceProviderDependencies.clear()
+
         genRouterMapFile(parseRoute(resolver))
         genAutowiredFile(parseAutowired(resolver))
         val providerItemList = parseServiceProvider(resolver)
@@ -61,8 +71,12 @@ class TheRouterSymbolProcessor(
 
     private fun parseRoute(resolver: Resolver): List<RouteItem> {
         val list: ArrayList<RouteItem> = ArrayList()
-        resolver.getSymbolsWithAnnotation(Route::class.java.name)
-            .forEach { it.accept(RouteVisitor(list), Unit) }
+        resolver.getSymbolsWithAnnotation(Route::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                routeDependencies.add(file)
+            }
+            it.accept(RouteVisitor(list), Unit)
+        }
         return list
     }
 
@@ -130,7 +144,8 @@ class TheRouterSymbolProcessor(
         val json = gson.toJson(routePagelist)
         var ps: PrintStream? = null
         try {
-            ps = PrintStream(codeGenerator.createNewFile(Dependencies.ALL_FILES, PACKAGE, className))
+            val dependencies = Dependencies(aggregating = true, *routeDependencies.toTypedArray())
+            ps = PrintStream(codeGenerator.createNewFile(dependencies, PACKAGE, className))
             ps.println("@file:JvmName(\"$className\")")
             ps.println("package $PACKAGE")
             ps.println()
@@ -171,8 +186,12 @@ class TheRouterSymbolProcessor(
 
     private fun parseAutowired(resolver: Resolver): Map<String, ArrayList<AutowiredItem>> {
         val map = HashMap<String, ArrayList<AutowiredItem>>()
-        resolver.getSymbolsWithAnnotation(Autowired::class.java.name)
-            .forEach { it.accept(AutowiredVisitor(map), Unit) }
+        resolver.getSymbolsWithAnnotation(Autowired::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                autoWiredDependencies.add(file)
+            }
+            it.accept(AutowiredVisitor(map), Unit)
+        }
         return map
     }
 
@@ -257,12 +276,8 @@ class TheRouterSymbolProcessor(
             val pkgName = fullClassName.substring(0, fullClassName.lastIndexOf('.'))
             var ps: PrintStream? = null
             try {
-                ps = PrintStream(
-                    codeGenerator.createNewFile(
-                        Dependencies.ALL_FILES,
-                        pkgName, simpleName
-                    )
-                )
+                val dependencies = Dependencies(aggregating = false, *autoWiredDependencies.toTypedArray())
+                ps = PrintStream(codeGenerator.createNewFile(dependencies, pkgName, simpleName))
                 ps.println("@file:JvmName(\"$simpleName\")")
                 ps.println(String.format("package %s", pkgName))
                 ps.println()
@@ -328,8 +343,12 @@ class TheRouterSymbolProcessor(
 
     private fun parseServiceProvider(resolver: Resolver): ArrayList<ServiceProviderItem> {
         val list: ArrayList<ServiceProviderItem> = ArrayList()
-        resolver.getSymbolsWithAnnotation(ServiceProvider::class.java.name)
-            .forEach { it.accept(ServiceProviderVisitor(list), Unit) }
+        resolver.getSymbolsWithAnnotation(ServiceProvider::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                serviceProviderDependencies.add(file)
+            }
+            it.accept(ServiceProviderVisitor(list), Unit)
+        }
         return list
     }
 
@@ -479,8 +498,12 @@ class TheRouterSymbolProcessor(
 
     private fun parseFlowTask(resolver: Resolver): ArrayList<FlowTaskItem> {
         val list = ArrayList<FlowTaskItem>()
-        resolver.getSymbolsWithAnnotation(FlowTask::class.java.name)
-            .forEach { it.accept(FlowTaskVisitor(list), Unit) }
+        resolver.getSymbolsWithAnnotation(FlowTask::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                serviceProviderDependencies.add(file)
+            }
+            it.accept(FlowTaskVisitor(list), Unit)
+        }
         return list
     }
 
@@ -528,8 +551,12 @@ class TheRouterSymbolProcessor(
 
     private fun parseActionInterceptor(resolver: Resolver): ArrayList<ActionInterceptorItem> {
         val list = ArrayList<ActionInterceptorItem>()
-        resolver.getSymbolsWithAnnotation(ActionInterceptor::class.java.name)
-            .forEach { it.accept(ActionInterceptorVisitor(list), Unit) }
+        resolver.getSymbolsWithAnnotation(ActionInterceptor::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                serviceProviderDependencies.add(file)
+            }
+            it.accept(ActionInterceptorVisitor(list), Unit)
+        }
         return list
     }
 
@@ -590,7 +617,8 @@ class TheRouterSymbolProcessor(
         )
         var ps: PrintStream? = null
         try {
-            ps = PrintStream(codeGenerator.createNewFile(Dependencies.ALL_FILES, PACKAGE, className))
+            val dependencies = Dependencies(aggregating = true, *serviceProviderDependencies.toTypedArray())
+            ps = PrintStream(codeGenerator.createNewFile(dependencies, PACKAGE, className))
             ps.println("@file:JvmName(\"$className\")")
             ps.println(String.format("package %s", PACKAGE))
             ps.println()
@@ -658,7 +686,6 @@ class TheRouterSymbolProcessor(
                     }
                 }
                 ps.println(") {")
-                ps.println("//////////" + serviceProviderItem.isMethod + serviceProviderItem.className + "-" + serviceProviderItem.description)
                 if (serviceProviderItem.isMethod) {
                     ps.print(
                         String.format(
