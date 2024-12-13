@@ -116,7 +116,11 @@ private class BufferExecutor : ExecutorService, Executor {
 
     @Synchronized
     override fun execute(r: Runnable) {
-        val trace = getTrace(Thread.currentThread().stackTrace)
+        val trace = if (TheRouter.isDebug) {
+            getTrace(Thread.currentThread().stackTrace)
+        } else {
+            ""
+        }
         checkTask(trace)
         taskQueue.offer(Task(r, trace) {
             flightTaskMap.remove(r.hashCode())
@@ -163,28 +167,7 @@ private class BufferExecutor : ExecutorService, Executor {
      */
     @Synchronized
     private fun scheduleNext() {
-        //线程池中正在执行的任务数
-        val activeCount = threadPoolExecutor.activeCount
-        //一级队列任务数
-        val queueSize = threadPoolExecutor.queue.size
-
-        //动态修改核心线程数，以适应不同场景的任务量
-        when {
-            taskQueue.size > MAX_QUEUE_SIZE * 100 -> {
-                threadPoolExecutor.corePoolSize = MAXIMUM_CORE_POOL_SIZE
-            }
-
-            taskQueue.size > MAX_QUEUE_SIZE * 10 -> {
-                threadPoolExecutor.corePoolSize = BIGGER_CORE_POOL_SIZE
-            }
-
-            else -> {
-                threadPoolExecutor.corePoolSize = CORE_POOL_SIZE
-            }
-        }
-
-        //如果一级队列没有满，且当前正在执行的线程不超过核心线程数
-        if (queueSize <= MAX_QUEUE_SIZE && activeCount < threadPoolExecutor.corePoolSize) {
+        fun doNext() {
             //从二级队列中取任务
             if (taskQueue.poll().also { activeTask = it } != null) {
                 activeTask?.let {
@@ -195,6 +178,36 @@ private class BufferExecutor : ExecutorService, Executor {
                 //将任务加入一级队列，或有可能直接被线程池执行(Executor内部逻辑)
                 threadPoolExecutor.execute(activeTask)
                 activeTask = null
+            }
+        }
+
+        val isMainThread = Thread.currentThread() == Looper.getMainLooper().thread
+        if (isMainThread) {
+            doNext()
+        } else {
+            //线程池中正在执行的任务数
+            val activeCount = threadPoolExecutor.activeCount
+            //一级队列任务数
+            val queueSize = threadPoolExecutor.queue.size
+
+            //动态修改核心线程数，以适应不同场景的任务量
+            when {
+                taskQueue.size > MAX_QUEUE_SIZE * 100 -> {
+                    threadPoolExecutor.corePoolSize = MAXIMUM_CORE_POOL_SIZE
+                }
+
+                taskQueue.size > MAX_QUEUE_SIZE * 10 -> {
+                    threadPoolExecutor.corePoolSize = BIGGER_CORE_POOL_SIZE
+                }
+
+                else -> {
+                    threadPoolExecutor.corePoolSize = CORE_POOL_SIZE
+                }
+            }
+
+            //如果一级队列没有满，且当前正在执行的线程不超过核心线程数
+            if (queueSize <= MAX_QUEUE_SIZE && activeCount < threadPoolExecutor.corePoolSize) {
+                doNext()
             }
         }
     }
