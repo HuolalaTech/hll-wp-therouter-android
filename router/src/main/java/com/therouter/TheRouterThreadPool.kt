@@ -20,11 +20,10 @@ private val CORE_POOL_SIZE = max(3, min(CPU_COUNT - 1, 6))
 private val BIGGER_CORE_POOL_SIZE = CPU_COUNT * 4
 private val MAXIMUM_CORE_POOL_SIZE = CPU_COUNT * 8
 private const val MAXIMUM_POOL_SIZE = Int.MAX_VALUE
-private const val KEEP_ALIVE_SECONDS = 30L
-private const val KEEP_ALIVE_MILLISECOND = KEEP_ALIVE_SECONDS * 1000
-private const val MAX_QUEUE_SIZE = 10
-private const val MAX_REPEAT_TASK_COUNT = 5
-private const val CHECK_REPEAT_TASK_TIME_MILLISECOND = MAX_REPEAT_TASK_COUNT * 1000L
+var KEEP_ALIVE_SECONDS = 30L
+var MAX_QUEUE_SIZE = 10
+var REPEAT_TASK_COUNT = 10
+var REPEAT_TASK_INTERVAL_SECONDS = 2L
 
 private const val THREAD_NAME = "TheRouterLibThread"
 
@@ -109,10 +108,12 @@ fun newThreadFactory(threadName: String): ThreadFactory {
 private class BufferExecutor : ExecutorService, Executor {
     val taskQueue = ArrayDeque<Task>()
     var activeTask: Task? = null
+
+    // 加入一级队列时被记录，任务执行完成时被移除
     val flightTaskMap = SparseArray<FlightTaskInfo>()
-    var prevCheckAliveTime = 0L
-    val taskTraceCountMap = ConcurrentHashMap<String, Int>()
-    var prevCheckRepeatTime = 0L
+
+    // 加入二级级队列时被记录，不会被移除
+    val taskTraceCountMap = HashMap<String, FlightTaskInfo>()
 
     @Synchronized
     override fun execute(r: Runnable) {
@@ -138,24 +139,30 @@ private class BufferExecutor : ExecutorService, Executor {
     @Synchronized
     private fun checkTask(trace: String) {
         if (TheRouter.isDebug) {
-            if (System.currentTimeMillis() - prevCheckAliveTime > KEEP_ALIVE_MILLISECOND) {
-                flightTaskMap.forEach { _, v ->
-                    if (System.currentTimeMillis() - (v?.createTime ?: 0) > KEEP_ALIVE_MILLISECOND) {
-                        v?.resetTime()
-                        debug("ThreadPool", "该任务耗时过久，请判断是否需要优化代码\n${v?.trace}")
-                    }
-                }
-                prevCheckAliveTime = System.currentTimeMillis()
+            flightTaskMap.forEach { _, v ->
+                require(
+                    System.currentTimeMillis() - (v?.createTime ?: System.currentTimeMillis())
+                            < KEEP_ALIVE_SECONDS * 1000L,
+                    "ThreadPool",
+                    "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
+                            "当前任务被创建时间为${v?.createTime}此时时间为${System.currentTimeMillis()}\n${v?.trace}"
+                )
             }
-            var count = taskTraceCountMap[trace] ?: 0
-            count++
-            if (System.currentTimeMillis() - prevCheckRepeatTime > CHECK_REPEAT_TASK_TIME_MILLISECOND) {
-                if (count > MAX_REPEAT_TASK_COUNT) {
-                    count = 0
-                    debug("ThreadPool", "该任务被频繁添加，请判断是否需要优化代码\n${trace}")
-                }
+
+            val info = taskTraceCountMap[trace] ?: FlightTaskInfo(trace).also {
+                it.createTime = Long.MAX_VALUE
+                it.count = 0
             }
-            taskTraceCountMap[trace] = count
+            info.count++
+            if (info.createTime - System.currentTimeMillis() < REPEAT_TASK_INTERVAL_SECONDS * 1000L) {
+                require(
+                    info.count <= REPEAT_TASK_COUNT,
+                    "ThreadPool",
+                    "该任务连续${info.count}次在${REPEAT_TASK_INTERVAL_SECONDS}秒内被添加，请优化逻辑\n${trace}"
+                )
+            }
+            info.createTime = System.currentTimeMillis()
+            taskTraceCountMap[trace] = info
         } else {
             flightTaskMap.clear()
             taskTraceCountMap.clear()
@@ -280,11 +287,7 @@ private class BufferExecutor : ExecutorService, Executor {
 
 private class FlightTaskInfo(val trace: String) {
     var createTime = System.currentTimeMillis()
-        private set
-
-    fun resetTime() {
-        createTime = System.currentTimeMillis()
-    }
+    var count = 0
 }
 
 private class Task(
