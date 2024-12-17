@@ -4,13 +4,10 @@ package com.therouter
 
 import android.os.Handler
 import android.os.Looper
-import android.util.SparseArray
 import java.lang.StringBuilder
 import java.util.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.math.max
 import kotlin.math.min
 
@@ -108,7 +105,7 @@ private class BufferExecutor : ExecutorService, Executor {
     var activeTask: Task? = null
 
     // 加入一级队列时被记录，任务执行完成时被移除
-    val flightTaskMap = SparseArray<FlightTaskInfo>()
+    val flightTaskMap = ConcurrentHashMap<Int, FlightTaskInfo>()
 
     @Synchronized
     override fun execute(r: Runnable) {
@@ -120,7 +117,9 @@ private class BufferExecutor : ExecutorService, Executor {
                 ""
             }
         ) {
-            flightTaskMap.remove(r.hashCode())
+            if (TheRouter.isDebug) {
+                flightTaskMap.remove(r.hashCode())
+            }
             scheduleNext()
         })
         //activeTask 不为空，表示一级队列已经满了，此刻任务应该被停留到二级队列等待调度
@@ -132,20 +131,14 @@ private class BufferExecutor : ExecutorService, Executor {
     /**
      * 检查是否有频繁添加任务，或有轮询任务的情况
      */
-    @Synchronized
     private fun checkTask() {
-        if (TheRouter.isDebug) {
-            flightTaskMap.forEach { _, v ->
-                require(
-                    System.currentTimeMillis() - (v?.createTime ?: System.currentTimeMillis())
-                            < KEEP_ALIVE_SECONDS * 1000L,
-                    "ThreadPool",
-                    "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
-                            "当前任务被创建时间为${v?.createTime}此时时间为${System.currentTimeMillis()}\n${v?.trace}"
-                )
-            }
-        } else {
-            flightTaskMap.clear()
+        flightTaskMap.values.forEach { v ->
+            require(
+                System.currentTimeMillis() - v.createTime < KEEP_ALIVE_SECONDS * 1000L,
+                "ThreadPool",
+                "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
+                        "当前任务被创建时间为${v.createTime}此时时间为${System.currentTimeMillis()}\n${v.trace}"
+            )
         }
     }
 
@@ -159,7 +152,7 @@ private class BufferExecutor : ExecutorService, Executor {
             if (taskQueue.poll().also { activeTask = it } != null) {
                 activeTask?.let {
                     if (TheRouter.isDebug) {
-                        flightTaskMap.put(it.r.hashCode(), FlightTaskInfo(it.trace))
+                        flightTaskMap[it.r.hashCode()] = FlightTaskInfo(it.trace)
                     }
                 }
                 //将任务加入一级队列，或有可能直接被线程池执行(Executor内部逻辑)
@@ -267,7 +260,6 @@ private class BufferExecutor : ExecutorService, Executor {
 
 private class FlightTaskInfo(val trace: String) {
     var createTime = System.currentTimeMillis()
-    var count = 0
 }
 
 private class Task(
@@ -288,10 +280,4 @@ private fun getTrace(trace: Array<StackTraceElement>): String {
         str.append(it).append('\n')
     }
     return str.toString()
-}
-
-private inline fun <T> SparseArray<T>.forEach(action: (key: Int, value: T?) -> Unit) {
-    for (index in 0 until size()) {
-        action(keyAt(index), valueAt(index))
-    }
 }
