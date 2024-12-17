@@ -22,8 +22,6 @@ private val MAXIMUM_CORE_POOL_SIZE = CPU_COUNT * 8
 private const val MAXIMUM_POOL_SIZE = Int.MAX_VALUE
 var KEEP_ALIVE_SECONDS = 30L
 var MAX_QUEUE_SIZE = 10
-var REPEAT_TASK_COUNT = 10
-var REPEAT_TASK_INTERVAL_SECONDS = 2L
 
 private const val THREAD_NAME = "TheRouterLibThread"
 
@@ -112,18 +110,16 @@ private class BufferExecutor : ExecutorService, Executor {
     // 加入一级队列时被记录，任务执行完成时被移除
     val flightTaskMap = SparseArray<FlightTaskInfo>()
 
-    // 加入二级级队列时被记录，不会被移除
-    val taskTraceCountMap = HashMap<String, FlightTaskInfo>()
-
     @Synchronized
     override fun execute(r: Runnable) {
-        val trace = if (TheRouter.isDebug) {
-            getTrace(Thread.currentThread().stackTrace)
-        } else {
-            ""
-        }
-        checkTask(trace)
-        taskQueue.offer(Task(r, trace) {
+        taskQueue.offer(Task(
+            r, if (TheRouter.isDebug) {
+                checkTask()
+                getTrace(Thread.currentThread().stackTrace)
+            } else {
+                ""
+            }
+        ) {
             flightTaskMap.remove(r.hashCode())
             scheduleNext()
         })
@@ -137,7 +133,7 @@ private class BufferExecutor : ExecutorService, Executor {
      * 检查是否有频繁添加任务，或有轮询任务的情况
      */
     @Synchronized
-    private fun checkTask(trace: String) {
+    private fun checkTask() {
         if (TheRouter.isDebug) {
             flightTaskMap.forEach { _, v ->
                 require(
@@ -148,24 +144,8 @@ private class BufferExecutor : ExecutorService, Executor {
                             "当前任务被创建时间为${v?.createTime}此时时间为${System.currentTimeMillis()}\n${v?.trace}"
                 )
             }
-
-            val info = taskTraceCountMap[trace] ?: FlightTaskInfo(trace).also {
-                it.createTime = Long.MAX_VALUE
-                it.count = 0
-            }
-            info.count++
-            if (info.createTime - System.currentTimeMillis() < REPEAT_TASK_INTERVAL_SECONDS * 1000L) {
-                require(
-                    info.count <= REPEAT_TASK_COUNT,
-                    "ThreadPool",
-                    "该任务连续${info.count}次在${REPEAT_TASK_INTERVAL_SECONDS}秒内被添加，请优化逻辑\n${trace}"
-                )
-            }
-            info.createTime = System.currentTimeMillis()
-            taskTraceCountMap[trace] = info
         } else {
             flightTaskMap.clear()
-            taskTraceCountMap.clear()
         }
     }
 
