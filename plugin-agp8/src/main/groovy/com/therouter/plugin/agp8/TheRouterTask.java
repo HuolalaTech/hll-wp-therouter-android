@@ -97,6 +97,9 @@ public abstract class TheRouterTask extends DefaultTask {
     }
 
     private void theRouterTransform() throws ClassNotFoundException, IOException {
+        TheRouterInjects.routeMapStringSet.clear();
+        TheRouterInjects.flowTaskMap.clear();
+        TheRouterInjects.allClass.clear();
         String tempText = "";
         if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
             tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
