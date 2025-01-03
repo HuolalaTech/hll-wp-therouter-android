@@ -162,7 +162,27 @@ class TheRouterSymbolProcessor(
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             val routeMapJson = json.replace("\"", "\\\"")
-            ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
+            val max = 200
+            if (routeMapJson.length > max) {
+                val stringBuilder = StringBuilder("\tconst val ROUTERMAP = \"")
+                var content = routeMapJson
+                while (content.length > max) {
+                    var index = max
+                    var sub = content.substring(0, index)
+                    var safe = !sub.endsWith('\\')
+                    while (!safe) {
+                        index--
+                        sub = content.substring(0, index)
+                        safe = !sub.endsWith('\\')
+                    }
+                    stringBuilder.append(sub).append("\"+\"")
+                    content = content.substring(index, content.length)
+                }
+                stringBuilder.append("\"")
+                ps.println(stringBuilder.toString())
+            } else {
+                ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
+            }
             ps.println()
             ps.println("\t@JvmStatic")
             ps.println("\tfun addRoute() {")
@@ -204,7 +224,8 @@ class TheRouterSymbolProcessor(
             property.annotations.forEach { annotation ->
                 val autowiredItem = AutowiredItem()
                 autowiredItem.fieldName = property.simpleName.asString()
-                autowiredItem.className = property.parentDeclaration?.qualifiedName?.asString() ?: property.packageName.asString()
+                autowiredItem.className =
+                    property.parentDeclaration?.qualifiedName?.asString() ?: property.packageName.asString()
                 autowiredItem.classNameAndTypeParameters = autowiredItem.className
                 property.parentDeclaration?.typeParameters?.size?.let { size ->
                     if (size > 0) {
@@ -536,7 +557,8 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val flowTaskItem = FlowTaskItem()
                 flowTaskItem.methodName = function.simpleName.asString()
-                flowTaskItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
+                flowTaskItem.className =
+                    function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "taskName" -> flowTaskItem.taskName = "${arg.value}"
