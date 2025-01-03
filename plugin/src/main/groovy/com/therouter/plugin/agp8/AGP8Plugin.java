@@ -88,7 +88,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             @Override
             public void execute(final Variant variant) {
                 ScopedArtifacts.Scope scope = ScopedArtifacts.Scope.ALL;
-                if (!isFirst) {
+                if (!isFirst && theRouterExtension.debug) {
                     scope = ScopedArtifacts.Scope.PROJECT;
 
                     String tempText = "";
