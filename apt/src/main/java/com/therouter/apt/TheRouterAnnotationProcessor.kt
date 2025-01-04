@@ -478,6 +478,15 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
                 }
                 ps.println("\t\t}")
                 ps.println()
+
+                for ((i, item) in pageMap[key]!!.withIndex()) {
+                    if (item.required) {
+                        ps.println(String.format("\t\tif (target.%s == null && com.therouter.TheRouter.isDebug()){", item.fieldName))
+                        ps.println("\t\t\tthrow new NullPointerException(\"@Autowired(required = true) ${key}.${item.fieldName} is null\");")
+                        ps.println("\t\t}")
+                    }
+                }
+
                 ps.println("\t\t}")
                 ps.println("\t}")
                 ps.println("}")

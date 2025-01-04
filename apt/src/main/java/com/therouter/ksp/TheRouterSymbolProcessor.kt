@@ -351,6 +351,15 @@ class TheRouterSymbolProcessor(
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t} // for end")
+
+                for ((i, item) in pageMap[key]!!.withIndex()) {
+                    if (item.required) {
+                        ps.println(String.format("\t\tif (target.%s == null && com.therouter.TheRouter.isDebug){", item.fieldName))
+                        ps.println("\t\t\tthrow NullPointerException(\"@Autowired(required = true) ${key}.${item.fieldName} is null\")")
+                        ps.println("\t\t}")
+                    }
+                }
+
                 ps.println()
                 ps.println("\t\t}")
                 ps.println("\t}")

@@ -13,7 +13,7 @@ import com.therouter.router.Route
 class Test2Activity : AppCompatActivity() {
 
     @JvmField
-    @Autowired
+    @Autowired(required = true)
     var test: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
