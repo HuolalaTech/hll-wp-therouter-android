@@ -178,7 +178,7 @@ class TheRouterSymbolProcessor(
                     stringBuilder.append(sub).append("\"+\"")
                     content = content.substring(index, content.length)
                 }
-                stringBuilder.append("\"")
+                stringBuilder.append(content).append("\"")
                 ps.println(stringBuilder.toString())
             } else {
                 ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
