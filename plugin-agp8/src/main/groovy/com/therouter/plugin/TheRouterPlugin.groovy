@@ -23,7 +23,7 @@ public class TheRouterPlugin extends AGP8Plugin {
         if (!isLibrary) {
             super.applyPlugin(project, theRouterExtension)
         } else {
-            throw new RuntimeException("`apply plugin: 'therouter'` must be applied in the app module! Remove it from module " + project.getName() + ".");
+//            throw new RuntimeException("`apply plugin: 'therouter'` must be applied in the app module! Remove it from module " + project.getName() + ".");
         }
     }
 }
