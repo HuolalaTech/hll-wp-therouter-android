@@ -3,6 +3,7 @@ package com.therouter.plugin;
 import com.therouter.plugin.agp8.AGP8Plugin
 import com.therouter.plugin.utils.EasyRegisterJson
 import io.github.flyjingfish.easy_register.plugin.InitPlugin
+import io.github.flyjingfish.easy_register.utils.Mode
 import io.github.flyjingfish.easy_register.utils.RegisterClassUtils
 import org.gradle.api.Project
 
@@ -14,7 +15,7 @@ public class TheRouterPlugin extends AGP8Plugin {
     @Override
     public void apply(Project project) {
         RegisterClassUtils.INSTANCE.setEnable(true)
-        RegisterClassUtils.INSTANCE.setMode("auto")
+        RegisterClassUtils.INSTANCE.setMode(Mode.AUTO)
         InitPlugin.INSTANCE.initFromJson(EasyRegisterJson.jsons)
         InitPlugin.INSTANCE.rootPluginDeepApply(project)
 

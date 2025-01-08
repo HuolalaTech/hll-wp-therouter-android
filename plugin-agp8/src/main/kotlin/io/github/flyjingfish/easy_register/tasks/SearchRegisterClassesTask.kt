@@ -33,32 +33,6 @@ class SearchRegisterClassesTask(
 
     private fun scanFile() = runBlocking {
         searchJoinPointLocation()
-
-//        if (isApp){
-//            val tmpOtherDir = File(registerCompileTempDir(project,variantName))
-//            ScannerUtils.createInitClass(tmpOtherDir)
-//            val wovenCodeJobs = mutableListOf<Deferred<Unit>>()
-//            val needDeleteFiles = mutableListOf<String>()
-//            for (file in tmpOtherDir.walk()) {
-//                if (file.isFile) {
-//                    val job = async(Dispatchers.IO) {
-//                        val relativePath = file.getRelativePath(tmpOtherDir)
-//                        val target = File(output.absolutePath + File.separatorChar + relativePath)
-//                        target.checkExist()
-//                        synchronized(needDeleteFiles){
-//                            needDeleteFiles.add(target.absolutePath)
-//                        }
-//                        file.inputStream().use {
-//                            target.saveEntry(it)
-//                        }
-//                    }
-//                    wovenCodeJobs.add(job)
-//                }
-//            }
-//            wovenCodeJobs.awaitAll()
-//            JsonUtils.exportCacheFile(File(registerCompileTempWovenJson(project, variantName)),needDeleteFiles)
-//
-//        }
     }
 
 

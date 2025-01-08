@@ -65,22 +65,6 @@ class SearchCodePlugin(private val root:Boolean): Plugin<Project> {
             val variantName = variant.name
             val buildTypeName = variant.buildType.name
 
-//            if (isApp){
-//                val isIncrementalStr = project.properties[RootStringConfig.APP_INCREMENTAL.propertyName]?: RootStringConfig.APP_INCREMENTAL.defaultValue
-//                val isIncremental = isIncrementalStr == "true"
-//                if (!isIncremental){
-//                    val debugMode = RegisterClassUtils.isDebugMode(buildTypeName,variantName)
-//                    if (debugMode){
-//                        javaCompile.outputs.upToDateWhen { return@upToDateWhen false }
-//                    }
-//                }
-//            }
-//            javaCompile.doFirst{
-//                val debugMode = RegisterClassUtils.isDebugMode(buildTypeName,variantName)
-//                if (debugMode){
-//                    JsonUtils.deleteNeedDelWovenFile(project, variantName)
-//                }
-//            }
             kotlinCompileVariantMap["compile${variantName.capitalized()}Kotlin"] = VariantBean(variantName,buildTypeName)
             javaCompile.doLast{
                 val task = try {

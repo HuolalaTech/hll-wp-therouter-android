@@ -10,17 +10,6 @@ import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
 import java.util.zip.ZipInputStream
 
-fun registerTransformIgnoreJarDir(project:Project, variantName:String):String{
-    return project.buildDir.absolutePath+"/tmp/easy-register/${variantName}/tempTransformIgnoreJar/".adapterOSPath()
-}
-
-fun registerCompileTempJson(project:Project, variantName:String):String{
-    return project.buildDir.absolutePath + "/tmp/easy-register/${variantName}/tempCompileClassJson/needDelClassInfo.json".adapterOSPath()
-}
-
-fun registerCompileTempWovenJson(project:Project, variantName:String):String{
-    return project.buildDir.absolutePath + "/tmp/easy-register/${variantName}/tempCompileClassJson/needDelWovenClassInfo.json".adapterOSPath()
-}
 fun registerCompileTempDir(project: Project, variantName:String):String{
     return project.buildDir.absolutePath + "/tmp/easy-register/${variantName}/tempCompileClass/".adapterOSPath()
 }
@@ -109,32 +98,6 @@ fun printLog(text: String) {
 val JAR_SIGNATURE_EXTENSIONS = setOf("SF", "RSA", "DSA", "EC")
 fun String.isJarSignatureRelatedFiles(): Boolean {
     return startsWith("META-INF/") && substringAfterLast('.') in JAR_SIGNATURE_EXTENSIONS
-}
-
-fun openJar(jarPath:String,destDir:String) {
-    // JAR文件路径和目标目录
-    ZipInputStream(FileInputStream(jarPath)).use { zis ->
-        while (true) {
-            val entry = zis.nextEntry ?: break
-            val entryName: String = entry.name
-            if (entryName.isEmpty() || entryName.startsWith("META-INF/") || "module-info.class" == entryName) {
-                continue
-            }
-            val filePath: String = destDir + File.separator + entryName
-            if (!entry.isDirectory) {
-                val file = File(filePath)
-                val parent = file.parentFile
-                if (!parent.exists()) {
-                    parent.mkdirs()
-                }
-                FileOutputStream(file).use {
-                    zis.copyTo(it)
-                }
-            } else {
-                File(filePath).mkdirs()
-            }
-        }
-    }
 }
 
 fun File.getFileClassname(directory :File):String {

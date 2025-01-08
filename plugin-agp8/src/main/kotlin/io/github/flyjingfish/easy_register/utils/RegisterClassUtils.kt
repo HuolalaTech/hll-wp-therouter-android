@@ -2,21 +2,20 @@ package io.github.flyjingfish.easy_register.utils
 
 import io.github.flyjingfish.easy_register.bean.SearchClass
 import io.github.flyjingfish.easy_register.bean.WovenClass
-import io.github.flyjingfish.easy_register.config.RootStringConfig
-import org.gradle.api.Project
 import org.objectweb.asm.commons.Method
-import java.io.File
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 object RegisterClassUtils {
     var log = true
     var enable = true
-    var mode = RootStringConfig.MODE.defaultValue
-    private val configJsonFileList = mutableListOf<File>()
+    var mode = Mode.DEBUG
     private val searchWovenClasses = mutableListOf<WovenClass>()
     private val searchClasses = mutableListOf<SearchClass>()
     private val wovenClasses = HashSet<String>()
+    private const val NOT_SET = 0
+    private const val MATCH = 1
+    private const val NOT_MATCH = 2
     fun addClass(moduleName:String,className:String,superClassName:String?,interfaces: Array<String>?){
         for (searchClass in searchClasses) {
             val matchExtends = if (searchClass.extendsClass.isNotEmpty()){
@@ -32,29 +31,29 @@ object RegisterClassUtils {
                     }
                 }
                 if (extends){
-                    1
+                    MATCH
                 }else{
-                    2
+                    NOT_MATCH
                 }
             }else{
-                0
+                NOT_SET
             }
 
             val matchName = if (searchClass.regex.isNotEmpty()){
                 val classnameArrayPattern: Pattern = Pattern.compile(searchClass.regex)
                 val matcher: Matcher = classnameArrayPattern.matcher(slashToDot(className))
                 if (matcher.find()){
-                    1
+                    MATCH
                 }else{
-                    2
+                    NOT_MATCH
                 }
             }else{
-                0
+                NOT_SET
             }
 
-            if ((matchExtends == 0 && matchName == 1)||
-                (matchName == 0 && matchExtends == 1)||
-                (matchName == 1 && matchExtends == 1)){
+            if ((matchExtends == NOT_SET && matchName == MATCH)||
+                (matchName == NOT_SET && matchExtends == MATCH)||
+                (matchName == MATCH && matchExtends == MATCH)){
                 searchClass.addClass(moduleName, className)
             }
 
@@ -71,60 +70,6 @@ object RegisterClassUtils {
         return searchWovenClasses
     }
 
-    fun addConfigJsonFile(file:File){
-        configJsonFileList.add(file)
-    }
-
-    fun clearConfigJsonFile(){
-        configJsonFileList.clear()
-    }
-
-    private fun exportHintFile(project: Project){
-        val childProjects = project.childProjects
-        if (childProjects.isEmpty()){
-            return
-        }
-        childProjects.forEach { (_,value)->
-            JsonUtils.exportConfigJson(value)
-            exportHintFile(value)
-        }
-    }
-
-
-    fun initConfig(project: Project){
-        val searchCls = JsonUtils.getJson(configJsonFileList)
-        var hadOldCount = 0
-        for (searchCl in searchCls) {
-            var hasOld = false
-            for (searchWovenClass in searchWovenClasses) {
-                if (searchCl == searchWovenClass){
-                    hasOld = true
-                }
-            }
-            if (hasOld){
-                hadOldCount++
-            }
-        }
-        if ((hadOldCount != searchCls.size && searchWovenClasses.isNotEmpty())){
-            searchWovenClasses.clear()
-            exportHintFile(project)
-            throw IllegalArgumentException("The config json file has changed, please clean project")
-        }
-        if (searchWovenClasses.isEmpty()){
-            searchWovenClasses.clear()
-            wovenClasses.clear()
-            searchClasses.clear()
-            searchWovenClasses.addAll(searchCls)
-            for (searchCl in searchCls) {
-                if (!searchCl.createWovenClass){
-                    wovenClasses.add(searchCl.wovenClass)
-                }
-                searchClasses.add(searchCl.searchClass)
-            }
-        }
-
-
-    }
 
     fun initConfig(jsons:List<String>){
         val searchCls = JsonUtils.getJson4Str(jsons)
@@ -159,8 +104,8 @@ object RegisterClassUtils {
     }
 
     fun isDebugMode(buildTypeName :String?,variantName :String):Boolean{
-        return if (mode == "auto" || mode == "debug"){
-            if (mode == "auto"){
+        return if (mode == Mode.AUTO || mode == Mode.DEBUG){
+            if (mode == Mode.AUTO){
                 if (buildTypeName != null){
                     buildTypeName.lowercase() == "debug"
                 }else{
