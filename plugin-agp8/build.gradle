@@ -25,6 +25,7 @@ dependencies {
     compileOnly 'com.android.tools.build:gradle:8.1.3'
     implementation 'com.android.tools.build:gradle-api:8.1.3'
     implementation 'com.google.code.gson:gson:2.9.1'
+    implementation 'io.github.FlyJingFish.EasyRegister:plugin:1.0.0'
 }
 
 task sourcesJar(type: Jar) {

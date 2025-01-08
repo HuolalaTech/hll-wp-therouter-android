@@ -5,6 +5,7 @@ import com.android.build.api.artifact.ScopedArtifact;
 import com.therouter.plugin.TheRouterExtension;
 import com.therouter.plugin.utils.TheRouterPluginUtils;
 
+import io.github.flyjingfish.easy_register.plugin.InitPlugin;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
@@ -88,33 +89,45 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             @Override
             public void execute(final Variant variant) {
                 ScopedArtifacts.Scope scope = ScopedArtifacts.Scope.ALL;
-                if (!isFirst && theRouterExtension.debug) {
-                    scope = ScopedArtifacts.Scope.PROJECT;
-
-                    String tempText = "";
-                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
-                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
-                    }
-                    final String allClassText = tempText;
-                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
-
-                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
-                        @Override
-                        public Unit invoke(TextParameters textParameters) {
-                            textParameters.getAsmTargetText().set(asmTargetText);
-                            textParameters.getAllClassText().set(allClassText);
-                            textParameters.getAsmTargetFile().set(asmTargetFile);
-                            textParameters.getAllClassFile().set(allClassFile);
-                            textParameters.getFlowTaskFile().set(flowTaskFile);
-                            textParameters.getRouteFile().set(routeFile);
-                            textParameters.getDebugValue().set(theRouterExtension.debug);
-                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
-                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
-                            return null;
-                        }
-                    });
+//                if (!isFirst && theRouterExtension.debug) {
+//                    scope = ScopedArtifacts.Scope.PROJECT;
+//
+//                    String tempText = "";
+//                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
+//                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
+//                    }
+//                    final String allClassText = tempText;
+//                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
+//
+//                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
+//                        @Override
+//                        public Unit invoke(TextParameters textParameters) {
+//                            textParameters.getAsmTargetText().set(asmTargetText);
+//                            textParameters.getAllClassText().set(allClassText);
+//                            textParameters.getAsmTargetFile().set(asmTargetFile);
+//                            textParameters.getAllClassFile().set(allClassFile);
+//                            textParameters.getFlowTaskFile().set(flowTaskFile);
+//                            textParameters.getRouteFile().set(routeFile);
+//                            textParameters.getDebugValue().set(theRouterExtension.debug);
+//                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
+//                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
+//                            return null;
+//                        }
+//                    });
+//                }
+                String buildTypeName = variant.getBuildType();
+                boolean isDebug;
+                if (buildTypeName != null){
+                    isDebug = "debug".equals(buildTypeName.toLowerCase());
+                }else{
+                    String variantName = variant.getName();
+                    isDebug = variantName.toLowerCase().contains("debug");
                 }
 
+                if (isDebug){
+                    InitPlugin.INSTANCE.transformClassesWith(project,variant);
+                    return;
+                }
                 String variantName = "TheRouter" + variant.getName().substring(0, 1).toUpperCase() + variant.getName().substring(1);
                 TaskProvider<TheRouterTask> theRouterTask = project.getTasks().register(variantName, TheRouterTask.class, task -> {
                     task.setTheRouterExtension(theRouterExtension);
