@@ -2,6 +2,7 @@ package com.therouter.router
 
 import a.initDefaultRouteMap
 import android.content.Intent
+import android.os.Looper
 import android.text.TextUtils
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -107,61 +108,86 @@ fun setRouteMapInitTask(task: () -> Unit) {
  * 尝试通过Intent，从路由表中获取对应的路由Path
  * 如果路由表中没有对应路由，则将类名作为路由Path新创建一条路由项
  */
-@Synchronized
 fun foundPathFromIntent(intent: Intent): String? {
-    val className = intent.component?.className
-    className?.let {
-        ROUTER_MAP.values.forEach {
-            if (it?.className == className) {
-                return it.path
+    fun foundPath(): String? {
+        val className = intent.component?.className
+        className?.let {
+            ROUTER_MAP.values.forEach {
+                if (it?.className == className) {
+                    return it.path
+                }
             }
+            // 如果路由表中没有这个类名，则新增一条路由项
+            val item = RouteItem(className, className, "", className)
+            item.addAll(intent.extras)
+            addRouteItem(item)
+            return className
         }
-        // 如果路由表中没有这个类名，则新增一条路由项
-        val item = RouteItem(className, className, "", className)
-        item.addAll(intent.extras)
-        addRouteItem(item)
-        return className
+        return null
     }
-    return null
+    if (Thread.currentThread() == Looper.getMainLooper().thread) {
+        return foundPath()
+    } else {
+        synchronized(ROUTER_MAP) {
+            return foundPath()
+        }
+    }
 }
 
 /**
  * 尝试通过Path，从路由表中获取对应的路由项，如果没有对应路由，则返回null
  */
-@Synchronized
 fun matchRouteMap(url: String?): RouteItem? {
-    var path = TheRouter.build(url ?: "").simpleUrl
-    if (path.endsWith("/")) {
-        path = path.substring(0, path.length - 1)
+    fun matchRoute(): RouteItem? {
+        var path = TheRouter.build(url ?: "").simpleUrl
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length - 1)
+        }
+        // copy是为了防止外部修改影响路由表
+        val routeItem = ROUTER_MAP[path]?.copy()
+        // 由于路由表中的path可能是正则path，要用入参替换掉
+        routeItem?.path = path
+        return routeItem
     }
-    // copy是为了防止外部修改影响路由表
-    val routeItem = ROUTER_MAP[path]?.copy()
-    // 由于路由表中的path可能是正则path，要用入参替换掉
-    routeItem?.path = path
-    return routeItem
+
+    if (Thread.currentThread() == Looper.getMainLooper().thread) {
+        return matchRoute()
+    } else {
+        synchronized(ROUTER_MAP) {
+            return matchRoute()
+        }
+    }
 }
 
 /**
  * 尝试通过ClassName，从路由表中获取对应的路由项，如果没有对应路由，则返回空数组
  */
-@Synchronized
 fun matchRouteMapForClassName(className: String?): List<RouteItem> {
-    val result = ArrayList<RouteItem>()
-    ROUTER_MAP.values.forEach {
-        it?.let {
-            if (it.className == className) {
-                // copy是为了防止外部修改影响路由表
-                result.add(it.copy())
+    fun match(): List<RouteItem> {
+        val result = ArrayList<RouteItem>()
+        ROUTER_MAP.values.forEach {
+            it?.let {
+                if (it.className == className) {
+                    // copy是为了防止外部修改影响路由表
+                    result.add(it.copy())
+                }
             }
         }
+        return result
     }
-    return result
+
+    if (Thread.currentThread() == Looper.getMainLooper().thread) {
+        return match()
+    } else {
+        synchronized(ROUTER_MAP) {
+            return match()
+        }
+    }
 }
 
 /**
  * 向路由表添加路由
  */
-@Synchronized
 fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
     if (routeItemArray != null && !routeItemArray.isEmpty()) {
         for (entity in routeItemArray) {
@@ -173,13 +199,22 @@ fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
 /**
  * 向路由表添加路由
  */
-@Synchronized
 fun addRouteItem(routeItem: RouteItem) {
-    var path = routeItem.path
-    if (path.endsWith("/")) {
-        path = path.substring(0, path.length - 1)
+    fun addRoute() {
+        var path = routeItem.path
+        if (path.endsWith("/")) {
+            path = path.substring(0, path.length - 1)
+        }
+        debugOnly("addRouteItem", "add $path")
+        ROUTER_MAP[path] = routeItem
+        onRouteMapChangedListener?.onChanged(routeItem)
     }
-    debugOnly("addRouteItem", "add $path")
-    ROUTER_MAP[path] = routeItem
-    onRouteMapChangedListener?.onChanged(routeItem)
+
+    if (Thread.currentThread() == Looper.getMainLooper().thread) {
+        return addRoute()
+    } else {
+        synchronized(ROUTER_MAP) {
+            return addRoute()
+        }
+    }
 }

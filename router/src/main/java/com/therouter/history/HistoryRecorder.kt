@@ -2,6 +2,7 @@
 
 package com.therouter.history
 
+import com.therouter.executeInMainThread
 import com.therouter.inject.RecyclerLruCache
 import java.util.*
 import kotlin.collections.ArrayList
@@ -20,13 +21,13 @@ private val mCacher = RecyclerLruCache<String?, History?>(HISTORY_LOG_MAX_SIZE).
 
 private val m2ndCacher = WeakHashMap<String?, History?>()
 
-@Synchronized
-fun pushHistory(event: History) = mCacher.put("${counter++}", event)
+fun pushHistory(event: History) = executeInMainThread {
+    mCacher.put("${counter++}", event)
+}
 
 /**
  * 导出路由的全部记录
  */
-@Synchronized
 fun export(level: Level): List<String> {
     val list = ArrayList<String>()
     for (index in 0..counter) {

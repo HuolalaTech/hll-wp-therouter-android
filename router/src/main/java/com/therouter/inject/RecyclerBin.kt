@@ -1,38 +1,30 @@
 package com.therouter.inject
 
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Created by ZhangTao on 17/8/1.
  */
 class RecyclerBin internal constructor() {
-    private val singletonMap = HashMap<ClassWrapper<*>, Any>()
+    private val singletonMap = ConcurrentHashMap<ClassWrapper<*>, Any>()
     private val mCacher = RecyclerLruCache<ClassWrapper<*>?, Any?>(MAX_SIZE).apply {
-        setOnEntryRemovedListener { key, oldValue, _ -> m2ndCacher[key] = oldValue }
+        setOnEntryRemovedListener { key, oldValue, _ -> synchronized(m2ndCacher) { m2ndCacher[key] = oldValue } }
     }
 
     private val m2ndCacher = WeakHashMap<ClassWrapper<*>, Any?>()
-    fun <T> put(clazz: Class<T>, t: T, vararg params: Any?): T? {
+    fun <T> put(clazz: Class<T>, t: T, vararg params: Any?) {
         val key: ClassWrapper<*> = ClassWrapper(clazz, *params)
-        return when {
+        when {
             clazz.isAnnotationPresent(Singleton::class.java) -> {
-                synchronized(singletonMap) {
-                    return when {
-                        singletonMap.containsKey(key) -> {
-                            singletonMap[key] as T?
-                        }
-                        t != null -> {
-                            singletonMap[key] = t
-                            t
-                        }
-                        else -> t
-                    }
+                if (t != null) {
+                    singletonMap[key] = t
                 }
             }
+
             clazz.isAnnotationPresent(NewInstance::class.java) -> t
             else -> {
                 mCacher.put(key, t)
-                t
             }
         }
     }
@@ -43,7 +35,9 @@ class RecyclerBin internal constructor() {
         if (t == null) {
             t = mCacher[key]
             if (t == null) {
-                t = m2ndCacher.remove(key)
+                synchronized(m2ndCacher) {
+                    t = m2ndCacher.remove(key)
+                }
                 if (t != null) {
                     mCacher.put(key, t)
                 }
