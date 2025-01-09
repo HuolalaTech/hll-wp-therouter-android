@@ -67,10 +67,6 @@ public class TheRouterTransform extends Transform {
     }
 
     private void theRouterTransform(Collection<TransformInput> inputs, TransformOutputProvider outputProvider) {
-        TheRouterInjects.serviceProvideMap.clear()
-        TheRouterInjects.autowiredSet.clear()
-        TheRouterInjects.routeSet.clear()
-
         File theRouterClassOutputFile
         Set<String> routeMapStringSet = new HashSet<>();
         Map<String, String> flowTaskMap = new HashMap<>();
