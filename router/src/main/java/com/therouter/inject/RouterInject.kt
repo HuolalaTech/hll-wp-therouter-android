@@ -18,13 +18,8 @@ class RouterInject {
     private val mInterceptors = CopyOnWriteArrayList<Interceptor>()
     private val mCustomInterceptors = CopyOnWriteArrayList<Interceptor>()
 
-    fun asyncInitRouterInject(context: Context?) {
-        execute {
-            trojan()
-            if (mInterceptors.isEmpty()) {
-                initServiceProvider(context)
-            }
-        }
+    fun asyncInitRouterInject(context: Context?) = execute {
+        syncInitRouterInject(context)
     }
 
     fun syncInitRouterInject(context: Context?) {
@@ -35,9 +30,7 @@ class RouterInject {
     }
 
     internal fun initServiceProvider(context: Context?) {
-        execute {
-            getAllDI(context)
-        }
+        getAllDI(context)
     }
 
     @Keep
