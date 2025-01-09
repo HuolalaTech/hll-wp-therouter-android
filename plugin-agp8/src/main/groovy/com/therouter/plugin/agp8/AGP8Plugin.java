@@ -116,33 +116,33 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                         }
                     });
                 }
-//                String buildTypeName = variant.getBuildType();
-//                boolean isDebug;
-//                if (buildTypeName != null){
-//                    isDebug = "debug".equalsIgnoreCase(buildTypeName);
-//                }else{
-//                    String variantName = variant.getName();
-//                    isDebug = variantName.toLowerCase().contains("debug");
-//                }
-//
-//                if (isDebug){
-//                    try {
-//                        Class initPluginClass = Class.forName("io.github.flyjingfish.easy_register.plugin.InitPlugin");
-//                        Method method  = initPluginClass.getDeclaredMethod(
-//                                "transformClassesWith",
-//                                Project.class,
-//                                Variant.class
-//                        );
-//                        method.setAccessible(true);
-//                        // 检查是否是静态方法并调用
-//                        method.invoke(null, project, variant);
-//                    } catch (ClassNotFoundException | IllegalAccessException |
-//                             InvocationTargetException | NoSuchMethodException e) {
-//                        throw new RuntimeException(e);
-//                    }
-//
-//                    return;
-//                }
+                String buildTypeName = variant.getBuildType();
+                boolean isDebug;
+                if (buildTypeName != null){
+                    isDebug = "debug".equalsIgnoreCase(buildTypeName);
+                }else{
+                    String variantName = variant.getName();
+                    isDebug = variantName.toLowerCase().contains("debug");
+                }
+
+                if (isDebug){
+                    try {
+                        Class initPluginClass = Class.forName("io.github.flyjingfish.easy_register.plugin.InitPlugin");
+                        Method method  = initPluginClass.getDeclaredMethod(
+                                "transformClassesWith",
+                                Project.class,
+                                Variant.class
+                        );
+                        method.setAccessible(true);
+                        // 检查是否是静态方法并调用
+                        method.invoke(null, project, variant);
+                    } catch (ClassNotFoundException | IllegalAccessException |
+                             InvocationTargetException | NoSuchMethodException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    return;
+                }
                 String variantName = "TheRouter" + variant.getName().substring(0, 1).toUpperCase() + variant.getName().substring(1);
                 TaskProvider<TheRouterTask> theRouterTask = project.getTasks().register(variantName, TheRouterTask.class, task -> {
                     task.setTheRouterExtension(theRouterExtension);
@@ -150,7 +150,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     task.setAllClassFile(allClassFile);
                     task.setFlowTaskFile(flowTaskFile);
                     task.setRouteFile(routeFile);
-                    task.setFirst(isFirst);
+                    task.setFirst(true);
                 });
                 variant.getArtifacts()
                         .forScope(scope)

@@ -14,14 +14,14 @@ public class TheRouterPlugin extends AGP8Plugin {
 
     @Override
     public void apply(Project project) {
-//        Class initPluginClass = Class.forName("io.github.flyjingfish.easy_register.plugin.InitPlugin");
-//        Method method  = initPluginClass.getDeclaredMethod(
-//                "initRoot",
-//                Project.class
-//        );
-//        method.setAccessible(true)
-//        // 检查是否是静态方法并调用
-//        method.invoke(null, project)
+        Class initPluginClass = Class.forName("io.github.flyjingfish.easy_register.plugin.InitPlugin");
+        Method method  = initPluginClass.getDeclaredMethod(
+                "initRoot",
+                Project.class
+        );
+        method.setAccessible(true)
+        // 检查是否是静态方法并调用
+        method.invoke(null, project)
 
         final TheRouterExtension theRouterExtension = project.getExtensions().create("TheRouter", TheRouterExtension.class);
         boolean isLibrary = project.getPlugins().hasPlugin("com.android.library");
