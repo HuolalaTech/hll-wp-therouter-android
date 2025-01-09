@@ -5,7 +5,6 @@ import com.android.build.api.artifact.ScopedArtifact;
 import com.therouter.plugin.TheRouterExtension;
 import com.therouter.plugin.utils.TheRouterPluginUtils;
 
-import io.github.flyjingfish.easy_register.plugin.InitPlugin;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
@@ -18,6 +17,8 @@ import com.android.build.api.instrumentation.InstrumentationScope;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,45 +90,59 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             @Override
             public void execute(final Variant variant) {
                 ScopedArtifacts.Scope scope = ScopedArtifacts.Scope.ALL;
-//                if (!isFirst && theRouterExtension.debug) {
-//                    scope = ScopedArtifacts.Scope.PROJECT;
-//
-//                    String tempText = "";
-//                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
-//                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
-//                    }
-//                    final String allClassText = tempText;
-//                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
-//
-//                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
-//                        @Override
-//                        public Unit invoke(TextParameters textParameters) {
-//                            textParameters.getAsmTargetText().set(asmTargetText);
-//                            textParameters.getAllClassText().set(allClassText);
-//                            textParameters.getAsmTargetFile().set(asmTargetFile);
-//                            textParameters.getAllClassFile().set(allClassFile);
-//                            textParameters.getFlowTaskFile().set(flowTaskFile);
-//                            textParameters.getRouteFile().set(routeFile);
-//                            textParameters.getDebugValue().set(theRouterExtension.debug);
-//                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
-//                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
-//                            return null;
-//                        }
-//                    });
-//                }
-                String buildTypeName = variant.getBuildType();
-                boolean isDebug;
-                if (buildTypeName != null){
-                    isDebug = "debug".equalsIgnoreCase(buildTypeName);
-                }else{
-                    String variantName = variant.getName();
-                    isDebug = variantName.toLowerCase().contains("debug");
-                }
+                if (!isFirst && theRouterExtension.debug) {
+                    scope = ScopedArtifacts.Scope.PROJECT;
 
-                if (isDebug){
-                    InitPlugin.INSTANCE.transformClassesWith(project,variant);
-                    return;
+                    String tempText = "";
+                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
+                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
+                    }
+                    final String allClassText = tempText;
+                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
+
+                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
+                        @Override
+                        public Unit invoke(TextParameters textParameters) {
+                            textParameters.getAsmTargetText().set(asmTargetText);
+                            textParameters.getAllClassText().set(allClassText);
+                            textParameters.getAsmTargetFile().set(asmTargetFile);
+                            textParameters.getAllClassFile().set(allClassFile);
+                            textParameters.getFlowTaskFile().set(flowTaskFile);
+                            textParameters.getRouteFile().set(routeFile);
+                            textParameters.getDebugValue().set(theRouterExtension.debug);
+                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
+                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
+                            return null;
+                        }
+                    });
                 }
+//                String buildTypeName = variant.getBuildType();
+//                boolean isDebug;
+//                if (buildTypeName != null){
+//                    isDebug = "debug".equalsIgnoreCase(buildTypeName);
+//                }else{
+//                    String variantName = variant.getName();
+//                    isDebug = variantName.toLowerCase().contains("debug");
+//                }
+//
+//                if (isDebug){
+//                    try {
+//                        Class initPluginClass = Class.forName("io.github.flyjingfish.easy_register.plugin.InitPlugin");
+//                        Method method  = initPluginClass.getDeclaredMethod(
+//                                "transformClassesWith",
+//                                Project.class,
+//                                Variant.class
+//                        );
+//                        method.setAccessible(true);
+//                        // 检查是否是静态方法并调用
+//                        method.invoke(null, project, variant);
+//                    } catch (ClassNotFoundException | IllegalAccessException |
+//                             InvocationTargetException | NoSuchMethodException e) {
+//                        throw new RuntimeException(e);
+//                    }
+//
+//                    return;
+//                }
                 String variantName = "TheRouter" + variant.getName().substring(0, 1).toUpperCase() + variant.getName().substring(1);
                 TaskProvider<TheRouterTask> theRouterTask = project.getTasks().register(variantName, TheRouterTask.class, task -> {
                     task.setTheRouterExtension(theRouterExtension);

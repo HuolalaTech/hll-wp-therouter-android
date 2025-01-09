@@ -7,6 +7,8 @@ import com.android.build.api.variant.ScopedArtifacts
 import com.android.build.api.variant.Variant
 import com.android.build.gradle.AppPlugin
 import io.github.flyjingfish.easy_register.tasks.AddClassesTask
+import io.github.flyjingfish.easy_register.utils.EasyRegisterJson
+import io.github.flyjingfish.easy_register.utils.Mode
 import io.github.flyjingfish.easy_register.utils.RegisterClassUtils
 import io.github.flyjingfish.easy_register.visitor.MyClassVisitorFactory
 import org.gradle.api.Project
@@ -40,7 +42,15 @@ object InitPlugin{
         RegisterClassUtils.initConfig(jsons)
     }
 
+    @JvmStatic
+    fun initRoot(project: Project) {
+        RegisterClassUtils.enable = true
+        RegisterClassUtils.mode = Mode.AUTO
+        initFromJson(EasyRegisterJson.jsons)
+        rootPluginDeepApply(project)
+    }
 
+    @JvmStatic
     fun transformClassesWith(project: Project, variant: Variant) {
         variant.instrumentation.transformClassesWith(
             MyClassVisitorFactory::class.java,

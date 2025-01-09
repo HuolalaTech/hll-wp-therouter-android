@@ -1,22 +1,18 @@
-package com.therouter.plugin.utils;
+package io.github.flyjingfish.easy_register.utils
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class EasyRegisterJson {
-
-    public static final String json = """
+object EasyRegisterJson {
+    val json = """
             [
               {
                 "wovenClass": "a.TheRouterServiceProvideInjecter",
                 "wovenMethod": "void addFlowTask(android.content.Context,com.therouter.flow.Digraph)",
                 "searchClass": {
-                  "regex": "^a.ServiceProvider__TheRouter__[^$]+$",
+                  "regex": "^a.ServiceProvider__TheRouter__[^${'$'}]+${'$'}",
                   "extendsClass": "",
                   "callType": "caller",
                   "callClass": "",
                   "callMethod": "void addFlowTask(android.content.Context,com.therouter.flow.Digraph)",
-                  "callMethodValue": "$0,$1",
+                  "callMethodValue": "${'$'}0,${'$'}1",
                   "useType": "className"
                 }
                         
@@ -25,12 +21,12 @@ public class EasyRegisterJson {
                 "wovenClass": "a.TheRouterServiceProvideInjecter",
                 "wovenMethod": "void autowiredInject(Object)",
                 "searchClass": {
-                  "regex": "^[^$]+__TheRouter__Autowired$",
+                  "regex": "^[^${'$'}]+__TheRouter__Autowired${'$'}",
                   "extendsClass": "",
                   "callType": "caller",
                   "callClass": "",
                   "callMethod": "void autowiredInject(Object)",
-                  "callMethodValue": "$0",
+                  "callMethodValue": "${'$'}0",
                   "useType": "className"
                 }
                         
@@ -39,7 +35,7 @@ public class EasyRegisterJson {
                 "wovenClass": "a.TheRouterServiceProvideInjecter",
                 "wovenMethod": "void initDefaultRouteMap()",
                 "searchClass": {
-                  "regex": "^a.RouterMap__TheRouter__[^$]+$",
+                  "regex": "^a.RouterMap__TheRouter__[^${'$'}]+${'$'}",
                   "extendsClass": "",
                   "callType": "caller",
                   "callClass": "",
@@ -53,7 +49,7 @@ public class EasyRegisterJson {
                 "wovenClass": "a.TheRouterServiceProvideInjecter",
                 "wovenMethod": "void trojan()",
                 "searchClass": {
-                  "regex": "^a.ServiceProvider__TheRouter__[^$]+$",
+                  "regex": "^a.ServiceProvider__TheRouter__[^${'$'}]+${'$'}",
                   "extendsClass": "",
                   "callType": "callee",
                   "callClass": "com.therouter.TheRouter",
@@ -64,7 +60,7 @@ public class EasyRegisterJson {
                         
               }
             ]
-            """;
-
-    public static final List<String> jsons = new ArrayList<>(List.of(json));
+            
+            """.trimIndent()
+    val jsons: List<String> = ArrayList(java.util.List.of(json))
 }
