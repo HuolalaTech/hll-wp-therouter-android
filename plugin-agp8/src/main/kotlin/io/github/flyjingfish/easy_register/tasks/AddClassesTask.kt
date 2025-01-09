@@ -37,7 +37,6 @@ abstract class AddClassesTask : DefaultTask() {
         }
         AsmUtils.createInitClass(tmpOtherDir)
         val wovenCodeJobs = mutableListOf<Deferred<Unit>>()
-        val needDeleteFiles = mutableListOf<String>()
         val outputDir = File(output.get().asFile.absolutePath)
         for (file in tmpOtherDir.walk()) {
             if (file.isFile) {
@@ -45,9 +44,6 @@ abstract class AddClassesTask : DefaultTask() {
                     val relativePath = file.getRelativePath(tmpOtherDir)
                     val target = File(outputDir.absolutePath + File.separatorChar + relativePath)
                     target.checkExist()
-                    synchronized(needDeleteFiles){
-                        needDeleteFiles.add(target.absolutePath)
-                    }
                     file.inputStream().use {
                         target.saveEntry(it)
                     }
