@@ -35,9 +35,6 @@ class RegisterClassVisitor(cv: ClassVisitor?) : ClassVisitor(Opcodes.ASM9, cv) {
         }else{
             super.visitMethod(access, name, descriptor, signature, exceptions)
         }
-//        else if (name == "register" && descriptor == "(Ljava/lang/String;)V"){
-//            super.visitMethod(access.addPublic(true), name, descriptor, signature, exceptions)
-//        }
     }
 
     inner class MyMethodAdapter(mv: MethodVisitor, access: Int, private val mName: String, private val mDesc: String) :

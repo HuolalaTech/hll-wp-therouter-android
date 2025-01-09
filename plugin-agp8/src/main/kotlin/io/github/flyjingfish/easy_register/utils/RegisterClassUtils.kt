@@ -107,9 +107,9 @@ object RegisterClassUtils {
         return if (mode == Mode.AUTO || mode == Mode.DEBUG){
             if (mode == Mode.AUTO){
                 if (buildTypeName != null){
-                    buildTypeName.lowercase() == "debug"
+                    buildTypeName.lowercase() == Mode.DEBUG.mode
                 }else{
-                    variantName.lowercase().contains("debug")
+                    variantName.lowercase().contains(Mode.DEBUG.mode)
                 }
             }else{
                 true

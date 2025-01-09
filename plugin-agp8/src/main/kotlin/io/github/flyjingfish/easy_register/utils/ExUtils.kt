@@ -14,10 +14,6 @@ fun registerCompileTempDir(project: Project, variantName:String):String{
     return project.buildDir.absolutePath + "/tmp/easy-register/${variantName}/tempCompileClass/".adapterOSPath()
 }
 
-fun hintCleanFile(project: Project):String{
-    return project.buildDir.absolutePath + "/tmp/easy-register/hintClean.json".adapterOSPath()
-}
-
 fun String.adapterOSPath():String {
     return replace('/', File.separatorChar)
 }
@@ -47,18 +43,6 @@ fun File.saveEntry(inputStream: InputStream) {
 fun ByteArray.saveFile(outFile : File){
     inputStream().use { inputStream->
         outFile.saveEntry(inputStream)
-    }
-}
-
-fun Int.addPublic(isAddPublic: Boolean):Int{
-    return if (isAddPublic){
-        if (this and Opcodes.ACC_PUBLIC != 0){
-            this
-        }else{
-            this and (Opcodes.ACC_PRIVATE or Opcodes.ACC_PROTECTED).inv() or Opcodes.ACC_PUBLIC
-        }
-    }else{
-        this
     }
 }
 private fun bytesToHex(bytes: ByteArray): String {
@@ -93,19 +77,6 @@ fun slashToDot(str: String): String {
 fun printLog(text: String) {
     if (!RegisterClassUtils.log) return
     println(text)
-}
-
-val JAR_SIGNATURE_EXTENSIONS = setOf("SF", "RSA", "DSA", "EC")
-fun String.isJarSignatureRelatedFiles(): Boolean {
-    return startsWith("META-INF/") && substringAfterLast('.') in JAR_SIGNATURE_EXTENSIONS
-}
-
-fun File.getFileClassname(directory :File):String {
-    return getRelativePath(directory).toClassPath()
-}
-
-fun String.toClassPath():String {
-    return replace(File.separatorChar, '/')
 }
 
 fun getWovenClassName(className:String,methodName:String,methodDesc:String):String{

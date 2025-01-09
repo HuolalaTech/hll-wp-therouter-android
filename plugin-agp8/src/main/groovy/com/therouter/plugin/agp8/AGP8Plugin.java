@@ -118,7 +118,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                 String buildTypeName = variant.getBuildType();
                 boolean isDebug;
                 if (buildTypeName != null){
-                    isDebug = "debug".equals(buildTypeName.toLowerCase());
+                    isDebug = "debug".equalsIgnoreCase(buildTypeName);
                 }else{
                     String variantName = variant.getName();
                     isDebug = variantName.toLowerCase().contains("debug");

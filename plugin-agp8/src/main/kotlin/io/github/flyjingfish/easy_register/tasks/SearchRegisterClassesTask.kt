@@ -38,7 +38,6 @@ class SearchRegisterClassesTask(
 
 
     private fun searchJoinPointLocation(){
-        //第一遍找配置文件
         RegisterClassUtils.clear(project.name)
         allDirectories.forEach { directory ->
             directory.walk().forEach { file ->
