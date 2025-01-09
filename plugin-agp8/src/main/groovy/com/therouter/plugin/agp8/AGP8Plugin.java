@@ -90,32 +90,32 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             @Override
             public void execute(final Variant variant) {
                 ScopedArtifacts.Scope scope = ScopedArtifacts.Scope.ALL;
-                if (!isFirst && theRouterExtension.debug) {
-                    scope = ScopedArtifacts.Scope.PROJECT;
-
-                    String tempText = "";
-                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
-                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
-                    }
-                    final String allClassText = tempText;
-                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
-
-                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
-                        @Override
-                        public Unit invoke(TextParameters textParameters) {
-                            textParameters.getAsmTargetText().set(asmTargetText);
-                            textParameters.getAllClassText().set(allClassText);
-                            textParameters.getAsmTargetFile().set(asmTargetFile);
-                            textParameters.getAllClassFile().set(allClassFile);
-                            textParameters.getFlowTaskFile().set(flowTaskFile);
-                            textParameters.getRouteFile().set(routeFile);
-                            textParameters.getDebugValue().set(theRouterExtension.debug);
-                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
-                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
-                            return null;
-                        }
-                    });
-                }
+//                if (!isFirst && theRouterExtension.debug) {
+//                    scope = ScopedArtifacts.Scope.PROJECT;
+//
+//                    String tempText = "";
+//                    if (TheRouterPluginUtils.needCheckRouteItemClass(theRouterExtension.checkRouteMap)) {
+//                        tempText = TheRouterPluginUtils.getTextFromFile(allClassFile);
+//                    }
+//                    final String allClassText = tempText;
+//                    final String asmTargetText = TheRouterPluginUtils.getTextFromFile(asmTargetFile);
+//
+//                    variant.getInstrumentation().transformClassesWith(TheRouterASM.class, InstrumentationScope.ALL, new Function1<TextParameters, Unit>() {
+//                        @Override
+//                        public Unit invoke(TextParameters textParameters) {
+//                            textParameters.getAsmTargetText().set(asmTargetText);
+//                            textParameters.getAllClassText().set(allClassText);
+//                            textParameters.getAsmTargetFile().set(asmTargetFile);
+//                            textParameters.getAllClassFile().set(allClassFile);
+//                            textParameters.getFlowTaskFile().set(flowTaskFile);
+//                            textParameters.getRouteFile().set(routeFile);
+//                            textParameters.getDebugValue().set(theRouterExtension.debug);
+//                            textParameters.getCheckRouteMapValue().set(theRouterExtension.checkRouteMap);
+//                            textParameters.getCheckFlowDependValue().set(theRouterExtension.checkFlowDepend);
+//                            return null;
+//                        }
+//                    });
+//                }
                 String buildTypeName = variant.getBuildType();
                 boolean isDebug;
                 if (buildTypeName != null){
