@@ -4,15 +4,11 @@ import io.github.flyjingfish.easy_register.bean.WovenClass
 import io.github.flyjingfish.easy_register.tasks.SearchRegisterClassesTask
 import io.github.flyjingfish.easy_register.visitor.RegisterClassVisitor
 import io.github.flyjingfish.easy_register.visitor.SearchClassScanner
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import org.gradle.api.Project
 import org.objectweb.asm.ClassReader
 import org.objectweb.asm.ClassVisitor
 import org.objectweb.asm.ClassWriter
+import org.objectweb.asm.Label
 import org.objectweb.asm.MethodVisitor
 import org.objectweb.asm.Opcodes
 import org.objectweb.asm.Type
@@ -21,6 +17,7 @@ import org.objectweb.asm.commons.Method
 import java.io.File
 import java.io.FileInputStream
 import java.util.jar.JarFile
+
 
 object AsmUtils {
     fun processFileForConfig(project: Project, file: File) {
@@ -121,10 +118,25 @@ object AsmUtils {
                 val path = output.absolutePath + File.separatorChar + dotToSlash(className).adapterOSPath()+".class"
                 val outFile = File(path)
                 val argTypes = Type.getArgumentTypes(method.descriptor)
+                var argSize = argTypes.size
                 fun addCode(mv:MethodVisitor){
                     val set = searchClass.getClassNames()
                     if (set.isNotEmpty()) {
                         for (routeModuleClassName in set) {
+                            val tryStart = Label()
+                            val tryEnd = Label()
+                            val labelCatch = Label()
+                            val tryCatchBlockEnd = Label()
+
+                            mv.visitTryCatchBlock(
+                                tryStart,
+                                tryEnd,
+                                labelCatch,
+                                "java/lang/Throwable"
+                            )
+                            mv.visitLabel(tryStart)
+
+
                             if (searchClass.callType == "callee" && searchClass.callClass.isNotEmpty()){
                                 val callClazz = dotToSlash(searchClass.callClass)
                                 var callMethod : Method ?= null
@@ -317,6 +329,23 @@ object AsmUtils {
                                 )
                             }
 
+                            mv.visitLabel(tryEnd)
+                            mv.visitJumpInsn(Opcodes.GOTO, tryCatchBlockEnd)
+
+                            mv.visitLabel(labelCatch)
+                            mv.visitVarInsn(Opcodes.ASTORE, argSize)
+
+                            mv.visitVarInsn(Opcodes.ALOAD, argSize)
+                            mv.visitMethodInsn(
+                                Opcodes.INVOKEVIRTUAL,
+                                "java/lang/Throwable",
+                                "printStackTrace",
+                                "()V",
+                                false
+                            )
+
+                            mv.visitLabel(tryCatchBlockEnd)
+
                         }
                     }
 
@@ -382,7 +411,7 @@ object AsmUtils {
                 addCode(mv)
 
                 mv.visitInsn(Opcodes.RETURN)
-                mv.visitMaxs(argTypes.size, argTypes.size+1)
+                mv.visitMaxs(argSize, argSize+1)
                 mv.visitEnd()
 
                 val classByteData = cw.toByteArray()
