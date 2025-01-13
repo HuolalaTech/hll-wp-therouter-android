@@ -7,8 +7,8 @@ import android.content.Intent
 import android.util.Log
 import com.therouter.TheRouter.logCat
 import com.therouter.flow.Digraph
-import com.therouter.flow.runInitFlowTask
 import com.therouter.inject.RouterInject
+import com.therouter.inject.SUFFIX_AUTOWIRED_DOT_CLASS
 import com.therouter.router.*
 import com.therouter.router.action.ActionManager
 import com.therouter.router.action.interceptor.ActionInterceptor
@@ -77,21 +77,13 @@ object TheRouter {
     fun init(context: Context?, asyncInitRouterInject: Boolean) {
         if (!inited) {
             debug("init", "TheRouter init start!")
-            addFlowTask(context, digraph)
-            debugOnly("init", "TheRouter.init() method do @FlowTask before task")
-            digraph.beforeSchedule()
-            execute {
-                debugOnly("init", "TheRouter.init() method do @FlowTask init")
-                digraph.initSchedule()
-                debugOnly("init", "TheRouter.init() method do @FlowTask schedule")
-                runInitFlowTask()
-            }
+            digraph.beforeInit(context)
             if (asyncInitRouterInject) {
                 routerInject.asyncInitRouterInject(context)
             } else {
                 routerInject.syncInitRouterInject(context)
             }
-            asyncInitRouteMap()
+            asyncInitRouteMap(context)
             execute {
                 context?.apply {
                     (applicationContext as Application).registerActivityLifecycleCallbacks(TheRouterLifecycleCallback)
@@ -200,6 +192,10 @@ object TheRouter {
     @JvmStatic
     fun inject(any: Any?) {
         autowiredInject(any)
+        if (isEmptyRouteMap() && any != null) {
+            val c = Class.forName(any.javaClass.name + SUFFIX_AUTOWIRED_DOT_CLASS)
+            c.getDeclaredMethod("autowiredInject", Object::class.java).invoke(any)
+        }
     }
 }
 

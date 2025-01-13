@@ -17,10 +17,12 @@ import java.util.zip.ZipEntry
 
 public class TheRouterInjects {
 
+    // ASM要插入的类，不能包含.class
     public static Map<String, String> serviceProvideMap = new HashMap<>()
     public static Set<String> autowiredSet = new HashSet<>()
     public static Set<String> routeSet = new HashSet<>()
 
+    // 用于编译期代码合法性检查的缓存
     public static final Set<String> routeMapStringSet = new HashSet<>();
     public static final Map<String, String> flowTaskMap = new HashMap<>();
     public static final Set<String> allClass = new HashSet<>();

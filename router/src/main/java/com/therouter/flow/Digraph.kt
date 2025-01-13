@@ -1,8 +1,12 @@
 package com.therouter.flow
 
+import a.addFlowTask
+import android.content.Context
 import android.text.TextUtils
-import com.therouter.debug
 import com.therouter.debugOnly
+import com.therouter.execute
+import com.therouter.inject.getAllDI
+import com.therouter.inject.getServiceProviderIndex
 import com.therouter.require
 import java.lang.StringBuilder
 import java.util.*
@@ -38,6 +42,27 @@ class Digraph {
             if (!tasks.containsKey(it)) {
                 tasks[it] = task
             }
+        }
+    }
+
+    /**
+     * 初始化方法
+     */
+    fun beforeInit(context: Context?) {
+        addFlowTask(context, this)
+        debugOnly("init", "TheRouter.init() method do @FlowTask before task")
+        if (tasks.isEmpty()) {
+            getAllDI(context)
+            context?.let {
+                getServiceProviderIndex().forEach { it.initFlowTask(context, this) }
+            }
+        }
+        beforeSchedule()
+        execute {
+            debugOnly("init", "TheRouter.init() method do @FlowTask init")
+            initSchedule()
+            debugOnly("init", "TheRouter.init() method do @FlowTask schedule")
+            runInitFlowTask()
         }
     }
 

@@ -157,6 +157,8 @@ class TheRouterSymbolProcessor(
             ps.println("@androidx.annotation.Keep")
             ps.println("class $className : com.therouter.router.IRouterMapAPT {")
             ps.println()
+            ps.println("\toverride fun init() { $className.addRoute() }")
+            ps.println()
             ps.println("\tcompanion object { ")
             ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
@@ -354,7 +356,12 @@ class TheRouterSymbolProcessor(
 
                 for ((i, item) in pageMap[key]!!.withIndex()) {
                     if (item.required) {
-                        ps.println(String.format("\t\tif (target.%s == null && com.therouter.TheRouter.isDebug){", item.fieldName))
+                        ps.println(
+                            String.format(
+                                "\t\tif (target.%s == null && com.therouter.TheRouter.isDebug){",
+                                item.fieldName
+                            )
+                        )
                         ps.println("\t\t\tthrow NullPointerException(\"@Autowired(required = true) ${key}.${item.fieldName} is null\")")
                         ps.println("\t\t}")
                     }
@@ -665,6 +672,10 @@ class TheRouterSymbolProcessor(
                     className
                 )
             )
+            ps.println()
+            ps.println("\toverride fun initFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
+            ps.println(String.format("\t\t%s.addFlowTask(context, digraph)", className))
+            ps.println("\t}")
             ps.println()
             ps.println("\toverride fun <T> interception(clazz: Class<T>?, vararg params: Any?): T? {")
             ps.println("\t\tvar obj: T? = null")

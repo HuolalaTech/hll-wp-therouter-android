@@ -7,8 +7,6 @@ import com.therouter.debug
 import com.therouter.execute
 import com.therouter.history.ServiceProviderHistory
 import com.therouter.history.pushHistory
-import dalvik.system.DexFile
-import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
 
 private val mRecyclerBin = RecyclerBin()
@@ -31,6 +29,7 @@ class RouterInject {
 
     internal fun initServiceProvider(context: Context?) {
         getAllDI(context)
+        mInterceptors.addAll(getServiceProviderIndex())
     }
 
     @Keep
@@ -81,42 +80,8 @@ class RouterInject {
         return t
     }
 
-    /**
-     * 将所有的 Interceptor 生成对象传入集合中
-     * 兼容性方案，性能较差，正常情况下不会被执行
-     *
-     * @WorkerThread
-     */
-    @Deprecated("")
-    private fun getAllDI(context: Context?) {
-        if (context == null) {
-            return
-        }
-        try {
-            val info = context.packageManager.getApplicationInfo(context.packageName, 0)
-            val path = info.sourceDir
-            val dexfile = DexFile(path)
-            val entries: Enumeration<*> = dexfile.entries()
-            while (entries.hasMoreElements()) {
-                val name = entries.nextElement() as String
-                if (name.startsWith("$PACKAGE.$SUFFIX")) {
-                    val clazz = Class.forName(name)
-                    if (Interceptor::class.java.isAssignableFrom(clazz) && Interceptor::class.java != clazz) {
-                        mInterceptors.add(clazz.newInstance() as Interceptor)
-                    }
-                }
-            }
-        } catch (e: Exception) {
-            routerInjectDebugLog("getAllDI error") {
-                e.printStackTrace()
-            }
-        }
-    }
 }
 
-const val PACKAGE = "a"
-const val SUFFIX = "ServiceProvider__TheRouter__"
-const val CLASS_NAME = "TheRouterServiceProvideInjecter"
 private fun routerInjectDebugLog(msg: String, block: () -> Unit = {}) {
     debug("RouterInject", msg, block)
 }

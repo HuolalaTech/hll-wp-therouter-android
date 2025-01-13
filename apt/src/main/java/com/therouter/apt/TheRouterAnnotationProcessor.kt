@@ -400,6 +400,9 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println(String.format("\tpublic static final String ROUTERMAP = \"%s\";", json.replace("\"", "\\\"")))
             ps.println()
 
+            ps.println("\tpublic void init() { $className.addRoute(); }")
+
+            ps.println()
             ps.println("\tpublic static void addRoute() {")
             var i = 0
             for (item in routePagelist) {
@@ -543,6 +546,12 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println("\tpublic static final String TAG = \"Created by kymjs, and APT Version is ${BuildConfig.VERSION}.\";")
             ps.println("\tpublic static final String THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\";")
             ps.println("\tpublic static final String FLOW_TASK_JSON = \"${stringBuilder.toString()}\";")
+            ps.println()
+
+            ps.println("\tpublic void initFlowTask(android.content.Context context, com.therouter.flow.Digraph digraph) {")
+            ps.println(String.format("\t\t%s.addFlowTask(context, digraph);", className))
+            ps.println("\t}")
+
             ps.println()
             ps.println("\tpublic <T> T interception(Class<T> clazz, Object... params) {")
             ps.println("\t\tT obj = null;")

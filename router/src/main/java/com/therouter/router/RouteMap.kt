@@ -1,6 +1,7 @@
 package com.therouter.router
 
 import a.initDefaultRouteMap
+import android.content.Context
 import android.content.Intent
 import android.os.Looper
 import android.text.TextUtils
@@ -13,6 +14,8 @@ import com.therouter.debugOnly
 import com.therouter.execute
 import com.therouter.executeInMainThread
 import com.therouter.getApplicationContext
+import com.therouter.inject.getAllDI
+import com.therouter.inject.getRouterMapIndex
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.charset.Charset
@@ -59,10 +62,14 @@ fun initRouteMap() {
 /**
  * 在异步初始化路由表
  */
-fun asyncInitRouteMap() {
+fun asyncInitRouteMap(context: Context?) {
     execute {
         debug("RouteMap", "will be add route map from： initDefaultRouteMap()")
         initDefaultRouteMap()
+        if (ROUTER_MAP.isEmpty()) {
+            getAllDI(context)
+            getRouterMapIndex().forEach { it.init() }
+        }
         initedRouteMap = true
         if (initTask == null) {
             initRouteMap()
@@ -218,3 +225,5 @@ fun addRouteItem(routeItem: RouteItem) {
         }
     }
 }
+
+internal fun isEmptyRouteMap() = ROUTER_MAP.isEmpty()
