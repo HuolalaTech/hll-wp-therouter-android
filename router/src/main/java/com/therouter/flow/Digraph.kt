@@ -1,6 +1,7 @@
 package com.therouter.flow
 
 import a.addFlowTask
+import a.asm
 import android.content.Context
 import android.text.TextUtils
 import com.therouter.debugOnly
@@ -51,7 +52,7 @@ class Digraph {
     fun beforeInit(context: Context?) {
         addFlowTask(context, this)
         debugOnly("init", "TheRouter.init() method do @FlowTask before task")
-        if (tasks.isEmpty()) {
+        if (!asm) {
             getAllDI(context)
             context?.let {
                 getServiceProviderIndex().forEach { it.initFlowTask(context, this) }

@@ -192,9 +192,13 @@ object TheRouter {
     @JvmStatic
     fun inject(any: Any?) {
         autowiredInject(any)
-        if (isEmptyRouteMap() && any != null) {
-            val c = Class.forName(any.javaClass.name + SUFFIX_AUTOWIRED_DOT_CLASS)
-            c.getDeclaredMethod("autowiredInject", Object::class.java).invoke(any)
+        if (!asm && any != null) {
+            try {
+                val c = Class.forName(any.javaClass.name + SUFFIX_AUTOWIRED_DOT_CLASS)
+                c.getDeclaredMethod("autowiredInject", Object::class.java).invoke(any)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 }

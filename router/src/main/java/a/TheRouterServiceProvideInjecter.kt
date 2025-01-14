@@ -3,7 +3,11 @@
 package a
 
 import android.content.Context
+import androidx.annotation.Keep
 import com.therouter.flow.Digraph
+
+@Keep
+const val asm = false
 
 /**
  * Created by ZhangTao on 18/2/24.

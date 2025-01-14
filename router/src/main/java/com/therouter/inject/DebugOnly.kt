@@ -37,14 +37,26 @@ internal fun getAllDI(context: Context?) {
         while (entries.hasMoreElements()) {
             val name = entries.nextElement()
             if (name.startsWith("$PACKAGE.$PREFIX_SERVICE_PROVIDER")) {
-                val clazz = Class.forName(name)
-                if (Interceptor::class.java.isAssignableFrom(clazz) && Interceptor::class.java != clazz) {
-                    serviceProviderIndex.add(clazz.newInstance() as Interceptor)
+                try {
+                    val clazz = Class.forName(name)
+                    if (Interceptor::class.java.isAssignableFrom(clazz) && Interceptor::class.java != clazz) {
+                        serviceProviderIndex.add(clazz.newInstance() as Interceptor)
+                    }
+                } catch (e: Exception) {
+                    debug("RouterInject", "create class error for $name") {
+                        e.printStackTrace()
+                    }
                 }
             } else if (name.startsWith("$PACKAGE.$PREFIX_ROUTER_MAP")) {
-                val clazz = Class.forName(name)
-                if (IRouterMapAPT::class.java.isAssignableFrom(clazz) && IRouterMapAPT::class.java != clazz) {
-                    routerMapIndex.add(clazz.newInstance() as IRouterMapAPT)
+                try {
+                    val clazz = Class.forName(name)
+                    if (IRouterMapAPT::class.java.isAssignableFrom(clazz) && IRouterMapAPT::class.java != clazz) {
+                        routerMapIndex.add(clazz.newInstance() as IRouterMapAPT)
+                    }
+                } catch (e: Exception) {
+                    debug("RouterInject", "create class error for $name") {
+                        e.printStackTrace()
+                    }
                 }
             }
         }

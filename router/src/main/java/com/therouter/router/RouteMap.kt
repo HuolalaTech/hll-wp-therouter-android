@@ -1,5 +1,6 @@
 package com.therouter.router
 
+import a.asm
 import a.initDefaultRouteMap
 import android.content.Context
 import android.content.Intent
@@ -66,7 +67,7 @@ fun asyncInitRouteMap(context: Context?) {
     execute {
         debug("RouteMap", "will be add route map from： initDefaultRouteMap()")
         initDefaultRouteMap()
-        if (ROUTER_MAP.isEmpty()) {
+        if (!asm) {
             getAllDI(context)
             getRouterMapIndex().forEach { it.init() }
         }

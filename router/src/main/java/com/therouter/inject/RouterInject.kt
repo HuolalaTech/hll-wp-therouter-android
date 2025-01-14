@@ -1,5 +1,6 @@
 package com.therouter.inject
 
+import a.asm
 import a.trojan
 import android.content.Context
 import androidx.annotation.Keep
@@ -22,7 +23,7 @@ class RouterInject {
 
     fun syncInitRouterInject(context: Context?) {
         trojan()
-        if (mInterceptors.isEmpty()) {
+        if (!asm) {
             initServiceProvider(context)
         }
     }
