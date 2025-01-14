@@ -36,7 +36,6 @@ public class TheRouterInjects {
     public static final String FIELD_FLOW_TASK_JSON = "FLOW_TASK_JSON"
     public static final String FIELD_APT_VERSION = "THEROUTER_APT_VERSION"
     public static final String FIELD_ROUTER_MAP = "ROUTERMAP"
-    public static final String FIELD_ROUTER_MAP_COUNT = "COUNT"
     public static final String UNKNOWN_VERSION = "unspecified"
     public static final String NOT_FOUND_VERSION = "0.0.0"
     public static final String DOT_CLASS = ".class"
@@ -57,7 +56,7 @@ public class TheRouterInjects {
      * @param jarFile
      * @return
      */
-    public static JarInfo tagJar(File jarFile, boolean isDebug) {
+    public static JarInfo tagJar(File jarFile) {
         JarInfo jarInfo = new JarInfo()
         if (jarFile) {
             def file = new JarFile(jarFile)
@@ -106,37 +105,12 @@ public class TheRouterInjects {
                     ClassReader reader = new ClassReader(inputStream)
                     ClassNode cn = new ClassNode()
                     reader.accept(cn, 0)
-                    Map<String, String> fieldMap = new HashMap<>()
-                    int count = 0
                     List<FieldNode> fieldList = cn.fields
                     for (FieldNode fieldNode : fieldList) {
-                        if (FIELD_ROUTER_MAP_COUNT == fieldNode.name) {
-                            count = fieldNode.value
-                        }
-                        if (fieldNode.name.startsWith(FIELD_ROUTER_MAP)) {
-                            fieldMap.put(fieldNode.name, fieldNode.value)
-                        }
-                    }
-
-                    if (fieldMap.size() == 1 && count == 0) {  // old version
-                        fieldMap.values().forEach {
+                        if (FIELD_ROUTER_MAP == fieldNode.name) {
                             println("---------TheRouter in jar get route map from: ${jarEntry.name}-------------------------------")
-                            if (isDebug) {
-                                println it
-                            }
-                            jarInfo.routeMapStringFromJar.add(it)
+                            jarInfo.routeMapStringFromJar.add(fieldNode.value)
                         }
-                    } else if (fieldMap.size() == count) {  // new version
-                        StringBuilder stringBuilder = new StringBuilder()
-                        for (int i = 0; i < count; i++) {
-                            stringBuilder.append(fieldMap.get(FIELD_ROUTER_MAP + i))
-                        }
-                        println("---------TheRouter in jar get route map from: ${jarEntry.name}-------------------------------")
-                        String route = stringBuilder.toString()
-                        if (isDebug) {
-                            println route
-                        }
-                        jarInfo.routeMapStringFromJar.add(route)
                     }
                 }
             }
@@ -147,7 +121,7 @@ public class TheRouterInjects {
     /**
      * 本方法仅 Transform API 会用到
      */
-    public static SourceInfo tagClass(String path, boolean isDebug) {
+    public static SourceInfo tagClass(String path) {
         SourceInfo sourceInfo = new SourceInfo();
         File dir = new File(path)
         if (dir.isDirectory()) {
@@ -202,38 +176,12 @@ public class TheRouterInjects {
                     ClassReader reader = new ClassReader(inputStream)
                     ClassNode cn = new ClassNode();
                     reader.accept(cn, 0);
-
-                    Map<String, String> fieldMap = new HashMap<>()
-                    int count = 0
-                    List<FieldNode> fieldList = cn.fields
+                    List<FieldNode> fieldList = cn.fields;
                     for (FieldNode fieldNode : fieldList) {
-                        if (FIELD_ROUTER_MAP_COUNT == fieldNode.name) {
-                            count = fieldNode.value
-                        }
-                        if (fieldNode.name.startsWith(FIELD_ROUTER_MAP)) {
-                            fieldMap.put(fieldNode.name, fieldNode.value)
-                        }
-                    }
-
-                    if (fieldMap.size() == 1 && count == 0) {  // old version
-                        fieldMap.values().forEach { value ->
+                        if (FIELD_ROUTER_MAP == fieldNode.name) {
                             println("---------TheRouter in source get route map from: ${it.name}-------------------------------")
-                            if (isDebug) {
-                                println value
-                            }
-                            sourceInfo.routeMapStringFromSource.add(value)
+                            sourceInfo.routeMapStringFromSource.add(fieldNode.value)
                         }
-                    } else if (fieldMap.size() == count) {  // new version
-                        StringBuilder stringBuilder = new StringBuilder()
-                        for (int i = 0; i < count; i++) {
-                            stringBuilder.append(fieldMap.get(FIELD_ROUTER_MAP + i))
-                        }
-                        println("---------TheRouter in source get route map from: ${it.name}-------------------------------")
-                        String route = stringBuilder.toString()
-                        if (isDebug) {
-                            println route
-                        }
-                        sourceInfo.routeMapStringFromSource.add(route)
                     }
                 }
             }
