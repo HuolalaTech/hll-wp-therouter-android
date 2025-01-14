@@ -1,0 +1,11 @@
+sdk.dir=/Users/kymjs/Library/Android/sdk
+
+app=true
+business-a=true
+business-b=true
+business-base=true
+
+router=true
+#plugin-agp8=true
+#plugin=true
+apt=true

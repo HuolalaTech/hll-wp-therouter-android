@@ -14,8 +14,7 @@ public class TheRouterPlugin extends AGP8Plugin {
         final TheRouterExtension theRouterExtension = project.extensions.create('TheRouter', TheRouterExtension)
         boolean isLibrary = project.getPlugins().hasPlugin("com.android.library")
         if (!isLibrary) {
-            // default true
-            boolean useAGP8 = !"false".equalsIgnoreCase(getGradleProperty(project, "agp8"))
+            boolean useAGP8 = "true".equalsIgnoreCase(getGradleProperty(project, "agp8"))
             String gradleVersion = project.gradle.gradleVersion
             int v = gradleVersion.tokenize('.')[0].toInteger()
             if (v < 7 || !useAGP8) {

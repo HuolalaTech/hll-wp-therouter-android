@@ -104,7 +104,7 @@ public class TheRouterTransform extends Transform {
                 if (cacheFile.exists()) {
                     jarInfo = TheRouterInjects.fromCache(cacheFile)
                 } else {
-                    jarInfo = TheRouterInjects.tagJar(jarInput.file)
+                    jarInfo = TheRouterInjects.tagJar(jarInput.file, theRouterExtension.debug)
                     TheRouterInjects.toCache(cacheFile, jarInfo)
                 }
                 if (jarInfo.isTheRouterJar) {
@@ -130,7 +130,7 @@ public class TheRouterTransform extends Transform {
                         directoryInput.contentTypes, directoryInput.scopes,
                         Format.DIRECTORY)
                 FileUtils.forceMkdir(dest)
-                SourceInfo sourceInfo = TheRouterInjects.tagClass(directoryInput.file.absolutePath)
+                SourceInfo sourceInfo = TheRouterInjects.tagClass(directoryInput.file.absolutePath, theRouterExtension.debug)
                 allClass.addAll(sourceInfo.allSourceClass)
                 routeMapStringSet.addAll(sourceInfo.routeMapStringFromSource)
                 flowTaskMap.putAll(sourceInfo.flowTaskMapFromSource)

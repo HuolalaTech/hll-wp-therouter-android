@@ -89,11 +89,26 @@ public abstract class TheRouterTask extends DefaultTask {
                             ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
                             ClassNode cn = new ClassNode();
                             reader.accept(cn, 0);
+                            Map<String, String> fieldMap = new HashMap<>();
+                            int count = 0;
                             List<FieldNode> fieldList = cn.fields;
                             for (FieldNode fieldNode : fieldList) {
-                                if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                    TheRouterInjects.routeMapStringSet.add(fieldNode.value.toString());
+                                if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
+                                    count = Integer.parseInt(fieldNode.value.toString());
                                 }
+                                if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
+                                    fieldMap.put(fieldNode.name, fieldNode.value.toString());
+                                }
+                            }
+
+                            if (fieldMap.size() == 1 && count == 0) {  // old version
+                                TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
+                            } else if (fieldMap.size() == count) { // new version
+                                StringBuilder stringBuilder = new StringBuilder();
+                                for (int i = 0; i < count; i++) {
+                                    stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
+                                }
+                                TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
                             }
                         } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
                             TheRouterInjects.serviceProvideMap.put(name.replaceAll(".class", ""), BuildConfig.VERSION);
@@ -147,11 +162,25 @@ public abstract class TheRouterTask extends DefaultTask {
                             ClassReader reader = new ClassReader(new FileInputStream(file));
                             ClassNode cn = new ClassNode();
                             reader.accept(cn, 0);
+                            Map<String, String> fieldMap = new HashMap<>();
+                            int count = 0;
                             List<FieldNode> fieldList = cn.fields;
                             for (FieldNode fieldNode : fieldList) {
-                                if (TheRouterInjects.FIELD_ROUTER_MAP.equals(fieldNode.name)) {
-                                    TheRouterInjects.routeMapStringSet.add(fieldNode.value.toString());
+                                if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
+                                    count = Integer.parseInt(fieldNode.value.toString());
                                 }
+                                if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
+                                    fieldMap.put(fieldNode.name, fieldNode.value.toString());
+                                }
+                            }
+                            if (fieldMap.size() == 1 && count == 0) {  // old version
+                                TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
+                            } else if (fieldMap.size() == count) {    // new version
+                                StringBuilder stringBuilder = new StringBuilder();
+                                for (int i = 0; i < count; i++) {
+                                    stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
+                                }
+                                TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

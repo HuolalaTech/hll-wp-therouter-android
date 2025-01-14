@@ -5,7 +5,7 @@ apply plugin: 'kotlin-kapt'
 apply plugin: 'com.google.devtools.ksp'
 
 TheRouter {
-    debug = true
+    debug = false
 }
 
 android {

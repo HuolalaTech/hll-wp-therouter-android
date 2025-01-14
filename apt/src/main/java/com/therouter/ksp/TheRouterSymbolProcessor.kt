@@ -164,11 +164,12 @@ class TheRouterSymbolProcessor(
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             val routeMapJson = json.replace("\"", "\\\"")
-            val max = 200
+            val max = 50000  // 65535
+            var count = 0
             if (routeMapJson.length > max) {
-                val stringBuilder = StringBuilder("\tconst val ROUTERMAP = \"")
                 var content = routeMapJson
                 while (content.length > max) {
+                    val stringBuilder = StringBuilder("\tconst val ROUTERMAP$count = \"")
                     var index = max
                     var sub = content.substring(0, index)
                     var safe = !sub.endsWith('\\')
@@ -177,14 +178,18 @@ class TheRouterSymbolProcessor(
                         sub = content.substring(0, index)
                         safe = !sub.endsWith('\\')
                     }
-                    stringBuilder.append(sub).append("\"+\"")
+                    stringBuilder.append(sub).append("\"")
+                    ps.println(stringBuilder.toString())
+                    count++
                     content = content.substring(index, content.length)
                 }
-                stringBuilder.append(content).append("\"")
-                ps.println(stringBuilder.toString())
+                ps.println("\tconst val ROUTERMAP$count = \"$content\"")
+                count++
             } else {
-                ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
+                ps.println("\tconst val ROUTERMAP$count = \"$routeMapJson\"")
+                count++
             }
+            ps.println("\tconst val COUNT = $count")
             ps.println()
             ps.println("\t@JvmStatic")
             ps.println("\tfun addRoute() {")

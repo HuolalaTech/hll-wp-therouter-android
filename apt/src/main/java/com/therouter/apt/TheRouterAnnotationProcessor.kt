@@ -397,7 +397,35 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             ps.println()
             ps.println("\tpublic static final String TAG = \"Created by kymjs, and APT Version is ${BuildConfig.VERSION}.\";")
             ps.println("\tpublic static final String THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\";")
-            ps.println(String.format("\tpublic static final String ROUTERMAP = \"%s\";", json.replace("\"", "\\\"")))
+
+            val routeMapJson = json.replace("\"", "\\\"")
+            val max = 50000  // 65535
+            var count = 0
+            if (routeMapJson.length > max) {
+                var content = routeMapJson
+                while (content.length > max) {
+                    val stringBuilder = java.lang.StringBuilder("\tpublic static final String ROUTERMAP$count = \"")
+                    var index = max
+                    var sub = content.substring(0, index)
+                    var safe = !sub.endsWith('\\')
+                    while (!safe) {
+                        index--
+                        sub = content.substring(0, index)
+                        safe = !sub.endsWith('\\')
+                    }
+                    stringBuilder.append(sub).append("\";")
+                    ps.println(stringBuilder.toString())
+                    count++
+                    content = content.substring(index, content.length)
+                }
+                ps.println("\tpublic static final String ROUTERMAP$count = \"$content\";")
+                count++
+            } else {
+                ps.println("\tpublic static final String ROUTERMAP$count = \"$routeMapJson\";")
+                count++
+            }
+
+            ps.println(String.format("\tpublic static final String COUNT = \"$count\";"))
             ps.println()
 
             ps.println("\tpublic void init() { $className.addRoute(); }")
