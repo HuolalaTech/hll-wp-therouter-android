@@ -65,7 +65,7 @@ public class TheRouterInjects {
             while (enumeration.hasMoreElements()) {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement()
                 jarInfo.allJarClass.add(jarEntry.name.replaceAll("/", "."))
-                if (jarEntry.name.contains(PREFIX_SERVICE_PROVIDER)) {
+                if (jarEntry.name.contains(PREFIX_SERVICE_PROVIDER) && !jarEntry.name.contains("\$")) {
                     int start = jarEntry.name.indexOf(PREFIX_SERVICE_PROVIDER)
                     int end = jarEntry.name.length() - DOT_CLASS.length()
                     String className = jarEntry.name.substring(start, end)
@@ -91,16 +91,16 @@ public class TheRouterInjects {
                             serviceProvideMap.put(className, aptVersion)
                         }
                     }
-                } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter")) {
+                } else if (jarEntry.name.contains("TheRouterServiceProvideInjecter") && !jarEntry.name.contains("\$")) {
                     jarInfo.isTheRouterJar = true;
                     jarInfo.theRouterInjectEntryName = jarEntry.name;
-                } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
+                } else if (jarEntry.name.contains(SUFFIX_AUTOWIRED_DOT_CLASS) && !jarEntry.name.contains("\$")) {
                     String className = jarEntry.name
                             .replace(DOT_CLASS, "")
                             .replace('\\', '.')
                             .replace('/', '.')
                     autowiredSet.add(className)
-                } else if (jarEntry.name.contains(PREFIX_ROUTER_MAP)) {
+                } else if (jarEntry.name.contains(PREFIX_ROUTER_MAP) && !jarEntry.name.contains("\$")) {
                     routeSet.add(jarEntry.name)
                     InputStream inputStream = file.getInputStream(jarEntry)
                     ClassReader reader = new ClassReader(inputStream)
@@ -153,7 +153,7 @@ public class TheRouterInjects {
         if (dir.isDirectory()) {
             dir.eachFileRecurse {
                 sourceInfo.allSourceClass.add(it.absolutePath.replace(File.separator, "."))
-                if (it.absolutePath.contains(PREFIX_SERVICE_PROVIDER)) {
+                if (it.absolutePath.contains(PREFIX_SERVICE_PROVIDER) && !it.absolutePath.contains("\$")) {
                     int start = it.absolutePath.indexOf(PREFIX_SERVICE_PROVIDER)
                     int end = it.absolutePath.length() - DOT_CLASS.length()
                     String className = it.absolutePath.substring(start, end)
@@ -179,7 +179,7 @@ public class TheRouterInjects {
                     if (!serviceProvideMap.containsKey(className) || aptVersion != NOT_FOUND_VERSION) {
                         serviceProvideMap.put(className, aptVersion)
                     }
-                } else if (it.absolutePath.contains(SUFFIX_AUTOWIRED_DOT_CLASS)) {
+                } else if (it.absolutePath.contains(SUFFIX_AUTOWIRED_DOT_CLASS) && !it.absolutePath.contains("\$")) {
                     String className = it.absolutePath
                             .replace(path, "")
                             .replace(DOT_CLASS, "")
@@ -189,7 +189,7 @@ public class TheRouterInjects {
                         className = className.substring(1)
                     }
                     autowiredSet.add(className)
-                } else if (it.absolutePath.contains(PREFIX_ROUTER_MAP)) {
+                } else if (it.absolutePath.contains(PREFIX_ROUTER_MAP) && !it.absolutePath.contains("\$")) {
                     int start = it.absolutePath.indexOf(PREFIX_ROUTER_MAP)
                     int end = it.absolutePath.length() - DOT_CLASS.length()
                     String className = it.absolutePath.substring(start, end)
