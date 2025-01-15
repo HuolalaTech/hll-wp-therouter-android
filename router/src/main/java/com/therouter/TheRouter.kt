@@ -8,7 +8,7 @@ import android.util.Log
 import com.therouter.TheRouter.logCat
 import com.therouter.flow.Digraph
 import com.therouter.inject.RouterInject
-import com.therouter.inject.SUFFIX_AUTOWIRED_DOT_CLASS
+import com.therouter.inject.getAutowiredIndex
 import com.therouter.router.*
 import com.therouter.router.action.ActionManager
 import com.therouter.router.action.interceptor.ActionInterceptor
@@ -193,11 +193,10 @@ object TheRouter {
     fun inject(any: Any?) {
         autowiredInject(any)
         if (!asm && any != null) {
-            try {
-                val c = Class.forName(any.javaClass.name + SUFFIX_AUTOWIRED_DOT_CLASS)
-                c.getDeclaredMethod("autowiredInject", Object::class.java).invoke(any)
-            } catch (e: Exception) {
-                e.printStackTrace()
+            getAutowiredIndex().forEach { entry ->
+                if (entry.key.isInstance(any)) {
+                    entry.value.invoke(null, any)
+                }
             }
         }
     }
