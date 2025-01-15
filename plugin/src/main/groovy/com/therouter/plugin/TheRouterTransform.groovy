@@ -152,8 +152,13 @@ public class TheRouterTransform extends Transform {
         Set<RouteItem> pageSet = new HashSet<>()
         Gson gson = new GsonBuilder().setPrettyPrinting().create()
         routeMapStringSet.each {
-            pageSet.addAll((List<RouteItem>) gson.fromJson(it, new TypeToken<List<RouteItem>>() {
-            }.getType()))
+            if (!it.isBlank()) {
+                List<RouteItem> l = (List<RouteItem>) gson.fromJson(it, new TypeToken<List<RouteItem>>() {
+                }.getType())
+                if (l != null) {
+                    pageSet.addAll(l)
+                }
+            }
         }
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(mProject.projectDir, "src/main/assets/therouter/routeMap.json")
