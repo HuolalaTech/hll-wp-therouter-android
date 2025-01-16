@@ -27,7 +27,7 @@ class RouteItem : Parcelable, Serializable {
     var description = ""
 
     // 仅用于RouteMap.json文件被gson转换时存储，外部不可访问
-    var params = HashMap<String, String>()
+    private var params = HashMap<String, String>()
 
     // extras存储运行期的路由表参数
     private var extras = Bundle()
