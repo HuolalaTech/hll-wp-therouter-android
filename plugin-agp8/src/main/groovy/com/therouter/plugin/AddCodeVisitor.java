@@ -88,7 +88,10 @@ public class AddCodeVisitor extends ClassVisitor {
                             if (!serviceProviderClassName.startsWith("a/")) {
                                 serviceProviderClassName = "a/" + serviceProviderClassName;
                             }
-                            String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
+                            String aptVersion = serviceProvideMap.get(serviceProviderClassName);
+                            if (aptVersion == null) {
+                                aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
+                            }
 
                             if (aptVersion != null && !aptVersion.equals("0.0.0")) {
                                 Label label0 = new Label();
