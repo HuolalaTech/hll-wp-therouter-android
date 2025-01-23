@@ -22,7 +22,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
             existsBuildFolder.set(therouterBuildFolder.exists());
             System.out.println();
             System.out.println("----------------------TheRouter Environment------------------------------");
-            System.out.println("TheRouter plugin：" + LogUI.C_BLACK_GREEN.getValue() + "cn.therouter:" + BuildConfig.NAME + ":" + BuildConfig.VERSION + LogUI.E_NORMAL.getValue());
+            System.out.println("TheRouter plugin agp8：" + LogUI.C_BLACK_GREEN.getValue() + "cn.therouter:" + BuildConfig.NAME + ":" + BuildConfig.VERSION + LogUI.E_NORMAL.getValue());
             System.out.println("JDK Version::" + System.getProperty("java.version"));
             System.out.println("Gradle Version::" + project.getGradle().getGradleVersion());
             System.out.println("本次是增量构建::" + (theRouterExtension.debug && existsBuildFolder.get()));

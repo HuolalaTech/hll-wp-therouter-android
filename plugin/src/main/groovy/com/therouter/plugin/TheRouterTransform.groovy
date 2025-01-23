@@ -55,7 +55,7 @@ public class TheRouterTransform extends Transform {
             theRouterExtension.checkFlowDepend = mProject.TheRouter.checkFlowDepend
             theRouterExtension.showFlowDepend = mProject.TheRouter.showFlowDepend
         }
-        println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
+        println("TheRouter编译插件agp7：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
         println "JDK Version::" + System.getProperty("java.version")
         println "Gradle Version::${mProject.gradle.gradleVersion}"
         println "checkRouteMap::${theRouterExtension.checkRouteMap}"
