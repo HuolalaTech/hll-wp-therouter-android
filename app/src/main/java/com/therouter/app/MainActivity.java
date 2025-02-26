@@ -31,25 +31,41 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.DEMO_NAVIGATOR).navigation();
+                TheRouter.build(HomePathIndex.DEMO_NAVIGATOR)
+                        .withInAnimation(R.anim.activity_slide_in)
+                        .withOutAnimation(R.anim.activity_slide_out)
+                        // 加动画以后，必须传入activity对象，否则debug环境抛异常，release动画不生效
+                        .navigation(v.getContext());
             }
         });
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.DEMO_SERVICE_PROVIDER).navigation();
+                TheRouter.build(HomePathIndex.DEMO_SERVICE_PROVIDER)
+                        .withInAnimation(R.anim.activity_slide_in)
+                        .withOutAnimation(R.anim.activity_slide_out)
+                        // 加动画以后，必须传入activity对象，否则debug环境抛异常，release动画不生效
+                        .navigation(v.getContext());
             }
         });
         findViewById(R.id.button3).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.DEMO_FLOW_TASK_EXECUTOR).navigation();
+                TheRouter.build(HomePathIndex.DEMO_FLOW_TASK_EXECUTOR)
+                        .withInAnimation(R.anim.activity_slide_in)
+                        .withOutAnimation(R.anim.activity_slide_out)
+                        // 加动画以后，必须传入activity对象，否则debug环境抛异常，release动画不生效
+                        .navigation(v.getContext());
             }
         });
         findViewById(R.id.button4).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.DEMO_ACTION_MANAGER).navigation();
+                TheRouter.build(HomePathIndex.DEMO_ACTION_MANAGER)
+                        .withInAnimation(R.anim.activity_slide_in)
+                        .withOutAnimation(R.anim.activity_slide_out)
+                        // 加动画以后，必须传入activity对象，否则debug环境抛异常，release动画不生效
+                        .navigation(v.getContext());
             }
         });
         findViewById(R.id.button5).setOnClickListener(new View.OnClickListener() {
@@ -58,5 +74,7 @@ public class MainActivity extends AppCompatActivity {
                 TheRouter.build(HomePathIndex.DEMO_OTHER).navigation();
             }
         });
+
+
     }
 }

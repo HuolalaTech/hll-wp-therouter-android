@@ -138,6 +138,9 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
             require("helloField".equals(parcelableBean.hello), "NavigatorTargetActivity", "parcelableBean.hello数值不对");
         }
 
+        if (button1 == null) {
+            button1 = findViewById(R.id.button1);
+        }
         if (button1 != null) {
             button1.setText("展示注解默认值");
             button1.setOnClickListener(new View.OnClickListener() {

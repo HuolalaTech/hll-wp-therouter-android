@@ -1,16 +1,9 @@
 package com.therouter.plugin.utils;
 
 import com.therouter.plugin.Node;
-import com.therouter.plugin.TheRouterInjects;
 import com.therouter.plugin.TheRouterPlugin;
 
-import org.codehaus.groovy.runtime.ResourceGroovyMethods;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -82,75 +75,6 @@ public class TheRouterPluginUtils {
         }
         node.setChildren(childrenNode);
         return node;
-    }
-
-    public static Set<String> getSetFromFile(File buildCacheFile) {
-        HashSet<String> set = new HashSet<>();
-        if (buildCacheFile.exists()) {
-            try {
-                String[] array = ResourceGroovyMethods.getText(buildCacheFile, StandardCharsets.UTF_8.displayName()).split("\n");
-                for (String item : array) {
-                    if (!item.trim().isBlank()) {
-                        set.add(item.trim());
-                    }
-                }
-            } catch (IOException e) {
-                System.out.println("Failed to read " + buildCacheFile.getName() + " file.");
-                e.printStackTrace();
-            }
-        }
-        return set;
-    }
-
-    public static String getTextFromFile(File buildCacheFile) {
-        StringBuilder dataStringBuilder = new StringBuilder();
-        if (buildCacheFile.exists()) {
-            try {
-                Set<String> set = getSetFromFile(buildCacheFile);
-                ArrayList<String> list = new ArrayList<>(set);
-                Collections.sort(list);
-                for (String item : list) {
-                    dataStringBuilder.append(item).append("\n");
-                }
-            } catch (Exception e) {
-                System.out.println("Failed to parse " + buildCacheFile.getName() + " file.");
-                e.printStackTrace();
-            }
-        }
-        return dataStringBuilder.toString();
-    }
-
-    public static void addTextToFileIgnoreCheck(File buildCacheFile, String line, boolean debug) {
-        if (debug) {
-            System.out.println("TheRouter::" + buildCacheFile.getName() + " -> " + line);
-        }
-        if (!buildCacheFile.exists()) {
-            try {
-                buildCacheFile.getParentFile().mkdirs();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            try {
-                buildCacheFile.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        try {
-            ResourceGroovyMethods.append(buildCacheFile, line + "\n", StandardCharsets.UTF_8.displayName());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static void addTextToFile(File buildCacheFile, String line, boolean debug) {
-        if (!line.contains("$")) {
-            // 从ASMFactory来的是不带.class的，从toTransform来的是带的，还要考虑json的情况，route.data/spi.data都是json
-            if (!line.endsWith(TheRouterInjects.DOT_CLASS) && !line.contains("\"") && !line.contains("[") && !line.contains("{")) {
-                line = line + TheRouterInjects.DOT_CLASS;
-            }
-            addTextToFileIgnoreCheck(buildCacheFile, line, debug);
-        }
     }
 
     public static boolean needCheckRouteItemClass(String mode) {

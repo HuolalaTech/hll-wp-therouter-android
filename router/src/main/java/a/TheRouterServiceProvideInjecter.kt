@@ -3,7 +3,12 @@
 package a
 
 import android.content.Context
+import androidx.annotation.Keep
 import com.therouter.flow.Digraph
+
+@Keep
+@JvmField
+internal var asm = false
 
 /**
  * Created by ZhangTao on 18/2/24.

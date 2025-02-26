@@ -55,7 +55,7 @@ public class TheRouterTransform extends Transform {
             theRouterExtension.checkFlowDepend = mProject.TheRouter.checkFlowDepend
             theRouterExtension.showFlowDepend = mProject.TheRouter.showFlowDepend
         }
-        println("TheRouter编译插件：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
+        println("TheRouter编译插件agp7：${LogUI.C_BLACK_GREEN.value}" + "cn.therouter:${BuildConfig.NAME}:${BuildConfig.VERSION}" + "${LogUI.E_NORMAL.value}")
         println "JDK Version::" + System.getProperty("java.version")
         println "Gradle Version::${mProject.gradle.gradleVersion}"
         println "checkRouteMap::${theRouterExtension.checkRouteMap}"
@@ -104,7 +104,7 @@ public class TheRouterTransform extends Transform {
                 if (cacheFile.exists()) {
                     jarInfo = TheRouterInjects.fromCache(cacheFile)
                 } else {
-                    jarInfo = TheRouterInjects.tagJar(jarInput.file)
+                    jarInfo = TheRouterInjects.tagJar(jarInput.file, theRouterExtension.debug)
                     TheRouterInjects.toCache(cacheFile, jarInfo)
                 }
                 if (jarInfo.isTheRouterJar) {
@@ -130,7 +130,7 @@ public class TheRouterTransform extends Transform {
                         directoryInput.contentTypes, directoryInput.scopes,
                         Format.DIRECTORY)
                 FileUtils.forceMkdir(dest)
-                SourceInfo sourceInfo = TheRouterInjects.tagClass(directoryInput.file.absolutePath)
+                SourceInfo sourceInfo = TheRouterInjects.tagClass(directoryInput.file.absolutePath, theRouterExtension.debug)
                 allClass.addAll(sourceInfo.allSourceClass)
                 routeMapStringSet.addAll(sourceInfo.routeMapStringFromSource)
                 flowTaskMap.putAll(sourceInfo.flowTaskMapFromSource)
@@ -152,8 +152,13 @@ public class TheRouterTransform extends Transform {
         Set<RouteItem> pageSet = new HashSet<>()
         Gson gson = new GsonBuilder().setPrettyPrinting().create()
         routeMapStringSet.each {
-            pageSet.addAll((List<RouteItem>) gson.fromJson(it, new TypeToken<List<RouteItem>>() {
-            }.getType()))
+            if (!it.isBlank()) {
+                List<RouteItem> l = (List<RouteItem>) gson.fromJson(it, new TypeToken<List<RouteItem>>() {
+                }.getType())
+                if (l != null) {
+                    pageSet.addAll(l)
+                }
+            }
         }
         // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
         File assetRouteMap = new File(mProject.projectDir, "src/main/assets/therouter/routeMap.json")

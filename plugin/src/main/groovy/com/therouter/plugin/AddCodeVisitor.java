@@ -1,6 +1,7 @@
 package com.therouter.plugin;
 
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -30,6 +31,14 @@ public class AddCodeVisitor extends ClassVisitor {
         Collections.sort(this.serviceProvideList);
         Collections.sort(this.autowiredList);
         Collections.sort(this.routeList);
+    }
+
+    @Override
+    public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
+        if ("asm".equals(name) && "Z".equals(descriptor)) {
+            return super.visitField(access, name, descriptor, signature, true);
+        }
+        return super.visitField(access, name, descriptor, signature, value);
     }
 
     @Override
@@ -79,7 +88,10 @@ public class AddCodeVisitor extends ClassVisitor {
                             if (!serviceProviderClassName.startsWith("a/")) {
                                 serviceProviderClassName = "a/" + serviceProviderClassName;
                             }
-                            String aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
+                            String aptVersion = serviceProvideMap.get(serviceProviderClassName);
+                            if (aptVersion == null) {
+                                aptVersion = serviceProvideMap.get(serviceProviderClassName.substring(2));
+                            }
 
                             if (aptVersion != null && !aptVersion.equals("0.0.0")) {
                                 Label label0 = new Label();

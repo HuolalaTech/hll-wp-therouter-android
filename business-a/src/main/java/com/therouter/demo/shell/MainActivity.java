@@ -34,7 +34,7 @@ import com.therouter.demo.di.ITest8;
 import com.therouter.demo.di.ITest9;
 import com.therouter.demo.di.TestEvent;
 import com.therouter.inject.RecyclerBin;
-import com.therouter.inject.RouterInject;
+import com.therouter.inject.RouterInjectKt;
 import com.therouter.router.Autowired;
 import com.therouter.router.Route;
 
@@ -92,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 try {
-                    Field field = RouterInject.class.getDeclaredField("mRecyclerBin");
+                    Field field = RouterInjectKt.class.getDeclaredField("mRecyclerBin");
                     field.setAccessible(true);
                     RecyclerBin recyclerBin = (RecyclerBin) field.get(TheRouter.getRouterInject());
                     Method method = RecyclerBin.class.getDeclaredMethod("debug");

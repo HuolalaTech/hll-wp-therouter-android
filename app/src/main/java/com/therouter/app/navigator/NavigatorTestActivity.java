@@ -140,8 +140,8 @@ public class NavigatorTestActivity extends AppCompatActivity {
             public void onClick(View v) {
                 TheRouter.build(HOME2)
                         .withInt("intValue", 12345678) // 测试传 int 值
-                        .withString("stringIntValue", "9876543")// 测试用 string 传 int 值
-                        .withString("str_123_Value", "使用另一个path跳转过来")// 测试 string
+                        .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
+                        .withString("str_123_Value", "测试传中文字符串")// 测试 string
                         .withString("boolParseError", "非boolean值") // 测试用 boolean 解析字符串的情况
                         .withString("shortParseError", "12345678") // 测试用 short 解析超长数字的情况
                         .withBoolean("boolValue", true) // 测试 boolean

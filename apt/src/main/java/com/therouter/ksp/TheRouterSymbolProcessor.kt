@@ -157,12 +157,39 @@ class TheRouterSymbolProcessor(
             ps.println("@androidx.annotation.Keep")
             ps.println("class $className : com.therouter.router.IRouterMapAPT {")
             ps.println()
+            ps.println("\toverride fun init() { $className.addRoute() }")
+            ps.println()
             ps.println("\tcompanion object { ")
             ps.println()
             ps.println("\tconst val TAG = \"Created by kymjs, and KSP Version is ${BuildConfig.VERSION}.\"")
             ps.println("\tconst val THEROUTER_APT_VERSION = \"${BuildConfig.VERSION}\"")
             val routeMapJson = json.replace("\"", "\\\"")
-            ps.println("\tconst val ROUTERMAP = \"$routeMapJson\"")
+            val max = 50000  // 65535
+            var count = 0
+            if (routeMapJson.length > max) {
+                var content = routeMapJson
+                while (content.length > max) {
+                    val stringBuilder = StringBuilder("\tconst val ROUTERMAP$count = \"")
+                    var index = max
+                    var sub = content.substring(0, index)
+                    var safe = !sub.endsWith('\\')
+                    while (!safe) {
+                        index--
+                        sub = content.substring(0, index)
+                        safe = !sub.endsWith('\\')
+                    }
+                    stringBuilder.append(sub).append("\"")
+                    ps.println(stringBuilder.toString())
+                    count++
+                    content = content.substring(index, content.length)
+                }
+                ps.println("\tconst val ROUTERMAP$count = \"$content\"")
+                count++
+            } else {
+                ps.println("\tconst val ROUTERMAP$count = \"$routeMapJson\"")
+                count++
+            }
+            ps.println("\tconst val COUNT = $count")
             ps.println()
             ps.println("\t@JvmStatic")
             ps.println("\tfun addRoute() {")
@@ -204,7 +231,8 @@ class TheRouterSymbolProcessor(
             property.annotations.forEach { annotation ->
                 val autowiredItem = AutowiredItem()
                 autowiredItem.fieldName = property.simpleName.asString()
-                autowiredItem.className = property.parentDeclaration?.qualifiedName?.asString() ?: property.packageName.asString()
+                autowiredItem.className =
+                    property.parentDeclaration?.qualifiedName?.asString() ?: property.packageName.asString()
                 autowiredItem.classNameAndTypeParameters = autowiredItem.className
                 property.parentDeclaration?.typeParameters?.size?.let { size ->
                     if (size > 0) {
@@ -330,6 +358,20 @@ class TheRouterSymbolProcessor(
                     ps.println("\t\t\t}")
                 }
                 ps.println("\t\t} // for end")
+
+                for ((i, item) in pageMap[key]!!.withIndex()) {
+                    if (item.required) {
+                        ps.println(
+                            String.format(
+                                "\t\tif (target.%s == null && com.therouter.TheRouter.isDebug){",
+                                item.fieldName
+                            )
+                        )
+                        ps.println("\t\t\tthrow NullPointerException(\"@Autowired(required = true) ${key}.${item.fieldName} is null\")")
+                        ps.println("\t\t}")
+                    }
+                }
+
                 ps.println()
                 ps.println("\t\t}")
                 ps.println("\t}")
@@ -536,7 +578,8 @@ class TheRouterSymbolProcessor(
             function.annotations.forEach { annotation ->
                 val flowTaskItem = FlowTaskItem()
                 flowTaskItem.methodName = function.simpleName.asString()
-                flowTaskItem.className = function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
+                flowTaskItem.className =
+                    function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "taskName" -> flowTaskItem.taskName = "${arg.value}"
@@ -634,6 +677,10 @@ class TheRouterSymbolProcessor(
                     className
                 )
             )
+            ps.println()
+            ps.println("\toverride fun initFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
+            ps.println(String.format("\t\t%s.addFlowTask(context, digraph)", className))
+            ps.println("\t}")
             ps.println()
             ps.println("\toverride fun <T> interception(clazz: Class<T>?, vararg params: Any?): T? {")
             ps.println("\t\tvar obj: T? = null")

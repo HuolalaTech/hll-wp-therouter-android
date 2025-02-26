@@ -4,13 +4,10 @@ package com.therouter
 
 import android.os.Handler
 import android.os.Looper
-import android.util.SparseArray
 import java.lang.StringBuilder
 import java.util.*
 import java.util.concurrent.*
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
 import kotlin.math.max
 import kotlin.math.min
 
@@ -20,11 +17,8 @@ private val CORE_POOL_SIZE = max(3, min(CPU_COUNT - 1, 6))
 private val BIGGER_CORE_POOL_SIZE = CPU_COUNT * 4
 private val MAXIMUM_CORE_POOL_SIZE = CPU_COUNT * 8
 private const val MAXIMUM_POOL_SIZE = Int.MAX_VALUE
-private const val KEEP_ALIVE_SECONDS = 30L
-private const val KEEP_ALIVE_MILLISECOND = KEEP_ALIVE_SECONDS * 1000
-private const val MAX_QUEUE_SIZE = 10
-private const val MAX_REPEAT_TASK_COUNT = 5
-private const val CHECK_REPEAT_TASK_TIME_MILLISECOND = MAX_REPEAT_TASK_COUNT * 1000L
+var KEEP_ALIVE_SECONDS = 30L
+var MAX_QUEUE_SIZE = 10
 
 private const val THREAD_NAME = "TheRouterLibThread"
 
@@ -109,17 +103,23 @@ fun newThreadFactory(threadName: String): ThreadFactory {
 private class BufferExecutor : ExecutorService, Executor {
     val taskQueue = ArrayDeque<Task>()
     var activeTask: Task? = null
-    val flightTaskMap = SparseArray<FlightTaskInfo>()
-    var prevCheckAliveTime = 0L
-    val taskTraceCountMap = ConcurrentHashMap<String, Int>()
-    var prevCheckRepeatTime = 0L
+
+    // 加入一级队列时被记录，任务执行完成时被移除
+    val flightTaskMap = ConcurrentHashMap<Int, FlightTaskInfo>()
 
     @Synchronized
     override fun execute(r: Runnable) {
-        val trace = getTrace(Thread.currentThread().stackTrace)
-        checkTask(trace)
-        taskQueue.offer(Task(r, trace) {
-            flightTaskMap.remove(r.hashCode())
+        taskQueue.offer(Task(
+            r, if (TheRouter.isDebug) {
+                checkTask()
+                getTrace(Thread.currentThread().stackTrace)
+            } else {
+                ""
+            }
+        ) {
+            if (TheRouter.isDebug) {
+                flightTaskMap.remove(r.hashCode())
+            }
             scheduleNext()
         })
         //activeTask 不为空，表示一级队列已经满了，此刻任务应该被停留到二级队列等待调度
@@ -131,30 +131,14 @@ private class BufferExecutor : ExecutorService, Executor {
     /**
      * 检查是否有频繁添加任务，或有轮询任务的情况
      */
-    @Synchronized
-    private fun checkTask(trace: String) {
-        if (TheRouter.isDebug) {
-            if (System.currentTimeMillis() - prevCheckAliveTime > KEEP_ALIVE_MILLISECOND) {
-                flightTaskMap.forEach { _, v ->
-                    if (System.currentTimeMillis() - (v?.createTime ?: 0) > KEEP_ALIVE_MILLISECOND) {
-                        v?.resetTime()
-                        debug("ThreadPool", "该任务耗时过久，请判断是否需要优化代码\n${v?.trace}")
-                    }
-                }
-                prevCheckAliveTime = System.currentTimeMillis()
-            }
-            var count = taskTraceCountMap[trace] ?: 0
-            count++
-            if (System.currentTimeMillis() - prevCheckRepeatTime > CHECK_REPEAT_TASK_TIME_MILLISECOND) {
-                if (count > MAX_REPEAT_TASK_COUNT) {
-                    count = 0
-                    debug("ThreadPool", "该任务被频繁添加，请判断是否需要优化代码\n${trace}")
-                }
-            }
-            taskTraceCountMap[trace] = count
-        } else {
-            flightTaskMap.clear()
-            taskTraceCountMap.clear()
+    private fun checkTask() {
+        flightTaskMap.values.forEach { v ->
+            require(
+                System.currentTimeMillis() - v.createTime < KEEP_ALIVE_SECONDS * 1000L,
+                "ThreadPool",
+                "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
+                        "当前任务被创建时间为${v.createTime}此时时间为${System.currentTimeMillis()}\n${v.trace}"
+            )
         }
     }
 
@@ -163,38 +147,47 @@ private class BufferExecutor : ExecutorService, Executor {
      */
     @Synchronized
     private fun scheduleNext() {
-        //线程池中正在执行的任务数
-        val activeCount = threadPoolExecutor.activeCount
-        //一级队列任务数
-        val queueSize = threadPoolExecutor.queue.size
-
-        //动态修改核心线程数，以适应不同场景的任务量
-        when {
-            taskQueue.size > MAX_QUEUE_SIZE * 100 -> {
-                threadPoolExecutor.corePoolSize = MAXIMUM_CORE_POOL_SIZE
-            }
-
-            taskQueue.size > MAX_QUEUE_SIZE * 10 -> {
-                threadPoolExecutor.corePoolSize = BIGGER_CORE_POOL_SIZE
-            }
-
-            else -> {
-                threadPoolExecutor.corePoolSize = CORE_POOL_SIZE
-            }
-        }
-
-        //如果一级队列没有满，且当前正在执行的线程不超过核心线程数
-        if (queueSize <= MAX_QUEUE_SIZE && activeCount < threadPoolExecutor.corePoolSize) {
+        fun doNext() {
             //从二级队列中取任务
             if (taskQueue.poll().also { activeTask = it } != null) {
                 activeTask?.let {
                     if (TheRouter.isDebug) {
-                        flightTaskMap.put(it.r.hashCode(), FlightTaskInfo(it.trace))
+                        flightTaskMap[it.r.hashCode()] = FlightTaskInfo(it.trace)
                     }
                 }
                 //将任务加入一级队列，或有可能直接被线程池执行(Executor内部逻辑)
                 threadPoolExecutor.execute(activeTask)
                 activeTask = null
+            }
+        }
+
+        val isMainThread = Thread.currentThread() == Looper.getMainLooper().thread
+        if (isMainThread) {
+            doNext()
+        } else {
+            //线程池中正在执行的任务数
+            val activeCount = threadPoolExecutor.activeCount
+            //一级队列任务数
+            val queueSize = threadPoolExecutor.queue.size
+
+            //动态修改核心线程数，以适应不同场景的任务量
+            when {
+                taskQueue.size > MAX_QUEUE_SIZE * 100 -> {
+                    threadPoolExecutor.corePoolSize = MAXIMUM_CORE_POOL_SIZE
+                }
+
+                taskQueue.size > MAX_QUEUE_SIZE * 10 -> {
+                    threadPoolExecutor.corePoolSize = BIGGER_CORE_POOL_SIZE
+                }
+
+                else -> {
+                    threadPoolExecutor.corePoolSize = CORE_POOL_SIZE
+                }
+            }
+
+            //如果一级队列没有满，且当前正在执行的线程不超过核心线程数
+            if (queueSize <= MAX_QUEUE_SIZE && activeCount < threadPoolExecutor.corePoolSize) {
+                doNext()
             }
         }
     }
@@ -267,11 +260,6 @@ private class BufferExecutor : ExecutorService, Executor {
 
 private class FlightTaskInfo(val trace: String) {
     var createTime = System.currentTimeMillis()
-        private set
-
-    fun resetTime() {
-        createTime = System.currentTimeMillis()
-    }
 }
 
 private class Task(
@@ -292,10 +280,4 @@ private fun getTrace(trace: Array<StackTraceElement>): String {
         str.append(it).append('\n')
     }
     return str.toString()
-}
-
-private inline fun <T> SparseArray<T>.forEach(action: (key: Int, value: T?) -> Unit) {
-    for (index in 0 until size()) {
-        action(keyAt(index), valueAt(index))
-    }
 }
