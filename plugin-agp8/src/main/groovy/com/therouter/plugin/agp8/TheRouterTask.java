@@ -79,9 +79,9 @@ public abstract class TheRouterTask extends DefaultTask {
         JarOutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
         Set<String> addedEntries = new HashSet<>();
         for (RegularFile file : getAllJars().get()) {
-            try {
-                File jar = file.getAsFile();
-                if (jar.exists()) {
+            File jar = file.getAsFile();
+            if (jar.exists()) {
+                try {
                     JarFile jarFile = new JarFile(jar);
                     for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                         JarEntry jarEntry = e.nextElement();
@@ -159,9 +159,10 @@ public abstract class TheRouterTask extends DefaultTask {
                         }
                     }
                     jarFile.close();
+                } catch (Exception err) {
+                    System.out.println("error jar is " + jar.getAbsolutePath());
+                    err.printStackTrace();
                 }
-            } catch (Exception err) {
-                err.printStackTrace();
             }
         }
 

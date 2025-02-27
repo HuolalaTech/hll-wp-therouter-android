@@ -15,7 +15,6 @@ import com.therouter.plugin.utils.TheRouterPluginUtils;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.Directory;
-import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
@@ -27,11 +26,24 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -67,9 +79,9 @@ public abstract class TheRouterTask extends DefaultTask {
         JarOutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
         Set<String> addedEntries = new HashSet<>();
         for (RegularFile file : getAllJars().get()) {
-            try {
-                File jar = file.getAsFile();
-                if (jar.exists()) {
+            File jar = file.getAsFile();
+            if (jar.exists()) {
+                try {
                     JarFile jarFile = new JarFile(jar);
                     for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                         JarEntry jarEntry = e.nextElement();
@@ -147,9 +159,10 @@ public abstract class TheRouterTask extends DefaultTask {
                         }
                     }
                     jarFile.close();
+                } catch (Exception err) {
+                    System.out.println("error jar is " + jar.getAbsolutePath());
+                    err.printStackTrace();
                 }
-            } catch (Exception err) {
-                err.printStackTrace();
             }
         }
 
