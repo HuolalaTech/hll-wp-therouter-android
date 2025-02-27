@@ -15,7 +15,6 @@ import com.therouter.plugin.utils.TheRouterPluginUtils;
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.Directory;
-import org.gradle.api.file.FileTree;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
@@ -27,11 +26,24 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
-import java.io.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.JarOutputStream;
@@ -67,84 +79,90 @@ public abstract class TheRouterTask extends DefaultTask {
         JarOutputStream jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
         Set<String> addedEntries = new HashSet<>();
         for (RegularFile file : getAllJars().get()) {
-            File jar = file.getAsFile();
-            JarFile jarFile = new JarFile(jar);
-            for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
-                JarEntry jarEntry = e.nextElement();
-                String name = jarEntry.getName();
-                if (name.contains("META-INF/") || !addedEntries.add(name)) {
-                    // 如果已添加该条目，则跳过
-                    continue;
-                }
+            try {
+                File jar = file.getAsFile();
+                if (jar.exists()) {
+                    JarFile jarFile = new JarFile(jar);
+                    for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
+                        JarEntry jarEntry = e.nextElement();
+                        String name = jarEntry.getName();
+                        if (name.contains("META-INF/") || !addedEntries.add(name)) {
+                            // 如果已添加该条目，则跳过
+                            continue;
+                        }
 
-                TheRouterInjects.allClass.add(name);
+                        TheRouterInjects.allClass.add(name);
 
-                if (name.contains("TheRouterServiceProvideInjecter")) {
-                    theRouterJar = jar;
-                    theRouterServiceProvideInjecter = jarEntry;
-                } else {
-                    if (!name.contains("$")) {
-                        if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
-                            TheRouterInjects.routeSet.add(name.replaceAll(".class", ""));
-                            ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                            ClassNode cn = new ClassNode();
-                            reader.accept(cn, 0);
-                            Map<String, String> fieldMap = new HashMap<>();
-                            int count = 0;
-                            List<FieldNode> fieldList = cn.fields;
-                            for (FieldNode fieldNode : fieldList) {
-                                if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
-                                    count = Integer.parseInt(fieldNode.value.toString());
-                                }
-                                if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
-                                    fieldMap.put(fieldNode.name, fieldNode.value.toString());
-                                }
-                            }
-
-                            if (fieldMap.size() == 1 && count == 0) {  // old version
-                                TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
-                            } else if (fieldMap.size() == count) { // new version
-                                StringBuilder stringBuilder = new StringBuilder();
-                                for (int i = 0; i < count; i++) {
-                                    stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
-                                }
-                                TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
-                            }
-                        } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
-                            TheRouterInjects.serviceProvideMap.put(name.replaceAll(".class", ""), BuildConfig.VERSION);
-                            if (!theRouterExtension.checkFlowDepend.isEmpty()) {
-                                ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                                ClassNode cn = new ClassNode();
-                                reader.accept(cn, 0);
-                                List<FieldNode> fieldList = cn.fields;
-                                for (FieldNode fieldNode : fieldList) {
-                                    if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                        Map<String, String> map = TheRouterInjects.gson.fromJson(fieldNode.value.toString(), HashMap.class);
-                                        TheRouterInjects.flowTaskMap.putAll(map);
+                        if (name.contains("TheRouterServiceProvideInjecter")) {
+                            theRouterJar = jar;
+                            theRouterServiceProvideInjecter = jarEntry;
+                        } else {
+                            if (!name.contains("$")) {
+                                if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
+                                    TheRouterInjects.routeSet.add(name.replaceAll(".class", ""));
+                                    ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                                    ClassNode cn = new ClassNode();
+                                    reader.accept(cn, 0);
+                                    Map<String, String> fieldMap = new HashMap<>();
+                                    int count = 0;
+                                    List<FieldNode> fieldList = cn.fields;
+                                    for (FieldNode fieldNode : fieldList) {
+                                        if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
+                                            count = Integer.parseInt(fieldNode.value.toString());
+                                        }
+                                        if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
+                                            fieldMap.put(fieldNode.name, fieldNode.value.toString());
+                                        }
                                     }
+
+                                    if (fieldMap.size() == 1 && count == 0) {  // old version
+                                        TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
+                                    } else if (fieldMap.size() == count) { // new version
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        for (int i = 0; i < count; i++) {
+                                            stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
+                                        }
+                                        TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
+                                    }
+                                } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
+                                    TheRouterInjects.serviceProvideMap.put(name.replaceAll(".class", ""), BuildConfig.VERSION);
+                                    if (!theRouterExtension.checkFlowDepend.isEmpty()) {
+                                        ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                                        ClassNode cn = new ClassNode();
+                                        reader.accept(cn, 0);
+                                        List<FieldNode> fieldList = cn.fields;
+                                        for (FieldNode fieldNode : fieldList) {
+                                            if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
+                                                Map<String, String> map = TheRouterInjects.gson.fromJson(fieldNode.value.toString(), HashMap.class);
+                                                TheRouterInjects.flowTaskMap.putAll(map);
+                                            }
+                                        }
+                                    }
+                                } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
+                                    TheRouterInjects.autowiredSet.add(name.replaceAll(".class", ""));
                                 }
                             }
-                        } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
-                            TheRouterInjects.autowiredSet.add(name.replaceAll(".class", ""));
+
+                            try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
+                                jarOutput.putNextEntry(new JarEntry(name));
+
+                                byte[] buffer = new byte[1024];
+                                int bytesRead;
+                                while ((bytesRead = inputStream.read(buffer)) != -1) {
+                                    jarOutput.write(buffer, 0, bytesRead);
+                                }
+
+                                jarOutput.closeEntry();
+                            } catch (IOException ex) {
+                                ex.printStackTrace();
+                            }
                         }
                     }
-
-                    try (InputStream inputStream = jarFile.getInputStream(jarEntry)) {
-                        jarOutput.putNextEntry(new JarEntry(name));
-
-                        byte[] buffer = new byte[1024];
-                        int bytesRead;
-                        while ((bytesRead = inputStream.read(buffer)) != -1) {
-                            jarOutput.write(buffer, 0, bytesRead);
-                        }
-
-                        jarOutput.closeEntry();
-                    } catch (IOException ex) {
-                        ex.printStackTrace();
-                    }
+                    jarFile.close();
                 }
+            } catch (Exception err) {
+                err.printStackTrace();
             }
-            jarFile.close();
         }
 
         for (Directory directory : getAllDirectories().get()) {
