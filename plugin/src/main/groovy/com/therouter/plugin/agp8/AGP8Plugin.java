@@ -45,6 +45,12 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     System.out.println("forceIncremental::" + theRouterExtension.forceIncremental);
                     System.out.println("incrementalCachePath::" + cachePath);
 
+                    if (theRouterExtension.forceIncremental && theRouterExtension.incrementalCachePath.isBlank()) {
+                        System.out.println(LogUI.C_WARN.getValue() + "TheRouter警告：" + LogUI.E_NORMAL.getValue());
+                        System.out.println(LogUI.C_WARN.getValue() + "你配置了forceIncremental=true，但未配置incrementalCachePath，这有可能造成prd包运行时执行反射逻辑，建议修改！" + LogUI.E_NORMAL.getValue());
+                        System.out.println(LogUI.C_WARN.getValue() + "配置逻辑请见文档：https://therouter.cn/docs/2024/07/22/01" + LogUI.E_NORMAL.getValue());
+                    }
+
                     if (isIncremental) {
                         System.out.println();
                         System.out.println("本次构建已开启增量编译，可在：\n" + project.getBuildFile().getAbsolutePath() + " 中设置关闭");
@@ -52,6 +58,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                         System.out.println("\tdebug = false");
                         System.out.println("\tforceIncremental = false");
                         System.out.println("}");
+                        System.out.println("详细原理请见文档：https://kymjs.com/code/2024/10/31/01/");
                     }
 
                     System.out.println("----------------------TheRouter Environment------------------------------");
