@@ -9,4 +9,8 @@ public class TheRouterExtension {
     public String checkFlowDepend = "";
     // 图形化展示当前的 FlowTask 依赖图
     public boolean showFlowDepend = false;
+    // 强制开启增量编译，增量编译默认只在debug模式并且有缓存时开启，如果强制开启增量编译，不论debug还是release都会启用增量
+    public boolean forceIncremental = false;
+    // 自定义增量编译缓存路径，取settings.gradle所在文件夹的相对路径
+    public String incrementalCachePath = "";
 }
