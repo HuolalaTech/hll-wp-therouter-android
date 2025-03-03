@@ -10,6 +10,7 @@ import com.therouter.plugin.TheRouterExtension;
 import com.therouter.plugin.TheRouterInjects;
 import com.therouter.plugin.TheRouterPlugin;
 import com.therouter.plugin.utils.ClassCacheUtils;
+import com.therouter.plugin.utils.TheRouterFlowTask;
 import com.therouter.plugin.utils.TheRouterPluginUtils;
 
 import org.codehaus.groovy.runtime.ResourceGroovyMethods;
@@ -379,7 +380,10 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
                 Set<String> dependencies = flowTaskDependMap.get(taskName);
 
                 for (String dependency : dependencies) {
-                    if (!flowTaskDependMap.containsKey(dependency)) {
+                    if (!flowTaskDependMap.containsKey(dependency)
+                            && !dependency.equalsIgnoreCase(TheRouterFlowTask.APP_ONSPLASH)
+                            && !dependency.equalsIgnoreCase(TheRouterFlowTask.THEROUTER_INITIALIZATION)
+                            && !dependency.equalsIgnoreCase(TheRouterFlowTask.BEFORE_THEROUTER_INITIALIZATION)) {
                         if (TheRouterPlugin.ERROR.equalsIgnoreCase(theRouterExtension.checkFlowDepend)) {
                             throw new RuntimeException("\n\n==========================================\n" +
                                     "TheRouter:: FlowTask::\n" +
