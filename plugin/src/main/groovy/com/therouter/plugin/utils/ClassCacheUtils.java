@@ -6,6 +6,8 @@ import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,8 +16,13 @@ import java.util.Set;
 
 public class ClassCacheUtils {
 
-    public static void write(Set<String> set, File file) throws IOException {
+    public static boolean write(Set<String> set, File file) throws IOException {
         String content = set2String(set);
+        String cache = set2String(readToSet(file));
+        if (content.equals(cache)) {
+            // 缓存没变化
+            return false;
+        }
         if (file.exists()) {
             file.delete();
         }
@@ -24,6 +31,7 @@ public class ClassCacheUtils {
         }
         file.createNewFile();
         ResourceGroovyMethods.write(file, content);
+        return true;
     }
 
     public static Set<String> readToSet(File file) throws IOException {
@@ -54,7 +62,9 @@ public class ClassCacheUtils {
 
     private static String set2String(Set<String> set) {
         StringBuilder stringBuilder = new StringBuilder();
-        for (String str : set) {
+        ArrayList<String> list = new ArrayList<>(set);
+        Collections.sort(list);
+        for (String str : list) {
             stringBuilder.append(str).append("\n");
         }
         return stringBuilder.toString();

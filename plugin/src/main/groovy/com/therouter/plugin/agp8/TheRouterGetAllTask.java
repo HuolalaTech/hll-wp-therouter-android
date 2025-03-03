@@ -3,7 +3,6 @@ package com.therouter.plugin.agp8;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import com.therouter.plugin.AddCodeVisitor;
 import com.therouter.plugin.BuildConfig;
 import com.therouter.plugin.LogUI;
 import com.therouter.plugin.RouteItem;
@@ -17,20 +16,15 @@ import org.codehaus.groovy.runtime.ResourceGroovyMethods;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.RegularFile;
-import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.FieldNode;
 
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -47,12 +41,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
 
 public abstract class TheRouterGetAllTask extends DefaultTask {
 
-    private TheRouterExtension theRouterExtension;
-    private File therouterBuildFolder;
+    protected TheRouterExtension theRouterExtension;
+    protected File therouterBuildFolder;
 
     @InputFiles
     public abstract ListProperty<RegularFile> getAllJars();
@@ -75,7 +68,10 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
         System.out.println("----------------------TheRouter build finish-----------------------------");
     }
 
-    private void theRouterTransform() throws ClassNotFoundException, IOException {
+    public void theRouterTransform() throws ClassNotFoundException, IOException {
+        File theRouterJar = null;
+        JarEntry theRouterServiceProvideInjecter = null;
+
         Set<String> addedEntries = new HashSet<>();
         for (RegularFile file : getAllJars().get()) {
             File jar = file.getAsFile();
@@ -91,51 +87,56 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
                         }
 
                         TheRouterInjects.allClass.add(name);
-
-                        if (!name.contains("$")) {
-                            if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
-                                TheRouterInjects.routeSet.add(name.replaceAll(".class", ""));
-                                ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
-                                ClassNode cn = new ClassNode();
-                                reader.accept(cn, 0);
-                                Map<String, String> fieldMap = new HashMap<>();
-                                int count = 0;
-                                List<FieldNode> fieldList = cn.fields;
-                                for (FieldNode fieldNode : fieldList) {
-                                    if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
-                                        count = Integer.parseInt(fieldNode.value.toString());
-                                    }
-                                    if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
-                                        fieldMap.put(fieldNode.name, fieldNode.value.toString());
-                                    }
-                                }
-
-                                if (fieldMap.size() == 1 && count == 0) {  // old version
-                                    TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
-                                } else if (fieldMap.size() == count) { // new version
-                                    StringBuilder stringBuilder = new StringBuilder();
-                                    for (int i = 0; i < count; i++) {
-                                        stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
-                                    }
-                                    TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
-                                }
-                            } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
-                                TheRouterInjects.serviceProvideMap.put(name.replaceAll(".class", ""), BuildConfig.VERSION);
-                                if (!theRouterExtension.checkFlowDepend.isEmpty()) {
+                        if (name.contains("TheRouterServiceProvideInjecter")) {
+                            theRouterJar = jar;
+                            theRouterServiceProvideInjecter = jarEntry;
+                        } else {
+                            if (!name.contains("$")) {
+                                if (name.contains(TheRouterInjects.PREFIX_ROUTER_MAP)) {
+                                    TheRouterInjects.routeSet.add(name.replaceAll(".class", ""));
                                     ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
                                     ClassNode cn = new ClassNode();
                                     reader.accept(cn, 0);
+                                    Map<String, String> fieldMap = new HashMap<>();
+                                    int count = 0;
                                     List<FieldNode> fieldList = cn.fields;
                                     for (FieldNode fieldNode : fieldList) {
-                                        if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
-                                            Map<String, String> map = TheRouterInjects.gson.fromJson(fieldNode.value.toString(), HashMap.class);
-                                            TheRouterInjects.flowTaskMap.putAll(map);
+                                        if (TheRouterInjects.FIELD_ROUTER_MAP_COUNT.equals(fieldNode.name)) {
+                                            count = Integer.parseInt(fieldNode.value.toString());
+                                        }
+                                        if (fieldNode.name.startsWith(TheRouterInjects.FIELD_ROUTER_MAP)) {
+                                            fieldMap.put(fieldNode.name, fieldNode.value.toString());
                                         }
                                     }
+
+                                    if (fieldMap.size() == 1 && count == 0) {  // old version
+                                        TheRouterInjects.routeMapStringSet.addAll(fieldMap.values());
+                                    } else if (fieldMap.size() == count) { // new version
+                                        StringBuilder stringBuilder = new StringBuilder();
+                                        for (int i = 0; i < count; i++) {
+                                            stringBuilder.append(fieldMap.get(TheRouterInjects.FIELD_ROUTER_MAP + i));
+                                        }
+                                        TheRouterInjects.routeMapStringSet.add(stringBuilder.toString());
+                                    }
+                                } else if (name.contains(TheRouterInjects.PREFIX_SERVICE_PROVIDER)) {
+                                    TheRouterInjects.serviceProvideMap.put(name.replaceAll(".class", ""), BuildConfig.VERSION);
+                                    if (!theRouterExtension.checkFlowDepend.isEmpty()) {
+                                        ClassReader reader = new ClassReader(jarFile.getInputStream(jarEntry));
+                                        ClassNode cn = new ClassNode();
+                                        reader.accept(cn, 0);
+                                        List<FieldNode> fieldList = cn.fields;
+                                        for (FieldNode fieldNode : fieldList) {
+                                            if (TheRouterInjects.FIELD_FLOW_TASK_JSON.equals(fieldNode.name)) {
+                                                Map<String, String> map = TheRouterInjects.gson.fromJson(fieldNode.value.toString(), HashMap.class);
+                                                TheRouterInjects.flowTaskMap.putAll(map);
+                                            }
+                                        }
+                                    }
+                                } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
+                                    TheRouterInjects.autowiredSet.add(name.replaceAll(".class", ""));
                                 }
-                            } else if (name.contains(TheRouterInjects.SUFFIX_AUTOWIRED)) {
-                                TheRouterInjects.autowiredSet.add(name.replaceAll(".class", ""));
                             }
+                            mergeClassTransform(jarFile.getInputStream(jarEntry), jarEntry.getName());
                         }
                     }
                     jarFile.close();
@@ -204,12 +205,18 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
                         TheRouterInjects.autowiredSet.add(name.replaceAll(".class", ""));
                     }
                 }
+                mergeClassTransform(new FileInputStream(file), name);
             }
         }
 
-        ClassCacheUtils.write(TheRouterInjects.serviceProvideMap.keySet(), new File(therouterBuildFolder, "serviceProvide.therouter"));
-        ClassCacheUtils.write(TheRouterInjects.autowiredSet, new File(therouterBuildFolder, "autowired.therouter"));
-        ClassCacheUtils.write(TheRouterInjects.routeSet, new File(therouterBuildFolder, "route.therouter"));
+        boolean change1 = ClassCacheUtils.write(TheRouterInjects.serviceProvideMap.keySet(), new File(therouterBuildFolder, "serviceProvide.therouter"));
+        boolean change2 = ClassCacheUtils.write(TheRouterInjects.autowiredSet, new File(therouterBuildFolder, "autowired.therouter"));
+        boolean change3 = ClassCacheUtils.write(TheRouterInjects.routeSet, new File(therouterBuildFolder, "route.therouter"));
+        if (change1 || change2 || change3) {
+            onCacheChange();
+        }
+
+        asmTheRouterJar(theRouterJar, theRouterServiceProvideInjecter);
 
         Set<RouteItem> pageSet = new HashSet<>();
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -419,8 +426,22 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
         System.out.println("---------TheRouter check flow task map--------------");
     }
 
+    public void onCacheChange() {
+        System.out.println(LogUI.C_ERROR.getValue() + "TheRouter：编译缓存发生变化，建议重新编译，避免新增改动未生效" + LogUI.E_NORMAL.getValue());
+    }
+
+    public void asmTheRouterJar(File theRouterJar, JarEntry theRouterServiceProvideInjecter)
+            throws ClassNotFoundException, IOException {
+        // 增量模式时全部不处理，只用来遍历并标记全部class，由下次编译时AsmClassVisitorFactory处理
+    }
+
+    public void mergeClassTransform(InputStream inputStream, String name)
+            throws ClassNotFoundException, IOException {
+        // 增量模式时全部不处理，只用来遍历并标记全部class，由下次编译时AsmClassVisitorFactory处理
+    }
+
     // 一个辅助方法，用来从 URI 中提取查询参数
-    private static Map<String, String> extractQueryParams(URI uri) {
+    public static Map<String, String> extractQueryParams(URI uri) {
         Map<String, String> queryPairs = new LinkedHashMap<>();
         String query = uri.getQuery();
         if (query != null) {
