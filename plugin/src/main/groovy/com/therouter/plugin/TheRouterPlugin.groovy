@@ -14,10 +14,9 @@ public class TheRouterPlugin extends AGP8Plugin {
         final TheRouterExtension theRouterExtension = project.extensions.create('TheRouter', TheRouterExtension)
         boolean isLibrary = project.getPlugins().hasPlugin("com.android.library")
         if (!isLibrary) {
-            boolean useAGP8 = "true".equalsIgnoreCase(getGradleProperty(project, "agp8"))
             String gradleVersion = project.gradle.gradleVersion
             int v = gradleVersion.tokenize('.')[0].toInteger()
-            if (v < 7 || !useAGP8) {
+            if (v < 7) {
                 def android = project.extensions.getByType(AppExtension)
                 def therouterTransform = new TheRouterTransform(project)
                 android.registerTransform(therouterTransform)
