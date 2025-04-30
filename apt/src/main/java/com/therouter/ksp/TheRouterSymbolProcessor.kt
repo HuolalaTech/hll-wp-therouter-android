@@ -401,6 +401,9 @@ class TheRouterSymbolProcessor(
             super.visitClassDeclaration(classDeclaration, data)
             sourcePath = getSourcePath(classDeclaration)
             classDeclaration.annotations.forEach { annotation ->
+                if (annotation.annotationType.toString() != "ServiceProvider") {
+                    return@forEach
+                }
                 val serviceProviderItem = ServiceProviderItem(false)
                 serviceProviderItem.className =
                     classDeclaration.qualifiedName?.asString().toString()
