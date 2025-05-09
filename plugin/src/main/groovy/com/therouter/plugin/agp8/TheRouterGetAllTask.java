@@ -65,6 +65,12 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
     @TaskAction
     public void taskAction() throws ClassNotFoundException, IOException {
         System.out.println("----------------------TheRouter build start------------------------------");
+        TheRouterInjects.serviceProvideMap.clear();
+        TheRouterInjects.autowiredSet.clear();
+        TheRouterInjects.routeSet.clear();
+        TheRouterInjects.routeMapStringSet.clear();
+        TheRouterInjects.flowTaskMap.clear();
+        TheRouterInjects.allClass.clear();
         theRouterTransform();
         System.out.println("----------------------TheRouter build finish-----------------------------");
     }
