@@ -1,4 +1,4 @@
-package com.therouter.app.navigator;
+package com.therouter.app.classtest;
 
 import static com.therouter.app.KotlinPathIndex.Test.HOME2;
 
@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -17,7 +18,9 @@ import com.therouter.TheRouter;
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.KotlinPathIndex;
 import com.therouter.app.R;
+import com.therouter.app.navigator.NavigatorTargetActivity;
 import com.therouter.app.router.InternalBeanTest;
+import com.therouter.router.Autowired;
 import com.therouter.router.Navigator;
 import com.therouter.router.Route;
 import com.therouter.router.interceptor.NavigationCallback;
@@ -26,11 +29,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function1;
-
 @Route(path = HomePathIndex.DEMO_NAVIGATOR)
 public class NavigatorTestActivity extends AppCompatActivity {
+
+    @Autowired
+    public String test;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,6 +43,9 @@ public class NavigatorTestActivity extends AppCompatActivity {
         // @Autowired 注入，这一行应该写在BaseActivity中更好
         // 如果用到了onNewIntent()，也需要调用这一行，并且在调用前需要将新intent 重新set一遍
         TheRouter.inject(this);
+
+        TextView textView = findViewById(R.id.test_top_title);
+        textView.setText(test);
 
         InternalBeanTest.RowBean bean = new InternalBeanTest.RowBean();
         bean.setHello("helloField");

@@ -84,13 +84,6 @@
     "params": {}
   },
   {
-    "path": "http://kymjs.com/therouter/demo_navigator",
-    "className": "com.therouter.app.navigator.NavigatorTestActivity",
-    "action": "",
-    "description": "",
-    "params": {}
-  },
-  {
     "path": "http://kymjs.com/therouter/home2",
     "className": "com.therouter.app.navigator.NavigatorTargetActivity2",
     "action": "",
@@ -160,6 +153,13 @@
   {
     "path": "http://kymjs.com/therouter/demo_flow_task_executor",
     "className": "com.therouter.app.flowtask.FlowTaskTestActivity",
+    "action": "",
+    "description": "",
+    "params": {}
+  },
+  {
+    "path": "http://kymjs.com/therouter/demo_navigator",
+    "className": "com.therouter.app.classtest.NavigatorTestActivity",
     "action": "",
     "description": "",
     "params": {}

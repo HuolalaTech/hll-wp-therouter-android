@@ -24,7 +24,7 @@
         </activity>
         <activity android:name="com.therouter.app.flowtask.FlowTaskTestActivity" />
         <activity android:name="com.therouter.app.flowtask.FlowTaskTestActivity2" />
-        <activity android:name="com.therouter.app.navigator.NavigatorTestActivity" />
+        <activity android:name="com.therouter.app.classtest.NavigatorTestActivity" />
         <activity android:name="com.therouter.app.action.TestActionActivity" />
         <activity android:name="com.therouter.app.navigator.KotlinTestActivity" />
         <activity android:name="com.therouter.app.navigator.NavigatorTargetActivity" />
