@@ -511,7 +511,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                         fragment?.arguments = bundle
                         debug("Navigator::navigation", "create fragment ${routeItem.className}")
                     } catch (e: Exception) {
-                        debug("Navigator::navigationFragment", "create fragment instance error") {
+                        debug("Navigator::navigationFragment", "create fragment instance error " + e.message) {
                             e.printStackTrace()
                         }
                     }
