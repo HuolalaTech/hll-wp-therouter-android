@@ -478,7 +478,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         debug("Navigator::navigationFragment", "path replace to $matchUrl")
-        var match = matchRouteMap(matchUrl)
+        var match: RouteItem? = matchRouteMap(matchUrl)
         match?.getExtras()?.let { b ->
             b.putAll(extras)
             kvPair.keys.forEach {
@@ -498,8 +498,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         debug("Navigator::navigationFragment", "route replace to $match")
-        match?.let {
-            routerInterceptor.invoke(match) { routeItem ->
+        match?.let { noNullMatch ->
+            routerInterceptor.invoke(noNullMatch) { routeItem ->
                 if (isFragmentClass(routeItem.className)) {
                     try {
                         fragment = instantiate(routeItem.className)
@@ -573,7 +573,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 }
             }
         }
-        var match = matchRouteMap(matchUrl)
+        var match: RouteItem? = matchRouteMap(matchUrl)
 
         // navigator can not jump, but ActionManager can handle it.
         if (ActionManager.isAction(this) && match == null) {
@@ -604,10 +604,10 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         if (match != null) {
-            if (!isFragmentClass(match.className)) {
+            if (!isFragmentClass(match?.className ?: "")) {
                 debug("Navigator::navigation", "NavigationCallback on found")
                 callback.onFound(this)
-                routerInterceptor.invoke(match) { routeItem ->
+                routerInterceptor.invoke(match!!) { routeItem ->
                     val intent = intent ?: Intent()
                     intentData?.let {
                         intent.data = it
@@ -700,7 +700,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
                 callback.onArrival(this)
             } else {
                 if (TheRouter.isDebug) {
-                    throw RuntimeException("TheRouter::Navigator ${match.className} is Fragment")
+                    throw RuntimeException("TheRouter::Navigator ${match?.className} is Fragment")
                 }
             }
         } else {
