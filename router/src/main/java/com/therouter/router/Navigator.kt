@@ -499,7 +499,7 @@ open class Navigator(var url: String?, val intent: Intent?) {
         }
         debug("Navigator::navigationFragment", "route replace to $match")
         match?.let {
-            routerInterceptor.invoke(match!!) { routeItem ->
+            routerInterceptor.invoke(match) { routeItem ->
                 if (isFragmentClass(routeItem.className)) {
                     try {
                         fragment = instantiate(routeItem.className)
@@ -604,99 +604,105 @@ open class Navigator(var url: String?, val intent: Intent?) {
             }
         }
         if (match != null) {
-            debug("Navigator::navigation", "NavigationCallback on found")
-            callback.onFound(this)
-            routerInterceptor.invoke(match!!) { routeItem ->
-                val intent = intent ?: Intent()
-                intentData?.let {
-                    intent.data = it
-                }
-                intentClipData?.let {
-                    intent.clipData = it
-                }
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && intentIdentifier != null) {
-                    intent.identifier = intentIdentifier
-                }
-                intent.component = context?.let { ComponentName(context.packageName, routeItem.className) } ?: let {
-                    if (TheRouter.isDebug) {
-                        throw RuntimeException("context is null, path is -> ${getUrlWithParams()}")
-                    } else {
-                        debug("Navigator::navigation", "context is null, path is -> ${getUrlWithParams()}")
+            if (!isFragmentClass(match.className)) {
+                debug("Navigator::navigation", "NavigationCallback on found")
+                callback.onFound(this)
+                routerInterceptor.invoke(match) { routeItem ->
+                    val intent = intent ?: Intent()
+                    intentData?.let {
+                        intent.data = it
                     }
-                    null
-                }
-                if (context !is Activity && fragment == null) {
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                }
-                TheRouterLifecycleCallback.addActivityCreatedObserver(routeItem.className) {
-                    if (it.javaClass.name == routeItem.className) {
-                        callback.onActivityCreated(this, it)
-                        if (!TextUtils.isEmpty(routeItem.action)) {
-                            TheRouter.build(routeItem.action)
-                                .withObject(KEY_OBJECT_NAVIGATOR, this)
-                                .withObject(KEY_OBJECT_ACTIVITY, it)
-                                .action(it)
+                    intentClipData?.let {
+                        intent.clipData = it
+                    }
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && intentIdentifier != null) {
+                        intent.identifier = intentIdentifier
+                    }
+                    intent.component = context?.let { ComponentName(context.packageName, routeItem.className) } ?: let {
+                        if (TheRouter.isDebug) {
+                            throw RuntimeException("context is null, path is -> ${getUrlWithParams()}")
+                        } else {
+                            debug("Navigator::navigation", "context is null, path is -> ${getUrlWithParams()}")
+                        }
+                        null
+                    }
+                    if (context !is Activity && fragment == null) {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    TheRouterLifecycleCallback.addActivityCreatedObserver(routeItem.className) {
+                        if (it.javaClass.name == routeItem.className) {
+                            callback.onActivityCreated(this, it)
+                            if (!TextUtils.isEmpty(routeItem.action)) {
+                                TheRouter.build(routeItem.action)
+                                    .withObject(KEY_OBJECT_NAVIGATOR, this)
+                                    .withObject(KEY_OBJECT_ACTIVITY, it)
+                                    .action(it)
+                            }
                         }
                     }
-                }
-                intent.putExtra(KEY_ACTION, routeItem.action)
-                intent.putExtra(KEY_PATH, getUrlWithParams())
-                intent.putExtra(KEY_DESCRIPTION, routeItem.description)
-                with(routeItem.getExtras()) {
-                    val bundle: Bundle? = getBundle(KEY_BUNDLE)
-                    if (bundle != null) {
-                        remove(KEY_BUNDLE)
-                        intent.putExtra(KEY_BUNDLE, bundle)
+                    intent.putExtra(KEY_ACTION, routeItem.action)
+                    intent.putExtra(KEY_PATH, getUrlWithParams())
+                    intent.putExtra(KEY_DESCRIPTION, routeItem.description)
+                    with(routeItem.getExtras()) {
+                        val bundle: Bundle? = getBundle(KEY_BUNDLE)
+                        if (bundle != null) {
+                            remove(KEY_BUNDLE)
+                            intent.putExtra(KEY_BUNDLE, bundle)
+                        }
+                        intent.putExtras(this)
                     }
-                    intent.putExtras(this)
-                }
-                intent.addFlags(routeItem.getExtras().getInt(KEY_INTENT_FLAGS))
-                if (requestCode == DEFAULT_REQUEST_CODE) {
-                    if (fragment != null) {
-                        debug("Navigator::navigation", "fragment.startActivity ${routeItem.className}")
-                        fragment.startActivity(intent, optionsCompat)
-                    } else {
-                        debug("Navigator::navigation", "startActivity ${routeItem.className}")
-                        context?.startActivity(intent, optionsCompat)
-                    }
-                } else {
-                    if (fragment != null) {
-                        debug("Navigator::navigation", "fragment.startActivityForResult ${routeItem.className}")
-                        fragment.startActivityForResult(intent, requestCode, optionsCompat)
-                    } else if (context is Activity) {
-                        debug("Navigator::navigation", "startActivityForResult ${routeItem.className}")
-                        context.startActivityForResult(intent, requestCode, optionsCompat)
-                    } else {
-                        if (TheRouter.isDebug) {
-                            throw RuntimeException("TheRouter::Navigator context is not Activity or Fragment")
+                    intent.addFlags(routeItem.getExtras().getInt(KEY_INTENT_FLAGS))
+                    if (requestCode == DEFAULT_REQUEST_CODE) {
+                        if (fragment != null) {
+                            debug("Navigator::navigation", "fragment.startActivity ${routeItem.className}")
+                            fragment.startActivity(intent, optionsCompat)
                         } else {
+                            debug("Navigator::navigation", "startActivity ${routeItem.className}")
                             context?.startActivity(intent, optionsCompat)
                         }
-                    }
-                }
-                val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
-                val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
-                if (inAnimId != 0 || outAnimId != 0) {
-                    if (context is Activity) {
-                        debug("Navigator::navigation", "overridePendingTransition ${routeItem.className}")
-                        context.overridePendingTransition(
-                            routeItem.getExtras().getInt(KEY_ANIM_IN),
-                            routeItem.getExtras().getInt(KEY_ANIM_OUT)
-                        )
-                    } else if (fragment != null) {
-                        fragment.activity?.overridePendingTransition(
-                            routeItem.getExtras().getInt(KEY_ANIM_IN),
-                            routeItem.getExtras().getInt(KEY_ANIM_OUT)
-                        )
                     } else {
-                        if (TheRouter.isDebug) {
-                            throw RuntimeException("TheRouter::Navigator context is not Activity, ignore animation")
+                        if (fragment != null) {
+                            debug("Navigator::navigation", "fragment.startActivityForResult ${routeItem.className}")
+                            fragment.startActivityForResult(intent, requestCode, optionsCompat)
+                        } else if (context is Activity) {
+                            debug("Navigator::navigation", "startActivityForResult ${routeItem.className}")
+                            context.startActivityForResult(intent, requestCode, optionsCompat)
+                        } else {
+                            if (TheRouter.isDebug) {
+                                throw RuntimeException("TheRouter::Navigator context is not Activity or Fragment")
+                            } else {
+                                context?.startActivity(intent, optionsCompat)
+                            }
                         }
                     }
+                    val inAnimId = routeItem.getExtras().getInt(KEY_ANIM_IN)
+                    val outAnimId = routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                    if (inAnimId != 0 || outAnimId != 0) {
+                        if (context is Activity) {
+                            debug("Navigator::navigation", "overridePendingTransition ${routeItem.className}")
+                            context.overridePendingTransition(
+                                routeItem.getExtras().getInt(KEY_ANIM_IN),
+                                routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                            )
+                        } else if (fragment != null) {
+                            fragment.activity?.overridePendingTransition(
+                                routeItem.getExtras().getInt(KEY_ANIM_IN),
+                                routeItem.getExtras().getInt(KEY_ANIM_OUT)
+                            )
+                        } else {
+                            if (TheRouter.isDebug) {
+                                throw RuntimeException("TheRouter::Navigator context is not Activity, ignore animation")
+                            }
+                        }
+                    }
+                    pushHistory(ActivityNavigatorHistory(getUrlWithParams()))
                 }
-                pushHistory(ActivityNavigatorHistory(getUrlWithParams()))
+                callback.onArrival(this)
+            } else {
+                if (TheRouter.isDebug) {
+                    throw RuntimeException("TheRouter::Navigator ${match.className} is Fragment")
+                }
             }
-            callback.onArrival(this)
         } else {
             callback.onLost(this, requestCode)
         }
