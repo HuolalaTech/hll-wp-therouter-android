@@ -1,5 +1,8 @@
 package com.therouter.plugin;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class TheRouterExtension {
     // 是否开启调试模式
     public boolean debug = false;
@@ -13,4 +16,7 @@ public class TheRouterExtension {
     public boolean forceIncremental = false;
     // 自定义增量编译缓存路径，取settings.gradle所在文件夹的相对路径
     public String incrementalCachePath = "";
+    // 在编译期要被干掉的类（只对 jar 包生效，源码不过滤)，可以用这个功能替换一些 jar 包中的类
+    // 格式： com/therouter/app/R$anim.class
+    public Set<String> removeClass = new HashSet<>();
 }

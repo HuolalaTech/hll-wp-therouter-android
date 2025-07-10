@@ -88,8 +88,12 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
                     for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
                         JarEntry jarEntry = e.nextElement();
                         String name = jarEntry.getName();
-                        if (name.contains("META-INF/") || !addedEntries.add(name)) {
+                        if (name.contains("META-INF/") || !addedEntries.add(name)
+                                || this.theRouterExtension.removeClass.contains(name)) {
                             // 如果已添加该条目，则跳过
+                            if (this.theRouterExtension.debug){
+                                System.out.println("TheRouter plugin remove file: " + name);
+                            }
                             continue;
                         }
 
