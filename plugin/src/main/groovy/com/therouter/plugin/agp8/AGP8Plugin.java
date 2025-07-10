@@ -72,10 +72,14 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                             return null;
                         }
                     });
+                    // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
+                    // 获取项目目录下 assets/therouter/routeMap.json 文件
+                    File assetRouteMapFile = new File(project.getProjectDir(), "src/main/assets/therouter/routeMap.json");
                     String name = "theRouterGetAllClassesWith" + variant.getName().substring(0, 1).toUpperCase() + variant.getName().substring(1);
                     TaskProvider<TheRouterGetAllTask> testTask = project.getTasks().register(name, TheRouterGetAllTask.class, task -> {
                         task.setTheRouterExtension(theRouterExtension);
                         task.setTheRouterBuildFolder(therouterBuildFolder);
+                        task.setAssetRouteMapFile(assetRouteMapFile);
                     });
                     variant.getArtifacts()
                             .forScope(ScopedArtifacts.Scope.ALL)

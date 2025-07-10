@@ -47,6 +47,9 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
 
     protected TheRouterExtension theRouterExtension;
     protected File therouterBuildFolder;
+    // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
+    // 获取项目目录下 assets/therouter/routeMap.json 文件
+    protected File assetRouteMap;
 
     @InputFiles
     public abstract ListProperty<RegularFile> getAllJars();
@@ -56,6 +59,10 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
 
     public void setTheRouterExtension(TheRouterExtension theRouterExtension) {
         this.theRouterExtension = theRouterExtension;
+    }
+
+    public void setAssetRouteMapFile(File assetRouteMapFile) {
+        this.assetRouteMap = assetRouteMapFile;
     }
 
     public void setTheRouterBuildFolder(File therouterBuildFolder) {
@@ -236,12 +243,8 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
             }.getType()));
         }
 
-        // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
-        // 获取项目目录下 assets/therouter/routeMap.json 文件
-        File assetRouteMap = new File(getProject().getProjectDir(), "src/main/assets/therouter/routeMap.json");
-
         // 如果文件存在
-        if (assetRouteMap.exists()) {
+        if (assetRouteMap != null && assetRouteMap.exists()) {
             // 如果 checkRouteMap 配置为 DELETE
             if (TheRouterPlugin.DELETE.equalsIgnoreCase(theRouterExtension.checkRouteMap)) {
                 System.out.println("---------TheRouter delete route map------------------------------------------");
@@ -279,13 +282,15 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
                 }
             }
         } else {
-            // 如果文件不存在，创建父目录和文件
-            System.out.println("---------TheRouter route map does not exist: /assets/therouter/routeMap.json-------");
-            try {
-                assetRouteMap.getParentFile().mkdirs();
-                assetRouteMap.createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if (assetRouteMap != null) {
+                // 如果文件不存在，创建父目录和文件
+                System.out.println("---------TheRouter route map does not exist: /assets/therouter/routeMap.json-------");
+                try {
+                    assetRouteMap.getParentFile().mkdirs();
+                    assetRouteMap.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
