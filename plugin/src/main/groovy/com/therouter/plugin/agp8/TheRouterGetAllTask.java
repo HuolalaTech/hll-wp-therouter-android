@@ -49,7 +49,7 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
     protected File therouterBuildFolder;
     // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
     // 获取项目目录下 assets/therouter/routeMap.json 文件
-    protected File assetRouteMap;
+    protected String assetRouteMapPath;
 
     @InputFiles
     public abstract ListProperty<RegularFile> getAllJars();
@@ -61,8 +61,8 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
         this.theRouterExtension = theRouterExtension;
     }
 
-    public void setAssetRouteMapFile(File assetRouteMapFile) {
-        this.assetRouteMap = assetRouteMapFile;
+    public void setAssetRouteMapPath(String assetRouteMapPath) {
+        this.assetRouteMapPath = assetRouteMapPath;
     }
 
     public void setTheRouterBuildFolder(File therouterBuildFolder) {
@@ -243,6 +243,7 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
             }.getType()));
         }
 
+        File assetRouteMap = new File(assetRouteMapPath);
         // 如果文件存在
         if (assetRouteMap != null && assetRouteMap.exists()) {
             // 如果 checkRouteMap 配置为 DELETE
