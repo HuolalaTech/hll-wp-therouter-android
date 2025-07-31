@@ -39,6 +39,7 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     isShow = true;
                     System.out.println();
                     System.out.println("----------------------TheRouter Environment------------------------------");
+//                    System.out.println(LogUI.C_ERROR.getValue() + "⚠️警告:你的接入方式已经废弃，请将根目录 build.gradle 中【cn.therouter.agp8】替换为【cn.therouter】" + LogUI.E_NORMAL.getValue());
                     System.out.println("TheRouter plugin agp8：" + LogUI.C_BLACK_GREEN.getValue() + "cn.therouter:" + BuildConfig.NAME + ":" + BuildConfig.VERSION + LogUI.E_NORMAL.getValue());
                     System.out.println("JDK Version::" + System.getProperty("java.version"));
                     System.out.println("Gradle Version::" + project.getGradle().getGradleVersion());
