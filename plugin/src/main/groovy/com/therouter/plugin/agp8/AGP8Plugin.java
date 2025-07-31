@@ -26,13 +26,13 @@ public abstract class AGP8Plugin implements Plugin<Project> {
         android.onVariants(android.selector().all(), new Action<Variant>() {
             @Override
             public void execute(final Variant variant) {
+                if (theRouterExtension.assetRouteMapPath == null || theRouterExtension.assetRouteMapPath.isBlank()) {
+                    theRouterExtension.assetRouteMapPath = new File(project.getProjectDir(), "src/main/assets/therouter/routeMap.json").getAbsolutePath();
+                }
                 String cachePath = project.getBuildDir().getAbsolutePath();
                 if (!theRouterExtension.incrementalCachePath.isBlank()) {
                     cachePath = new File(project.getRootDir(), theRouterExtension.incrementalCachePath).getAbsolutePath();
                 }
-                // 让第三方Activity也支持路由，第三方页面的路由表可以在assets中添加
-                // 获取项目目录下 assets/therouter/routeMap.json 文件
-                String assetRouteMapPath = new File(project.getProjectDir(), "src/main/assets/therouter/routeMap.json").getAbsolutePath();
                 final File therouterBuildFolder = new File(cachePath, "therouter");
                 boolean isIncremental = theRouterExtension.forceIncremental || (theRouterExtension.debug && therouterBuildFolder.exists());
                 if (!isShow) {
@@ -79,7 +79,6 @@ public abstract class AGP8Plugin implements Plugin<Project> {
                     TaskProvider<TheRouterGetAllTask> testTask = project.getTasks().register(name, TheRouterGetAllTask.class, task -> {
                         task.setTheRouterExtension(theRouterExtension);
                         task.setTheRouterBuildFolder(therouterBuildFolder);
-                        task.setAssetRouteMapPath(assetRouteMapPath);
                     });
                     variant.getArtifacts()
                             .forScope(ScopedArtifacts.Scope.ALL)
