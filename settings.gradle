@@ -29,7 +29,8 @@ getLocalProperties().entrySet().each { entry ->
                 include ":$moduleName"
                 def moduleProject = project(":$moduleName")
                 moduleProject.projectDir = file
-                if (Boolean.valueOf(gradle8)) {
+                def agp8BuildFile = new File(file, "agp8-build.gradle")
+                if (Boolean.valueOf(gradle8) && agp8BuildFile.exists()) {
                     moduleProject.buildFileName = "agp8-build.gradle"
                 }
             }

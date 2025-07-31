@@ -34,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
                 TheRouter.build(HomePathIndex.DEMO_NAVIGATOR)
                         .withInAnimation(R.anim.activity_slide_in)
                         .withOutAnimation(R.anim.activity_slide_out)
+                        .withString("test", "helloworld")
                         // 加动画以后，必须传入activity对象，否则debug环境抛异常，release动画不生效
                         .navigation(v.getContext());
             }

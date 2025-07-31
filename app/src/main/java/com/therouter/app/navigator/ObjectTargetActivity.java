@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.therouter.app.HomePathIndex;
 import com.therouter.app.R;
+import com.therouter.app.classtest.NavigatorTestActivity;
 import com.therouter.demo.base.BaseActivity;
 import com.therouter.router.OnRouteMapChangedListener;
 import com.therouter.router.Route;

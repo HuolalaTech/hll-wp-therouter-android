@@ -9,6 +9,13 @@
         android:orientation="vertical">
 
         <TextView
+            android:id="@+id/test_top_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="6dp"
+            android:text="xxx" />
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="6dp"
