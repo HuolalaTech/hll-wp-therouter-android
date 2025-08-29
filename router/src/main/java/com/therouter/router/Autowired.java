@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
  * Annotation for parameters, which need autowired.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.FIELD})
+@Target({ElementType.FIELD, ElementType.PARAMETER})
 public @interface Autowired {
 
     String name() default "";

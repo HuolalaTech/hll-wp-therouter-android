@@ -12,7 +12,7 @@ import java.lang.annotation.Target;
  * Created by ZhangTao on 17/8/11.
  */
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Repeatable(Routes.class)
 @kotlin.annotation.Repeatable
 public @interface Route {

@@ -10,23 +10,15 @@ import java.lang.annotation.RetentionPolicy
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
-@java.lang.annotation.Repeatable(value = Routes::class)
+@java.lang.annotation.Repeatable(value = ComposeRoutes::class)
 @Repeatable
-annotation class Route(
+annotation class ComposeRoute(
     /**
      * 路由path，不限格式，建议是一个url，允许多个path对应同一个Activity
      */
     val path: String = "",
     /**
-     * 自定义事件，一般用来打开目标页面后做一个执行动作，例如随机页面弹出广告弹窗
-     */
-    val action: String = "",
-    /**
      * 页面描述，会被记录到路由表中，方便后期排查的时候知道每个path或Activity是什么业务
      */
-    val description: String = "",
-    /**
-     * 页面参数，自动写入intent中，允许写在路由表中动态下发修改默认值，或通过路由跳转时代码传入
-     */
-    val params: Array<String> = []
+    val description: String = ""
 )
