@@ -59,11 +59,3 @@ task javadocJar(type: Jar, dependsOn: dokkaJavadoccccc) {
     archiveClassifier.set('javadoc')
     from javadoc.destinationDir
 }
-
-android {
-    defaultConfig {
-        buildConfigField "String", "VERSION", "\"${project.version}\""
-    }
-}
-apply from: "${project.getRootDir()}/buildsystem/publish.gradle"
-
