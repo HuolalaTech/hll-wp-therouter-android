@@ -41,6 +41,9 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
     String stringIntValue;
 
     @Autowired
+    String urlParams;
+
+    @Autowired
     String str_123_Value;
 
     @Autowired
@@ -85,6 +88,10 @@ public class NavigatorTargetActivity<T> extends AppCompatActivity {
         setTitle("导航落地页1");
         // Autowired注入，这一行应该写在BaseActivity中
         TheRouter.inject(this);
+
+        final TextView textView0 = findViewById(R.id.textview0);
+        textView0.setText("接收到url拼接传参：urlParams=" + urlParams);
+        require(intValue == 12345678, "NavigatorTargetActivity", "intValue数值不对");
 
         final TextView textView1 = findViewById(R.id.textview1);
         textView1.setText("接收int值传递：integer2=" + intValue);
