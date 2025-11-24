@@ -5,6 +5,8 @@ if (Boolean.valueOf(gradle8)) {
     rootProject.buildFileName = "agp8-build.gradle"
     pluginManagement {
         repositories {
+            mavenCentral()
+            google()
             maven { url 'https://maven.therouter.cn:8443/repository/maven-public/' }
             maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
         }
@@ -12,6 +14,8 @@ if (Boolean.valueOf(gradle8)) {
     dependencyResolutionManagement {
         repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
         repositories {
+            mavenCentral()
+            google()
             maven { url 'https://maven.therouter.cn:8443/repository/maven-public/' }
             maven { url 'https://s01.oss.sonatype.org/content/groups/staging/' }
         }
