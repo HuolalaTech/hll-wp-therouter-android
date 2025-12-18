@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    namespace = "cn.therouter"
+    namespace = "cn.therouter.compose"
     compileSdk 33
 
     defaultConfig {
