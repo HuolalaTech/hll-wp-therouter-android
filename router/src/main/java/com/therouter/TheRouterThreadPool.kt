@@ -134,10 +134,10 @@ private class BufferExecutor : ExecutorService, Executor {
     private fun checkTask() {
         flightTaskMap.values.forEach { v ->
             require(
-                System.currentTimeMillis() - v.createTime < KEEP_ALIVE_SECONDS * 1000L,
+                System.nanoTime() - v.createTime < KEEP_ALIVE_SECONDS * 1000L,
                 "ThreadPool",
                 "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
-                        "当前任务被创建时间为${v.createTime}此时时间为${System.currentTimeMillis()}\n${v.trace}"
+                        "当前任务被创建时间为${v.createTime}此时时间为${System.nanoTime()}\n${v.trace}"
             )
         }
     }
@@ -259,7 +259,7 @@ private class BufferExecutor : ExecutorService, Executor {
 }
 
 private class FlightTaskInfo(val trace: String) {
-    var createTime = System.currentTimeMillis()
+    var createTime = System.nanoTime()
 }
 
 private class Task(
