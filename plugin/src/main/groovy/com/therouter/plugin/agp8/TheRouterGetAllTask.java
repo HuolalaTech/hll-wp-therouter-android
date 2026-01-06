@@ -457,6 +457,7 @@ public abstract class TheRouterGetAllTask extends DefaultTask {
         for (String key : flowTaskDependMap.keySet()) {
             TheRouterPluginUtils.fillTodoList(flowTaskDependMap, key);
         }
+        TheRouterPluginUtils.freeTodoList();
 
         if (theRouterExtension.showFlowDepend) {
             // 再次遍历 flowTaskDependMap 的 keySet 并调用 fillNode

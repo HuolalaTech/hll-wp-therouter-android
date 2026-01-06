@@ -44,6 +44,10 @@ public class TheRouterPluginUtils {
         }
     }
 
+    public static void freeTodoList() {
+        loopDependStack.clear();
+    }
+
     public static Set<String> dependStack = new HashSet<>();
 
     public static void fillNode(Node node, String root) {
