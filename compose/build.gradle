@@ -34,7 +34,7 @@ android {
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.21"
     implementation "cn.therouter:router:latest"
-    compileOnly "cn.therouter:stub:latest"
+    compileOnly(platform("androidx.compose:compose-bom:2025.08.00"))
 }
 
 task sourcesJar(type: Jar) {
