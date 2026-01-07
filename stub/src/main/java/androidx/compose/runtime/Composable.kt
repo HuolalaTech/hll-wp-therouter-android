@@ -32,7 +32,7 @@ package androidx.compose.runtime
  * the tree.
  */
 @MustBeDocumented
-@Retention(AnnotationRetention.BINARY)
+@Retention(AnnotationRetention.RUNTIME)
 @Target(
     // function declarations
     // @Composable fun Foo() { ... }
