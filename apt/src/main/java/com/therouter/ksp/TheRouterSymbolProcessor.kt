@@ -171,22 +171,8 @@ class TheRouterSymbolProcessor(
                 parameter.hasDefault = it.hasDefault
                 parameter.parameterName = it.name?.getShortName() ?: ""
                 parameter.fieldName = parameter.parameterName
-                val temp = it.type.resolve().declaration
-                parameter.parameterClassName = temp.qualifiedName?.asString() ?: ""
-                if (temp.typeParameters.isNotEmpty()) {
-                    val typeParametText = StringBuilder("<")
-                    temp.typeParameters.forEach {
-                        var type = ""
-                        it.bounds.forEach {
-                            type = it.resolve().declaration.qualifiedName?.asString() ?: ""
-                        }
-                        typeParametText.append(type).append(", ")
-                    }
-                    typeParametText.deleteAt(typeParametText.length - 1)
-                    typeParametText.deleteAt(typeParametText.length - 1)
-                    typeParametText.append(">")
-                    parameter.parameterClassName += typeParametText.toString()
-                }
+                // 使用新函数获取完整的参数类型，包括泛型嵌套
+                parameter.parameterClassName = getParameterType(it.type.resolve())
 
                 it.annotations.forEach { parameterAnnotation ->
                     if ("Autowired" == parameterAnnotation.shortName.asString()) {
@@ -431,7 +417,7 @@ class TheRouterSymbolProcessor(
                     }
                 }
 
-                autowiredItem.type = getFieldType(property.type.resolve())
+                autowiredItem.type = getParameterType(property.type.resolve())
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -463,18 +449,31 @@ class TheRouterSymbolProcessor(
         }
     }
 
-    private fun getFieldType(type: KSType?): String =
-        if (type != null && type.arguments.isNotEmpty()) {
-            val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
-            type.arguments.forEach {
-                classNameBuilder.append(getFieldType(it.type?.resolve())).append(",")
-            }
-            classNameBuilder.deleteCharAt(classNameBuilder.length - 1)
-            classNameBuilder.append(">")
-            classNameBuilder.toString()
-        } else {
-            type?.declaration?.qualifiedName?.asString() ?: ""
+    /**
+     * 获取参数类型的完整字符串表示，包括泛型嵌套
+     * @param type 参数的类型
+     * @return 完整的类型字符串，如 "kotlin.collections.List<kotlin.String>"
+     */
+    private fun getParameterType(type: KSType?): String {
+        if (type == null) {
+            return ""
         }
+        // 如果没有类型参数，直接返回基础类型名
+        if (type.arguments.isEmpty()) {
+            return type.declaration.qualifiedName?.asString() ?: ""
+        }
+        // 有类型参数，递归处理泛型嵌套
+        val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
+        type.arguments.forEachIndexed { index, typeArgument ->
+            if (index > 0) {
+                classNameBuilder.append(", ")
+            }
+            // 递归处理嵌套的泛型类型
+            classNameBuilder.append(getParameterType(typeArgument.type?.resolve()))
+        }
+        classNameBuilder.append(">")
+        return classNameBuilder.toString()
+    }
 
     private fun genAutowiredFile(pageMap: Map<String, List<AutowiredItem>>) {
         val keyList = ArrayList(pageMap.keys)

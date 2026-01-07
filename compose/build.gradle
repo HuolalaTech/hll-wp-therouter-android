@@ -33,8 +33,8 @@ android {
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.21"
-    implementation "cn.therouter:router:1.3.1-rc2"
-    compileOnly "cn.therouter:stub:1.3.1-rc1"
+    implementation "cn.therouter:router:latest"
+    compileOnly "cn.therouter:stub:latest"
 }
 
 task sourcesJar(type: Jar) {
