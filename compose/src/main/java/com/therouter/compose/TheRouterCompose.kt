@@ -12,7 +12,7 @@ fun composable(route: String, composable: @Composable (Map<String, Any?>?) -> Un
     routeMap.put(route, composable)
 }
 
-fun Navigator.withComposableObject(key: String, value: @Composable Any): Navigator {
+fun Navigator.withComposableObject(key: String, value: @Composable () -> Unit): Navigator {
     arguments[key] = SoftReference(value)
     return this
 }
