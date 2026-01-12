@@ -33,6 +33,7 @@ import com.therouter.apt.SUFFIX_AUTOWIRED
 import com.therouter.apt.ServiceProviderItem
 import com.therouter.apt.duplicateRemove
 import com.therouter.apt.gson
+import com.therouter.brick.DataProviderItem
 import com.therouter.inject.ServiceProvider
 import com.therouter.router.Autowired
 import com.therouter.router.Route
@@ -123,15 +124,19 @@ class TheRouterSymbolProcessor(
                 item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
-                        "type" -> {
-                            item.type = arg.value.toString()
+                        "path" -> {
+                            item.path = arg.value.toString()
                         }
 
                         "priority" -> {
-                            if (arg.value == null) {
-                                item.priority = 0
-                            } else {
+                            if (arg.value != null) {
                                 item.priority = arg.value as Int
+                            }
+                        }
+
+                        "fieldName" -> {
+                            if (arg.value != null) {
+                                item.fieldName = arg.value as String
                             }
                         }
                     }
@@ -178,18 +183,19 @@ class TheRouterSymbolProcessor(
             var i = 0
             for (item in routePagelist) {
                 i++
-                ps.println("\t//com.therouter.brick.DataRepository.mapping.put(\"${item.type}\", ${item.returnType}::class.java)")
-                ps.println("\tvar x$i = com.therouter.brick.DataRepository.mapping.get(\"${item.type}\")")
+                ps.println("\t//com.therouter.brick.DataRepository.mapping.put(\"${item.path}\", ${item.returnType}::class.java)")
+                ps.println("\tvar x$i = com.therouter.brick.DataRepository.mapping.get(\"${item.path}\")")
                 ps.println("\tif (x$i == null) {")
                 ps.println("\t\tx$i = ArrayList<com.therouter.brick.DataProvider<*>>()")
                 ps.println("\t}")
                 ps.println("\tval dp$i = com.therouter.brick.DataProvider<${item.returnType}>()")
                 ps.println("\tdp$i.priority = ${item.priority}")
-                ps.println("\tdp$i.type = \"${item.type}\"")
-                ps.println("\tdp$i.clazz = ${item.returnType}::class.java")
+                ps.println("\tdp$i.fieldName = ${item.fieldName}")
+                ps.println("\tdp$i.path = \"${item.path}\"")
+                ps.println("\tdp$i.returnType = ${item.returnType}::class.java")
                 ps.println("\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
                 ps.println("\tx$i.add(dp$i)")
-                ps.println("\tcom.therouter.brick.DataRepository.mapping.set(\"${item.type}\", x$i)")
+                ps.println("\tcom.therouter.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
                 ps.println("\t")
             }
 
@@ -212,7 +218,10 @@ class TheRouterSymbolProcessor(
         genRouterMapFile(routeList, composeRouteList)
     }
 
-    inner class RouteVisitor(private val routeList: ArrayList<RouteItem>, private val composeRouteList: ArrayList<ComposeItem>) :
+    inner class RouteVisitor(
+        private val routeList: ArrayList<RouteItem>,
+        private val composeRouteList: ArrayList<ComposeItem>
+    ) :
         TheRouterVisitor(logger) {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
             super.visitClassDeclaration(classDeclaration, data)
@@ -263,7 +272,7 @@ class TheRouterSymbolProcessor(
         override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
             super.visitFunctionDeclaration(function, data)
             sourcePath = getSourcePath(function)
-            var fileText:List<String> = ArrayList()
+            var fileText: List<String> = ArrayList()
 
             if (function.functionKind != FunctionKind.STATIC && function.functionKind != FunctionKind.TOP_LEVEL) {
                 logger.error("The modifiers of the " + function.qualifiedName?.asString() + "() must be top level function!")
@@ -271,7 +280,8 @@ class TheRouterSymbolProcessor(
             val composeRoute = ComposeItem()
             function.annotations.forEach { annotation ->
                 composeRoute.methodName = function.simpleName.asString()
-                composeRoute.className = function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
+                composeRoute.className =
+                    function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -310,6 +320,7 @@ class TheRouterSymbolProcessor(
                                         parameter.parameterName = rename
                                     }
                                 }
+
                                 "args" -> {
                                     val rename = "${arg.value}"
                                     if (rename.isNotBlank()) {
@@ -417,9 +428,18 @@ class TheRouterSymbolProcessor(
                 }
 
                 val hasDefaultComposeParameter = ArrayList<ComposeParameter>()
+                var i = 0
                 item.params.forEach {
                     if (it.hasDefault) {
                         hasDefaultComposeParameter.add(it)
+                    } else {
+                        i++
+                        ps.println("\t\tval map$i = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
+                        ps.println("\t\tif (map$i == null) {")
+                        ps.println("\t\t\tmap$i = HashMap<String, Class<*>>()")
+                        ps.println("\t\t}")
+                        ps.println("\t\tmap$i.put(\"${it.parameterName}\", \"${it.parameterClassName}::class.java\")")
+                        ps.println("\t\tcom.therouter.brick.DataRepository.composeMapping.put(\"${item.path}\", map$i)")
                     }
                 }
                 val lambdaText = StringBuilder()

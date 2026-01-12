@@ -1,17 +1,18 @@
-package com.therouter.ksp
+package com.therouter.brick
 
 class DataProviderItem : Comparable<DataProviderItem?> {
-    var type = ""
+    var path = ""
     var className = ""
     var methodName = ""
     var returnType = ""
     var priority = 0
+    var fieldName = "brickData"
 
     override fun compareTo(other: DataProviderItem?): Int {
-        return if (other?.type == null) {
+        return if (other?.path == null) {
             0
         } else {
-            other.type.compareTo(type)
+            other.path.compareTo(path)
         }
     }
 }
