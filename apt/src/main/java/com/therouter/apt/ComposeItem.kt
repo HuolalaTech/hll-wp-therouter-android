@@ -40,6 +40,7 @@ class ComposeItem : Comparable<ComposeItem?> {
 class ComposeParameter {
     var parameterName = ""
     var parameterClassName = ""
+    var parameterSimpleClassName = ""
     var hasDefault = false
     var fieldName = ""
 

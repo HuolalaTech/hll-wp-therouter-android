@@ -311,6 +311,7 @@ class TheRouterSymbolProcessor(
                 parameter.fieldName = parameter.parameterName
                 // 使用新函数获取完整的参数类型，包括泛型嵌套
                 parameter.parameterClassName = getParameterType(it.type.resolve())
+                parameter.parameterSimpleClassName = it.type.resolve().declaration.qualifiedName?.asString() ?: ""
 
                 it.annotations.forEach { parameterAnnotation ->
                     if ("Autowired" == parameterAnnotation.shortName.asString()) {
@@ -441,7 +442,7 @@ class TheRouterSymbolProcessor(
                         ps.println("\t\tif (map$j == null) {")
                         ps.println("\t\t\tmap$j = HashMap<String, Class<*>>()")
                         ps.println("\t\t}")
-                        ps.println("\t\tmap$j.put(\"${it.parameterName}\", ${it.parameterClassName}::class.java)")
+                        ps.println("\t\tmap$j.put(\"${it.parameterName}\", ${it.parameterSimpleClassName}::class.java)")
                         ps.println("\t\tcom.therouter.brick.DataRepository.composeMapping.put(\"${item.path}\", map$j)")
                     }
                 }
