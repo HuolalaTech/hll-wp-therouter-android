@@ -192,7 +192,7 @@ class TheRouterSymbolProcessor(
                 ps.println("\t}")
                 ps.println("\tval dp$i = com.therouter.brick.DataProvider<${item.returnType}>()")
                 ps.println("\tdp$i.priority = ${item.priority}")
-                ps.println("\tdp$i.fieldName = ${item.fieldName}")
+                ps.println("\tdp$i.fieldName = \"${item.fieldName}\"")
                 ps.println("\tdp$i.path = \"${item.path}\"")
                 ps.println("\tdp$i.returnType = ${item.returnType}::class.java")
                 ps.println("\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")

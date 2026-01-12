@@ -6,7 +6,7 @@ class DataProviderItem : Comparable<DataProviderItem?> {
     var methodName = ""
     var returnType = ""
     var priority = 0
-    var fieldName = "brickData"
+    var fieldName = ""
 
     override fun compareTo(other: DataProviderItem?): Int {
         return if (other?.path == null) {
