@@ -437,7 +437,7 @@ class TheRouterSymbolProcessor(
                         hasDefaultComposeParameter.add(it)
                     } else {
                         j++
-                        ps.println("\t\tval map$j = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
+                        ps.println("\t\tvar map$j = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
                         ps.println("\t\tif (map$j == null) {")
                         ps.println("\t\t\tmap$j = HashMap<String, Class<*>>()")
                         ps.println("\t\t}")
