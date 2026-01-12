@@ -137,6 +137,8 @@ class TheRouterSymbolProcessor(
                         "fieldName" -> {
                             if (arg.value != null) {
                                 item.fieldName = arg.value as String
+                            } else {
+                                item.fieldName = item.className.lowercase()
                             }
                         }
                     }
