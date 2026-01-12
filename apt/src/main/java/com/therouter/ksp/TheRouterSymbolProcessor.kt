@@ -424,7 +424,7 @@ class TheRouterSymbolProcessor(
                 ps.println("\t\tcom.therouter.router.addRouteItem(item$i)")
             }
 
-            var composeRouteParamsCount = 0
+            var j = 0
             for (item in composeRouteList) {
                 if (item.description.isNotEmpty()) {
                     ps.println("\t\t// ${item.description} ")
@@ -436,13 +436,13 @@ class TheRouterSymbolProcessor(
                     if (it.hasDefault) {
                         hasDefaultComposeParameter.add(it)
                     } else {
-                        composeRouteParamsCount++
-                        ps.println("\t\tval map$i = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
-                        ps.println("\t\tif (map$i == null) {")
-                        ps.println("\t\t\tmap$i = HashMap<String, Class<*>>()")
+                        j++
+                        ps.println("\t\tval map$j = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
+                        ps.println("\t\tif (map$j == null) {")
+                        ps.println("\t\t\tmap$j = HashMap<String, Class<*>>()")
                         ps.println("\t\t}")
-                        ps.println("\t\tmap$i.put(\"${it.parameterName}\", ${it.parameterClassName}::class.java)")
-                        ps.println("\t\tcom.therouter.brick.DataRepository.composeMapping.put(\"${item.path}\", map$i)")
+                        ps.println("\t\tmap$j.put(\"${it.parameterName}\", ${it.parameterClassName}::class.java)")
+                        ps.println("\t\tcom.therouter.brick.DataRepository.composeMapping.put(\"${item.path}\", map$j)")
                     }
                 }
                 val lambdaText = StringBuilder()
