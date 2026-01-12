@@ -6,7 +6,6 @@ import com.google.devtools.ksp.processing.Dependencies
 import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessor
-import com.google.devtools.ksp.symbol.FileLocation
 import com.google.devtools.ksp.symbol.FunctionKind
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
@@ -24,6 +23,7 @@ import com.therouter.apt.ComposeParameter
 import com.therouter.apt.FlowTaskItem
 import com.therouter.apt.KEY_USE_EXTEND
 import com.therouter.apt.PACKAGE
+import com.therouter.apt.PREFIX_CLASS_NAME
 import com.therouter.apt.PREFIX_ROUTER_MAP
 import com.therouter.apt.PREFIX_SERVICE_PROVIDER
 import com.therouter.apt.PROPERTY_FILE
@@ -37,7 +37,6 @@ import com.therouter.inject.ServiceProvider
 import com.therouter.router.Autowired
 import com.therouter.router.Route
 import com.therouter.router.action.ActionInterceptor
-import java.io.File
 import java.io.FileInputStream
 import java.io.PrintStream
 import java.util.HashSet
@@ -59,11 +58,13 @@ class TheRouterSymbolProcessor(
     private val routeDependencies = mutableSetOf<KSFile>()
     private val autoWiredDependencies = mutableSetOf<KSFile>()
     private val serviceProviderDependencies = mutableSetOf<KSFile>()
+    private val brickDependencies = mutableSetOf<KSFile>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         routeDependencies.clear()
         autoWiredDependencies.clear()
         serviceProviderDependencies.clear()
+        brickDependencies.clear()
 
         parseRoute(resolver)
         parseAutowired(resolver)
@@ -71,7 +72,132 @@ class TheRouterSymbolProcessor(
         val flowTaskList = parseFlowTask(resolver)
         val actionInterceptorList = parseActionInterceptor(resolver)
         genServiceProviderFile(providerItemList, flowTaskList, actionInterceptorList)
+        parseBrick(resolver)
         return emptyList()
+    }
+
+    private fun parseBrick(resolver: Resolver) {
+        val list = ArrayList<DataProviderItem>()
+        resolver.getSymbolsWithAnnotation(com.therouter.brick.annotation.DataProvider::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                brickDependencies.add(file)
+            }
+            it.accept(ModelVisitor(list), Unit)
+        }
+        genRouterMapFile(list)
+    }
+
+    inner class ModelVisitor(private val list: ArrayList<DataProviderItem>) : TheRouterVisitor(logger) {
+
+        override fun visitFunctionDeclaration(f: KSFunctionDeclaration, data: Unit) {
+            super.visitFunctionDeclaration(f, data)
+            sourcePath = getSourcePath(f)
+            if (f.functionKind != FunctionKind.STATIC && f.functionKind != FunctionKind.TOP_LEVEL) {
+                logger.error(
+                    "\n=========================\n"
+                            + "The modifiers of the " + f.qualifiedName?.asString() + "() must be TOP_LEVEL Method!"
+                            + "\n=========================\n\n\n\n"
+                )
+            }
+            if (f.parameters.size != 1) {
+                logger.error(
+                    "\n=========================\n"
+                            + f.qualifiedName?.asString() + "() must only has Navigator parameter"
+                            + "\n=========================\n\n\n\n"
+                )
+            }
+            f.parameters.forEach {
+                if (it.type.resolve().declaration.qualifiedName?.asString() != "com.therouter.router.Navigator") {
+                    logger.error(
+                        "\n=========================\n"
+                                + f.qualifiedName?.asString() + "(" + it.type.resolve().declaration.qualifiedName?.asString()
+                                + ") must only has Navigator parameter"
+                                + "\n=========================\n\n\n\n"
+                    )
+                }
+            }
+            f.annotations.forEach { annotation ->
+                val item = DataProviderItem()
+                item.methodName = f.simpleName.asString()
+                item.className = f.parentDeclaration?.qualifiedName?.asString() ?: f.packageName.asString()
+                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
+                annotation.arguments.forEach { arg ->
+                    when (arg.name?.asString()) {
+                        "type" -> {
+                            item.type = arg.value.toString()
+                        }
+
+                        "priority" -> {
+                            if (arg.value == null) {
+                                item.priority = 0
+                            } else {
+                                item.priority = arg.value as Int
+                            }
+                        }
+                    }
+                }
+                list.add(item)
+            }
+        }
+    }
+
+    private fun genRouterMapFile(list: ArrayList<DataProviderItem>) {
+        if (list.isEmpty()) {
+            return
+        }
+        val routePagelist = ArrayList(HashSet(list)).apply { sort() }
+        // 确保只要编译的软硬件环境不变，类名就不会改变
+        val className = PREFIX_CLASS_NAME + kotlin.math.abs(
+            if (sourcePath.isEmpty()) {
+                if (routePagelist.isEmpty()) {
+                    routePagelist.hashCode()
+                } else {
+                    routePagelist[0].className.hashCode()
+                }
+            } else {
+                sourcePath.hashCode()
+            },
+        )
+        var ps: PrintStream? = null
+        try {
+            val dependencies = Dependencies(aggregating = true, *brickDependencies.toTypedArray())
+            ps = PrintStream(codeGenerator.createNewFile(dependencies, PACKAGE, className))
+            ps.println("@file:JvmName(\"$className\")")
+            ps.println("package ${PACKAGE}")
+            ps.println()
+            ps.println("/**")
+            ps.println(" * Generated code, Don't modify!!!")
+            ps.println(" * Created by kymjs, and Brick KSP Version is ${BuildConfig.VERSION}.")
+            ps.println(" * JDK Version is ${System.getProperty("java.version")}.")
+            ps.println(" */")
+            ps.println()
+            ps.println("val TAG = \"Created by kymjs, and Brick KSP Version is ${BuildConfig.VERSION}.\"")
+            ps.println()
+            ps.println("@com.therouter.app.flowtask.lifecycle.FlowTask(taskName = \"$className\")")
+            ps.println("fun addRoute(context: android.content.Context) {")
+            var i = 0
+            for (item in routePagelist) {
+                i++
+                ps.println("\t//com.therouter.brick.DataRepository.mapping.put(\"${item.type}\", ${item.returnType}::class.java)")
+                ps.println("\tvar x$i = com.therouter.brick.DataRepository.mapping.get(\"${item.type}\")")
+                ps.println("\tif (x$i == null) {")
+                ps.println("\t\tx$i = ArrayList<com.therouter.brick.DataProvider<*>>()")
+                ps.println("\t}")
+                ps.println("\tval dp$i = com.therouter.brick.DataProvider<${item.returnType}>()")
+                ps.println("\tdp$i.priority = ${item.priority}")
+                ps.println("\tdp$i.type = \"${item.type}\"")
+                ps.println("\tdp$i.clazz = ${item.returnType}::class.java")
+                ps.println("\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
+                ps.println("\tx$i.add(dp$i)")
+                ps.println("\tcom.therouter.brick.DataRepository.mapping.set(\"${item.type}\", x$i)")
+                ps.println("\t")
+            }
+
+            ps.println("}")
+            ps.flush()
+        } finally {
+            ps?.close()
+        }
     }
 
     private fun parseRoute(resolver: Resolver) {

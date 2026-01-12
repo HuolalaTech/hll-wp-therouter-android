@@ -37,6 +37,8 @@ const val PACKAGE = "a"
 const val PREFIX_SERVICE_PROVIDER = "ServiceProvider__TheRouter__"
 const val PREFIX_ROUTER_MAP = "RouterMap__TheRouter__"
 const val SUFFIX_AUTOWIRED = "__TheRouter__Autowired"
+
+const val PREFIX_CLASS_NAME = "Brick__TheRouter__"
 val gson = Gson()
 
 class TheRouterAnnotationProcessor : AbstractProcessor() {
