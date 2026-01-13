@@ -1,7 +1,7 @@
-package com.therouter.brick
+package com.therouter.compose
 
+import android.R
 import android.app.Activity
-import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionContext
@@ -15,15 +15,13 @@ import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.SavedStateRegistryOwner
 import androidx.savedstate.findViewTreeSavedStateRegistryOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
-import com.therouter.compose.compose
-import com.therouter.router.Navigator
 
-object BrickViewFactory {
+object ComposeViewFactory {
 
     public fun makeView(
         activity: Activity,
-        width: Int = activity.window.decorView.findViewById<ViewGroup>(android.R.id.content).getChildAt(0).width,
-        height: Int = activity.window.decorView.findViewById<ViewGroup>(android.R.id.content).getChildAt(0).height,
+        width: Int = activity.window.decorView.findViewById<ViewGroup>(R.id.content).getChildAt(0).width,
+        height: Int = activity.window.decorView.findViewById<ViewGroup>(R.id.content).getChildAt(0).height,
         parent: CompositionContext? = null,
         content: @Composable () -> Unit,
     ): ViewGroup {
@@ -51,15 +49,5 @@ object BrickViewFactory {
         if (decorView.findViewTreeSavedStateRegistryOwner() == null && activity is SavedStateRegistryOwner) {
             decorView.setViewTreeSavedStateRegistryOwner(activity)
         }
-    }
-}
-
-@Composable
-fun Navigator.brickView() {
-    DataRepository.makeData(this) { k, v ->
-        if (v != null) {
-            this.withObject(k, v)
-        }
-        this.compose()
     }
 }

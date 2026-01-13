@@ -9,3 +9,7 @@ import java.lang.annotation.RetentionPolicy
 @Retention(RetentionPolicy.SOURCE)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
 annotation class DataProvider(val path: String, val fieldName: String = "", val priority: Int = 0)
+
+@Retention(RetentionPolicy.SOURCE)
+@Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
+annotation class DataProviders(vararg val value: DataProvider)
