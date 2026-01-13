@@ -5,7 +5,6 @@ import a.trojan
 import android.content.Context
 import androidx.annotation.Keep
 import com.therouter.TheRouter
-import com.therouter.app.brick.BrickInit
 import com.therouter.debug
 import com.therouter.execute
 import com.therouter.history.ServiceProviderHistory
@@ -28,7 +27,6 @@ class RouterInject {
         if (!asm) {
             initServiceProvider(context)
         }
-        TheRouter.get(BrickInit::class.java)?.initBrick()
     }
 
     internal fun initServiceProvider(context: Context?) {

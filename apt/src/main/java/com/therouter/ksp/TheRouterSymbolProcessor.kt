@@ -370,7 +370,7 @@ class TheRouterSymbolProcessor(
 
             for (item in brickList){
                 i++
-                ps.println("\tvar x$i = com.therouter.brick.DataRepository.mapping.get(\"${item.path}\")")
+                ps.println("\tvar x$i = com.therouter.app.brick.DataRepository.mapping.get(\"${item.path}\")")
                 ps.println("\tif (x$i == null) {")
                 ps.println("\t\tx$i = ArrayList<com.therouter.brick.DataProvider<*>>()")
                 ps.println("\t}")
@@ -381,7 +381,7 @@ class TheRouterSymbolProcessor(
                 ps.println("\tdp$i.returnType = ${item.returnType}::class.java")
                 ps.println("\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
                 ps.println("\tx$i.add(dp$i)")
-                ps.println("\tcom.therouter.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
+                ps.println("\tcom.therouter.app.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
                 ps.println("\t")
             }
 
@@ -397,12 +397,12 @@ class TheRouterSymbolProcessor(
                         hasDefaultComposeParameter.add(it)
                     } else {
                         i++
-                        ps.println("\t\tvar map$i = com.therouter.brick.DataRepository.composeMapping.get(\"${item.path}\")")
+                        ps.println("\t\tvar map$i = com.therouter.app.brick.DataRepository.composeMapping.get(\"${item.path}\")")
                         ps.println("\t\tif (map$i == null) {")
                         ps.println("\t\t\tmap$i = HashMap<String, Class<*>>()")
                         ps.println("\t\t}")
                         ps.println("\t\tmap$i.put(\"${it.parameterName}\", ${it.parameterSimpleClassName}::class.java)")
-                        ps.println("\t\tcom.therouter.brick.DataRepository.composeMapping.put(\"${item.path}\", map$i)")
+                        ps.println("\t\tcom.therouter.app.brick.DataRepository.composeMapping.put(\"${item.path}\", map$i)")
                     }
                 }
                 val lambdaText = StringBuilder()

@@ -10,6 +10,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.therouter.ROUTE_MAP_ASSETS_PATH
 import com.therouter.TheRouter
+import com.therouter.app.brick.DataRepository
 import com.therouter.debug
 import com.therouter.debugOnly
 import com.therouter.execute
@@ -81,6 +82,7 @@ fun asyncInitRouteMap(context: Context?) {
         executeInMainThread {
             sendPendingNavigator()
         }
+        DataRepository.brickCheck()
     }
 }
 
