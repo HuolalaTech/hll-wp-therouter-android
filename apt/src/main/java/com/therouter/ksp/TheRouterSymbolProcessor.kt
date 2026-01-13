@@ -372,9 +372,9 @@ class TheRouterSymbolProcessor(
                 i++
                 ps.println("\tvar x$i = com.therouter.app.brick.DataRepository.mapping.get(\"${item.path}\")")
                 ps.println("\tif (x$i == null) {")
-                ps.println("\t\tx$i = ArrayList<com.therouter.brick.DataProvider<*>>()")
+                ps.println("\t\tx$i = ArrayList<com.therouter.app.brick.DataProvider<*>>()")
                 ps.println("\t}")
-                ps.println("\tval dp$i = com.therouter.brick.DataProvider<${item.returnType}>()")
+                ps.println("\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnType}>()")
                 ps.println("\tdp$i.priority = ${item.priority}")
                 ps.println("\tdp$i.fieldName = \"${item.fieldName}\"")
                 ps.println("\tdp$i.path = \"${item.path}\"")
