@@ -67,6 +67,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
     private var intentData: Uri? = null
     private var intentClipData: ClipData? = null
 
+    var exContext: Context? = null
+
     val simpleUrl: String
         get() {
             val tempUrl = url ?: ""

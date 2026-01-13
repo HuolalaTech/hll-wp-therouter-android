@@ -1,5 +1,6 @@
 package com.therouter.compose
 
+import android.content.Context
 import androidx.compose.runtime.Composable
 import com.therouter.app.brick.DataRepository.brickRouteMap
 import com.therouter.router.Navigator
@@ -21,6 +22,11 @@ fun Navigator.withComposableObject(key: String, value: @Composable () -> Unit): 
 
 @Composable
 fun Navigator.compose() {
+    this.compose(null)
+}
+@Composable
+fun Navigator.compose(context: Context?) {
+    this.exContext = context
     val type = simpleUrl
     val allField = brickRouteMap.get(type)
     allField?.forEach {
