@@ -370,19 +370,19 @@ class TheRouterSymbolProcessor(
 
             for (item in brickList){
                 i++
-                ps.println("\tvar x$i = com.therouter.app.brick.DataRepository.mapping.get(\"${item.path}\")")
-                ps.println("\tif (x$i == null) {")
-                ps.println("\t\tx$i = ArrayList<com.therouter.app.brick.DataProvider<*>>()")
-                ps.println("\t}")
-                ps.println("\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnType}>()")
-                ps.println("\tdp$i.priority = ${item.priority}")
-                ps.println("\tdp$i.fieldName = \"${item.fieldName}\"")
-                ps.println("\tdp$i.path = \"${item.path}\"")
-                ps.println("\tdp$i.returnType = ${item.returnType}::class.java")
-                ps.println("\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
-                ps.println("\tx$i.add(dp$i)")
-                ps.println("\tcom.therouter.app.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
-                ps.println("\t")
+                ps.println("\t\tvar x$i = com.therouter.app.brick.DataRepository.mapping.get(\"${item.path}\")")
+                ps.println("\t\tif (x$i == null) {")
+                ps.println("\t\t\tx$i = ArrayList<com.therouter.app.brick.DataProvider<*>>()")
+                ps.println("\t\t}")
+                ps.println("\t\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnType}>()")
+                ps.println("\t\tdp$i.priority = ${item.priority}")
+                ps.println("\t\tdp$i.fieldName = \"${item.fieldName}\"")
+                ps.println("\t\tdp$i.path = \"${item.path}\"")
+                ps.println("\t\tdp$i.returnType = ${item.returnType}::class.java")
+                ps.println("\t\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
+                ps.println("\t\tx$i.add(dp$i)")
+                ps.println("\t\tcom.therouter.app.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
+                ps.println("")
             }
 
             for (item in composeRouteList) {
