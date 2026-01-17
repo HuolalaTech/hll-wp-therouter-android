@@ -5,6 +5,7 @@ class DataProviderItem : Comparable<DataProviderItem?> {
     var className = ""
     var methodName = ""
     var returnType = ""
+    var returnTypeWithParams = ""
     var priority = 0
     var fieldName = ""
 

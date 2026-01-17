@@ -120,8 +120,8 @@ class TheRouterSymbolProcessor(
                 val item = DataProviderItem()
                 item.methodName = f.simpleName.asString()
                 item.className = f.parentDeclaration?.qualifiedName?.asString() ?: f.packageName.asString()
-//                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
-                item.returnType = getParameterType(f.returnType?.resolve())
+                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
+                item.returnTypeWithParams = getParameterType(f.returnType?.resolve())
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "path" -> {
@@ -375,7 +375,7 @@ class TheRouterSymbolProcessor(
                 ps.println("\t\tif (x$i == null) {")
                 ps.println("\t\t\tx$i = ArrayList<com.therouter.app.brick.DataProvider<*>>()")
                 ps.println("\t\t}")
-                ps.println("\t\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnType}>()")
+                ps.println("\t\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnTypeWithParams}>()")
                 ps.println("\t\tdp$i.priority = ${item.priority}")
                 ps.println("\t\tdp$i.fieldName = \"${item.fieldName}\"")
                 ps.println("\t\tdp$i.path = \"${item.path}\"")
