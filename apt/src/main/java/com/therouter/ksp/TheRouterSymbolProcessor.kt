@@ -120,7 +120,8 @@ class TheRouterSymbolProcessor(
                 val item = DataProviderItem()
                 item.methodName = f.simpleName.asString()
                 item.className = f.parentDeclaration?.qualifiedName?.asString() ?: f.packageName.asString()
-                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
+//                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
+                item.returnType = getParameterType(f.returnType?.resolve())
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
                         "path" -> {
