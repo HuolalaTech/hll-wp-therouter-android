@@ -11,7 +11,12 @@ import java.lang.annotation.RetentionPolicy
 @kotlin.annotation.Repeatable
 @Retention(RetentionPolicy.SOURCE)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
-annotation class DataProvider(val path: String, val fieldName: String = "", val priority: Int = 0)
+annotation class DataProvider(
+    val path: String,
+    val async: Boolean = false,
+    val fieldName: String = "",
+    val priority: Int = 0
+)
 
 @Retention(RetentionPolicy.SOURCE)
 @Target(AnnotationTarget.ANNOTATION_CLASS, AnnotationTarget.FUNCTION)
