@@ -366,9 +366,11 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
         if (pageList.isEmpty()) {
             return
         }
-        val path = processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_ROUTER_MAP + "temp").toUri().toString()
+        val tempFile = processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_ROUTER_MAP + "temp")
+        val path = tempFile.toUri().toString()
         // As long as the compiled software and hardware environment remains unchanged, the class name will not change
         val className = PREFIX_ROUTER_MAP + abs(path.hashCode()).toString()
+        tempFile.delete()
         val routePagelist = duplicateRemove(pageList)
         val json = gson.toJson(routePagelist)
         var ps: PrintStream? = null
@@ -550,9 +552,11 @@ class TheRouterAnnotationProcessor : AbstractProcessor() {
             isFirst = false
         }
         stringBuilder.append("}")
-        val path =
-            processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_SERVICE_PROVIDER + "temp").toUri().toString()
+        val tempFile = processingEnv.filer.createSourceFile(PACKAGE + POINT + PREFIX_SERVICE_PROVIDER + "temp")
+        val path = tempFile.toUri().toString()
+        // As long as the compiled software and hardware environment remains unchanged, the class name will not change
         val className = PREFIX_SERVICE_PROVIDER + abs(path.hashCode()).toString()
+        tempFile.delete()
         var ps: PrintStream? = null
         try {
             val jfo = processingEnv.filer.createSourceFile(PACKAGE + POINT + className)

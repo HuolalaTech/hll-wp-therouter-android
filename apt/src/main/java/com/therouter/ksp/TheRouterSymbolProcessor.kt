@@ -18,6 +18,8 @@ import com.therouter.app.flowtask.lifecycle.FlowTask
 import com.therouter.apt.ActionInterceptorItem
 import com.therouter.apt.AutowiredItem
 import com.therouter.apt.BuildConfig
+import com.therouter.apt.ComposeItem
+import com.therouter.apt.ComposeParameter
 import com.therouter.apt.FlowTaskItem
 import com.therouter.apt.KEY_USE_EXTEND
 import com.therouter.apt.PACKAGE
@@ -30,38 +32,43 @@ import com.therouter.apt.SUFFIX_AUTOWIRED
 import com.therouter.apt.ServiceProviderItem
 import com.therouter.apt.duplicateRemove
 import com.therouter.apt.gson
+import com.therouter.brick.DataProviderItem
 import com.therouter.inject.ServiceProvider
 import com.therouter.router.Autowired
 import com.therouter.router.Route
 import com.therouter.router.action.ActionInterceptor
 import java.io.FileInputStream
 import java.io.PrintStream
-import java.lang.StringBuilder
-import java.util.HashMap
+import java.util.HashSet
 import java.util.Locale
 import java.util.Properties
 import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.text.StringBuilder
 
 /**
  * Created by ZhangTao on 17/8/11.
  */
 class TheRouterSymbolProcessor(
     private val codeGenerator: CodeGenerator,
-    private val logger: KSPLogger
+    private val logger: KSPLogger,
 ) : SymbolProcessor {
     private var sourcePath = ""
 
     private val routeDependencies = mutableSetOf<KSFile>()
     private val autoWiredDependencies = mutableSetOf<KSFile>()
     private val serviceProviderDependencies = mutableSetOf<KSFile>()
+    private val brickDependencies = mutableSetOf<KSFile>()
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         routeDependencies.clear()
         autoWiredDependencies.clear()
         serviceProviderDependencies.clear()
+        brickDependencies.clear()
 
-        genRouterMapFile(parseRoute(resolver))
-        genAutowiredFile(parseAutowired(resolver))
+        val brickList = parseBrick(resolver)
+        parseRoute(resolver, brickList)
+        parseAutowired(resolver)
         val providerItemList = parseServiceProvider(resolver)
         val flowTaskList = parseFlowTask(resolver)
         val actionInterceptorList = parseActionInterceptor(resolver)
@@ -69,18 +76,95 @@ class TheRouterSymbolProcessor(
         return emptyList()
     }
 
-    private fun parseRoute(resolver: Resolver): List<RouteItem> {
-        val list: ArrayList<RouteItem> = ArrayList()
-        resolver.getSymbolsWithAnnotation(Route::class.java.name).forEach {
+    private fun parseBrick(resolver: Resolver): ArrayList<DataProviderItem> {
+        val list = ArrayList<DataProviderItem>()
+        resolver.getSymbolsWithAnnotation(com.therouter.brick.annotation.DataProvider::class.java.name).forEach {
             it.containingFile?.let { file ->
-                routeDependencies.add(file)
+                brickDependencies.add(file)
             }
-            it.accept(RouteVisitor(list), Unit)
+            it.accept(ModelVisitor(list), Unit)
         }
         return list
     }
 
-    inner class RouteVisitor(private val list: ArrayList<RouteItem>) : TheRouterVisitor(logger) {
+    inner class ModelVisitor(private val list: ArrayList<DataProviderItem>) : TheRouterVisitor(logger) {
+
+        override fun visitFunctionDeclaration(f: KSFunctionDeclaration, data: Unit) {
+            super.visitFunctionDeclaration(f, data)
+            sourcePath = getSourcePath(f)
+            if (f.functionKind != FunctionKind.STATIC && f.functionKind != FunctionKind.TOP_LEVEL) {
+                logger.error(
+                    "\n=========================\n"
+                            + "The modifiers of the " + f.qualifiedName?.asString() + "() must be TOP_LEVEL Method!"
+                            + "\n=========================\n\n\n\n"
+                )
+            }
+            if (f.parameters.size != 1) {
+                logger.error(
+                    "\n=========================\n"
+                            + f.qualifiedName?.asString() + "() must only has Navigator parameter"
+                            + "\n=========================\n\n\n\n"
+                )
+            }
+            f.parameters.forEach {
+                if (it.type.resolve().declaration.qualifiedName?.asString() != "com.therouter.router.Navigator") {
+                    logger.error(
+                        "\n=========================\n"
+                                + f.qualifiedName?.asString() + "(" + it.type.resolve().declaration.qualifiedName?.asString()
+                                + ") must only has Navigator parameter"
+                                + "\n=========================\n\n\n\n"
+                    )
+                }
+            }
+            f.annotations.forEach { annotation ->
+                val item = DataProviderItem()
+                item.methodName = f.simpleName.asString()
+                item.className = f.parentDeclaration?.qualifiedName?.asString() ?: f.packageName.asString()
+                item.returnType = f.returnType?.resolve()?.declaration?.qualifiedName?.asString() ?: ""
+                item.returnTypeWithParams = getParameterType(f.returnType?.resolve())
+                annotation.arguments.forEach { arg ->
+                    when (arg.name?.asString()) {
+                        "path" -> {
+                            item.path = arg.value.toString()
+                        }
+
+                        "priority" -> {
+                            if (arg.value != null) {
+                                item.priority = arg.value as Int
+                            }
+                        }
+
+                        "fieldName" -> {
+                            if (arg.value != null) {
+                                item.fieldName = arg.value as String
+                            } else {
+                                item.fieldName = item.className.lowercase()
+                            }
+                        }
+                    }
+                }
+                list.add(item)
+            }
+        }
+    }
+
+    private fun parseRoute(resolver: Resolver, brickList: ArrayList<DataProviderItem>) {
+        val routeList: ArrayList<RouteItem> = ArrayList()
+        val composeRouteList: ArrayList<ComposeItem> = ArrayList()
+        resolver.getSymbolsWithAnnotation(Route::class.java.name).forEach {
+            it.containingFile?.let { file ->
+                routeDependencies.add(file)
+            }
+            it.accept(RouteVisitor(routeList, composeRouteList), Unit)
+        }
+        genRouterMapFile(routeList, composeRouteList, brickList)
+    }
+
+    inner class RouteVisitor(
+        private val routeList: ArrayList<RouteItem>,
+        private val composeRouteList: ArrayList<ComposeItem>
+    ) :
+        TheRouterVisitor(logger) {
         override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
             super.visitClassDeclaration(classDeclaration, data)
             sourcePath = getSourcePath(classDeclaration)
@@ -122,24 +206,106 @@ class TheRouterSymbolProcessor(
                     }
                 }
                 if (routeItem.path.isNotEmpty() && !routeItem.className.isNullOrEmpty()) {
-                    list.add(routeItem)
+                    routeList.add(routeItem)
                 }
+            }
+        }
+
+        override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
+            super.visitFunctionDeclaration(function, data)
+            sourcePath = getSourcePath(function)
+            var fileText: List<String> = ArrayList()
+
+            if (function.functionKind != FunctionKind.STATIC && function.functionKind != FunctionKind.TOP_LEVEL) {
+                logger.error("The modifiers of the " + function.qualifiedName?.asString() + "() must be top level function!")
+            }
+            val composeRoute = ComposeItem()
+            function.annotations.forEach { annotation ->
+                composeRoute.methodName = function.simpleName.asString()
+                composeRoute.className =
+                    function.parentDeclaration?.qualifiedName?.asString() ?: function.packageName.asString()
+
+                annotation.arguments.forEach { arg ->
+                    when (arg.name?.asString()) {
+                        "path" -> composeRoute.path = "${arg.value}"
+                        "action" -> {
+                            if ("${arg.value}".isNotEmpty()) {
+                                logger.error("@Composable function " + function.qualifiedName?.asString() + "() cannot support action!")
+                            }
+                        }
+
+                        "description" -> composeRoute.description = "${arg.value}"
+                        "params" -> {
+                            if ("${arg.value}".isNotEmpty() && "${arg.value}".replace(" ", "") != "[]") {
+                                logger.error("@Composable function " + function.qualifiedName?.asString() + "() cannot support params!")
+                            }
+                        }
+                    }
+                }
+            }
+
+            function.parameters.forEach {
+                val parameter = ComposeParameter()
+                parameter.hasDefault = it.hasDefault
+                parameter.parameterName = it.name?.getShortName() ?: ""
+                parameter.fieldName = parameter.parameterName
+                // 使用新函数获取完整的参数类型，包括泛型嵌套
+                parameter.parameterClassName = getParameterType(it.type.resolve())
+                parameter.parameterSimpleClassName = it.type.resolve().declaration.qualifiedName?.asString() ?: ""
+
+                it.annotations.forEach { parameterAnnotation ->
+                    if ("Autowired" == parameterAnnotation.shortName.asString()) {
+                        parameterAnnotation.arguments.forEach { arg ->
+                            when (arg.name?.asString()) {
+                                "name" -> {
+                                    val rename = "${arg.value}"
+                                    if (rename.isNotBlank()) {
+                                        parameter.parameterName = rename
+                                    }
+                                }
+
+                                "args" -> {
+                                    val rename = "${arg.value}"
+                                    if (rename.isNotBlank()) {
+                                        parameter.parameterClassName = rename
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                if (!composeRoute.params.contains(parameter)) {
+                    composeRoute.params.add(parameter)
+                }
+            }
+
+            if (composeRoute.path.isNotEmpty() && !composeRoute.className.isNullOrEmpty() && !composeRoute.methodName.isNullOrEmpty()) {
+                composeRouteList.add(composeRoute)
             }
         }
     }
 
-    private fun genRouterMapFile(pageList: List<RouteItem>) {
-        if (pageList.isEmpty()) {
+    private fun genRouterMapFile(
+        pageList: List<RouteItem>,
+        composeRouteList: ArrayList<ComposeItem>,
+        brickList: ArrayList<DataProviderItem>
+    ) {
+        if (pageList.isEmpty() && composeRouteList.isEmpty() && brickList.isEmpty()) {
             return
         }
         val routePagelist = duplicateRemove(pageList)
+        val routePagelist2 = ArrayList(HashSet(composeRouteList)).apply { sort() }
         // 确保只要编译的软硬件环境不变，类名就不会改变
         val className = PREFIX_ROUTER_MAP + kotlin.math.abs(
             if (sourcePath.isEmpty()) {
-                routePagelist[0].className?.hashCode() ?: routePagelist[0].path.hashCode()
+                if (routePagelist.isEmpty()) {
+                    routePagelist2[0].className?.hashCode() ?: routePagelist2[0].path.hashCode()
+                } else {
+                    routePagelist[0].className?.hashCode() ?: routePagelist[0].path.hashCode()
+                }
             } else {
                 sourcePath.hashCode()
-            }
+            },
         )
         val json = gson.toJson(routePagelist)
         var ps: PrintStream? = null
@@ -202,6 +368,119 @@ class TheRouterSymbolProcessor(
                 }
                 ps.println("\t\tcom.therouter.router.addRouteItem(item$i)")
             }
+
+            for (item in brickList){
+                i++
+                ps.println("\t\tvar x$i = com.therouter.app.brick.DataRepository.mapping.get(\"${item.path}\")")
+                ps.println("\t\tif (x$i == null) {")
+                ps.println("\t\t\tx$i = ArrayList<com.therouter.app.brick.DataProvider<*>>()")
+                ps.println("\t\t}")
+                ps.println("\t\tval dp$i = com.therouter.app.brick.DataProvider<${item.returnTypeWithParams}>()")
+                ps.println("\t\tdp$i.priority = ${item.priority}")
+                ps.println("\t\tdp$i.fieldName = \"${item.fieldName}\"")
+                ps.println("\t\tdp$i.path = \"${item.path}\"")
+                ps.println("\t\tdp$i.returnType = ${item.returnType}::class.java")
+                ps.println("\t\tdp$i.make = { nav -> ${item.className}.${item.methodName}(nav)}")
+                ps.println("\t\tx$i.add(dp$i)")
+                ps.println("\t\tcom.therouter.app.brick.DataRepository.mapping.set(\"${item.path}\", x$i)")
+                ps.println("")
+            }
+
+            for (item in composeRouteList) {
+                if (item.description.isNotEmpty()) {
+                    ps.println("\t\t// ${item.description} ")
+                }
+
+                val hasDefaultComposeParameter = ArrayList<ComposeParameter>()
+
+                item.params.forEach {
+                    if (it.hasDefault) {
+                        hasDefaultComposeParameter.add(it)
+                    } else {
+                        i++
+                        ps.println("\t\tvar map$i = com.therouter.app.brick.DataRepository.composeMapping.get(\"${item.path}\")")
+                        ps.println("\t\tif (map$i == null) {")
+                        ps.println("\t\t\tmap$i = HashMap<String, Class<*>>()")
+                        ps.println("\t\t}")
+                        ps.println("\t\tmap$i.put(\"${it.parameterName}\", ${it.parameterSimpleClassName}::class.java)")
+                        ps.println("\t\tcom.therouter.app.brick.DataRepository.composeMapping.put(\"${item.path}\", map$i)")
+                    }
+                }
+                val lambdaText = StringBuilder()
+                var paramsText = ""
+                if (hasDefaultComposeParameter.isEmpty()) {
+                    paramsText = ""
+                    if (item.params.isNotEmpty()) {
+                        var isFirst = true
+                        item.params.forEach {
+                            if (it.parameterName.isNotBlank()) {
+                                val startFix = if (isFirst) "" else ", "
+                                paramsText += "${startFix}it?.get(\"${it.parameterName}\") as ${it.parameterClassName}"
+                                isFirst = false
+                            }
+                        }
+                    }
+                    lambdaText.append("${item.className}.${item.methodName}($paramsText)")
+                } else {
+                    // 111 每一位表示一个带默认值的参数，1表示判断有值，0表示判断没值
+                    val binaryCount = (2 shl (hasDefaultComposeParameter.size - 1)) - 1
+                    for (index in 0..binaryCount) {
+                        lambdaText.append("if (")
+                        // 3 遍历每一个带默认值的参数
+                        for (number in 0 until hasDefaultComposeParameter.size) {
+                            val bit = (index shr number) and 1
+                            lambdaText.append("(it?.containsKey(\"${hasDefaultComposeParameter.get(number).parameterName}\")?:false) == ${bit == 1} &&")
+                        }
+                        // 写在这里，可以少一次循环
+                        paramsText = ""
+                        if (item.params.isNotEmpty()) {
+                            var isFirst = true
+                            item.params.forEach {
+                                if (it.parameterName.isNotBlank()) {
+                                    var bit = 1
+                                    if (it.hasDefault) {
+                                        for (number in 0 until hasDefaultComposeParameter.size) {
+                                            if (hasDefaultComposeParameter.get(number).parameterName == it.parameterName) {
+                                                bit = (index shr number) and 1
+                                            }
+                                        }
+                                    }
+                                    if (bit == 1) {
+                                        val startFix = if (isFirst) "" else ", "
+                                        val defaultFieldPrefix = if (it.hasDefault) "${it.fieldName} = " else ""
+                                        paramsText += "${startFix}${defaultFieldPrefix}it?.get(\"${it.parameterName}\") as ${it.parameterClassName}"
+                                        isFirst = false
+                                    }
+                                }
+                            }
+                        }
+                        // delete last " &&"
+                        lambdaText.deleteAt(lambdaText.length - 1)
+                        lambdaText.deleteAt(lambdaText.length - 1)
+                        lambdaText.deleteAt(lambdaText.length - 1)
+                        lambdaText.append(") {")
+                        lambdaText.append("${item.className}.${item.methodName}($paramsText)")
+                            .append("} else ")
+                    }
+
+                    lambdaText.append("{")
+                    paramsText = ""
+                    if (item.params.isNotEmpty()) {
+                        var isFirst = true
+                        item.params.forEach {
+                            if (it.parameterName.isNotBlank() && !it.hasDefault) {
+                                val startFix = if (isFirst) "" else ", "
+                                paramsText += "${startFix}it?.get(\"${it.parameterName}\") as ${it.parameterClassName}"
+                                isFirst = false
+                            }
+                        }
+                    }
+                    lambdaText.append("${item.className}.${item.methodName}($paramsText)")
+                        .append("}")
+                }
+                ps.println("\t\tcom.therouter.compose.composable(\"${item.path}\", {$lambdaText})")
+            }
+
             ps.println("\t}")
             ps.println("\t}")
             ps.println("}")
@@ -211,7 +490,7 @@ class TheRouterSymbolProcessor(
         }
     }
 
-    private fun parseAutowired(resolver: Resolver): Map<String, ArrayList<AutowiredItem>> {
+    private fun parseAutowired(resolver: Resolver) {
         val map = HashMap<String, ArrayList<AutowiredItem>>()
         resolver.getSymbolsWithAnnotation(Autowired::class.java.name).forEach {
             it.containingFile?.let { file ->
@@ -219,7 +498,7 @@ class TheRouterSymbolProcessor(
             }
             it.accept(AutowiredVisitor(map), Unit)
         }
-        return map
+        genAutowiredFile(map)
     }
 
     inner class AutowiredVisitor(private val map: HashMap<String, ArrayList<AutowiredItem>>) :
@@ -248,7 +527,7 @@ class TheRouterSymbolProcessor(
                     }
                 }
 
-                autowiredItem.type = getFieldType(property.type.resolve())
+                autowiredItem.type = getParameterType(property.type.resolve())
 
                 annotation.arguments.forEach { arg ->
                     when (arg.name?.asString()) {
@@ -280,18 +559,31 @@ class TheRouterSymbolProcessor(
         }
     }
 
-    private fun getFieldType(type: KSType?): String =
-        if (type != null && type.arguments.isNotEmpty()) {
-            val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
-            type.arguments.forEach {
-                classNameBuilder.append(getFieldType(it.type?.resolve())).append(",")
-            }
-            classNameBuilder.deleteCharAt(classNameBuilder.length - 1)
-            classNameBuilder.append(">")
-            classNameBuilder.toString()
-        } else {
-            type?.declaration?.qualifiedName?.asString() ?: ""
+    /**
+     * 获取参数类型的完整字符串表示，包括泛型嵌套
+     * @param type 参数的类型
+     * @return 完整的类型字符串，如 "kotlin.collections.List<kotlin.String>"
+     */
+    private fun getParameterType(type: KSType?): String {
+        if (type == null) {
+            return ""
         }
+        // 如果没有类型参数，直接返回基础类型名
+        if (type.arguments.isEmpty()) {
+            return type.declaration.qualifiedName?.asString() ?: ""
+        }
+        // 有类型参数，递归处理泛型嵌套
+        val classNameBuilder = StringBuilder(type.declaration.qualifiedName?.asString()).append("<")
+        type.arguments.forEachIndexed { index, typeArgument ->
+            if (index > 0) {
+                classNameBuilder.append(", ")
+            }
+            // 递归处理嵌套的泛型类型
+            classNameBuilder.append(getParameterType(typeArgument.type?.resolve()))
+        }
+        classNameBuilder.append(">")
+        return classNameBuilder.toString()
+    }
 
     private fun genAutowiredFile(pageMap: Map<String, List<AutowiredItem>>) {
         val keyList = ArrayList(pageMap.keys)
@@ -346,8 +638,8 @@ class TheRouterSymbolProcessor(
                             item.className,
                             item.fieldName,
                             item.required,
-                            item.description
-                        )
+                            item.description,
+                        ),
                     )
                     ps.println("\t\t\t\tif ($variableName != null){")
                     ps.println("\t\t\t\t\t// ${item.description}")
@@ -364,8 +656,8 @@ class TheRouterSymbolProcessor(
                         ps.println(
                             String.format(
                                 "\t\tif (target.%s == null && com.therouter.TheRouter.isDebug){",
-                                item.fieldName
-                            )
+                                item.fieldName,
+                            ),
                         )
                         ps.println("\t\t\tthrow NullPointerException(\"@Autowired(required = true) ${key}.${item.fieldName} is null\")")
                         ps.println("\t\t}")
@@ -426,8 +718,8 @@ class TheRouterSymbolProcessor(
                                 if (kv is KSType) {
                                     params.add(
                                         transformNumber(
-                                            kv.declaration.qualifiedName?.asString() ?: ""
-                                        )
+                                            kv.declaration.qualifiedName?.asString() ?: "",
+                                        ),
                                     )
                                 }
                             }
@@ -454,13 +746,13 @@ class TheRouterSymbolProcessor(
                         }
                         if (!STR_TRUE.equals(
                                 prop.getProperty(KEY_USE_EXTEND),
-                                ignoreCase = true
+                                ignoreCase = true,
                             )
                         ) {
                             throw IllegalArgumentException(
                                 serviceProviderItem.className +
                                         " has multiple interfaces. Must to be specified returnType=XXX," +
-                                        " or configuration KEY_USE_EXTEND=true in gradle.properties"
+                                        " or configuration KEY_USE_EXTEND=true in gradle.properties",
                             )
                         } else {
                             serviceProviderItem.returnType = serviceProviderItem.className
@@ -504,8 +796,8 @@ class TheRouterSymbolProcessor(
                                 if (kv is KSType) {
                                     params.add(
                                         transformNumber(
-                                            kv.declaration.qualifiedName?.asString() ?: ""
-                                        )
+                                            kv.declaration.qualifiedName?.asString() ?: "",
+                                        ),
                                     )
                                 }
                             }
@@ -514,8 +806,8 @@ class TheRouterSymbolProcessor(
                                     params.add(
                                         transformNumber(
                                             it.type.resolve().declaration.qualifiedName?.asString()
-                                                ?: ""
-                                        )
+                                                ?: "",
+                                        ),
                                     )
                                 }
                             } else if (params.size != function.parameters.size) {
@@ -573,7 +865,7 @@ class TheRouterSymbolProcessor(
             function.parameters.forEach {
                 if (it.type.resolve().declaration.qualifiedName?.asString() != "android.content.Context") {
                     logger.error(
-                        "=========================\n\n\n\n" + function.qualifiedName?.asString() + "(" + it.type.resolve().declaration.qualifiedName?.asString() + ") must only has Context parameter"
+                        "=========================\n\n\n\n" + function.qualifiedName?.asString() + "(" + it.type.resolve().declaration.qualifiedName?.asString() + ") must only has Context parameter",
                     )
                 }
             }
@@ -627,7 +919,7 @@ class TheRouterSymbolProcessor(
     private fun genServiceProviderFile(
         pageList: ArrayList<ServiceProviderItem>,
         flowTaskList: ArrayList<FlowTaskItem>,
-        actionInterceptorList: ArrayList<ActionInterceptorItem>
+        actionInterceptorList: ArrayList<ActionInterceptorItem>,
     ) {
         if (pageList.isEmpty() && flowTaskList.isEmpty() && actionInterceptorList.isEmpty()) {
             return
@@ -659,7 +951,7 @@ class TheRouterSymbolProcessor(
                 }
             } else {
                 sourcePath.hashCode()
-            }
+            },
         )
         var ps: PrintStream? = null
         try {
@@ -677,8 +969,8 @@ class TheRouterSymbolProcessor(
             ps.println(
                 String.format(
                     "public class %s : com.therouter.inject.Interceptor {",
-                    className
-                )
+                    className,
+                ),
             )
             ps.println()
             ps.println("\toverride fun initFlowTask(context: android.content.Context, digraph: com.therouter.flow.Digraph) {")
@@ -700,15 +992,15 @@ class TheRouterSymbolProcessor(
                     ps.print(
                         String.format(
                             "if (%s::class.javaObjectType.isAssignableFrom(clazz)",
-                            serviceProviderItem.returnType
-                        )
+                            serviceProviderItem.returnType,
+                        ),
                     )
                 } else {
                     ps.print(
                         String.format(
                             "if (%s::class.java.equals(clazz)",
-                            serviceProviderItem.returnType
-                        )
+                            serviceProviderItem.returnType,
+                        ),
                     )
                 }
                 // 多参数判断
@@ -730,8 +1022,8 @@ class TheRouterSymbolProcessor(
                                 Locale.getDefault(),
                                 "\n\t\t\t\t&& params[%d] is %s",
                                 count,
-                                serviceProviderItem.params[count]
-                            )
+                                serviceProviderItem.params[count],
+                            ),
                         )
                     }
                 }
@@ -742,16 +1034,16 @@ class TheRouterSymbolProcessor(
                             "\t\t\tval returnType: %s = %s.%s(",
                             serviceProviderItem.returnType,
                             serviceProviderItem.className,
-                            serviceProviderItem.methodName
-                        )
+                            serviceProviderItem.methodName,
+                        ),
                     )
                 } else {
                     ps.print(
                         String.format(
                             "\t\t\tval returnType: %s = %s(",
                             serviceProviderItem.returnType,
-                            serviceProviderItem.className
-                        )
+                            serviceProviderItem.className,
+                        ),
                     )
                 }
 
@@ -763,8 +1055,8 @@ class TheRouterSymbolProcessor(
                                 Locale.getDefault(),
                                 "params[%d] as %s",
                                 count,
-                                serviceProviderItem.params[count]
-                            )
+                                serviceProviderItem.params[count],
+                            ),
                         )
                         if (count != serviceProviderItem.params.size - 1) {
                             ps.print(", ")

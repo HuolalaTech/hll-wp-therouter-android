@@ -27,8 +27,20 @@ public abstract class TheRouterTask extends TheRouterGetAllTask {
 
     @Override
     public void taskAction() throws ClassNotFoundException, IOException {
-        jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
-        super.taskAction();
+        try {
+            jarOutput = new JarOutputStream(new BufferedOutputStream(new FileOutputStream(getOutputFile().get().getAsFile())));
+            super.taskAction();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (jarOutput != null) {
+                try {
+                    jarOutput.close();
+                } catch (Exception ee) {
+                    ee.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
@@ -38,19 +50,16 @@ public abstract class TheRouterTask extends TheRouterGetAllTask {
 
     @Override
     public void mergeClassTransform(InputStream inputStream, String name) throws ClassNotFoundException, IOException {
-        try (inputStream) {
-            jarOutput.putNextEntry(new JarEntry(name));
+        // 外部已保证调用完自动释放 inputStream
+        jarOutput.putNextEntry(new JarEntry(name));
 
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                jarOutput.write(buffer, 0, bytesRead);
-            }
-
-            jarOutput.closeEntry();
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            jarOutput.write(buffer, 0, bytesRead);
         }
+
+        jarOutput.closeEntry();
     }
 
     @Override
@@ -71,7 +80,5 @@ public abstract class TheRouterTask extends TheRouterGetAllTask {
             jarOutput.closeEntry();
             jarFile.close();
         }
-
-        jarOutput.close();
     }
 }

@@ -58,7 +58,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HomePathIndex.HOME)
+                TheRouter.build(HomePathIndex.HOME + "?urlParams=abcd")
                         .withInt("intValue", 12345678) // 测试传 int 值
                         .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
                         .withString("str_123_Value", "测试传中文字符串")// 测试 string
@@ -117,7 +117,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button1_1).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String urlWithParams = TheRouter.build(HomePathIndex.HOME)
+                String urlWithParams = TheRouter.build(HomePathIndex.HOME + "?urlParams=abcd")
                         .withInt("intValue", 12345678)
                         .withString("stringIntValue", "12345678")
                         .withString("str_123_Value", "测试传中文字符串")
@@ -145,7 +145,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
         findViewById(R.id.button2).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                TheRouter.build(HOME2)
+                TheRouter.build(HOME2 + "?urlParams=另一个PATH")
                         .withInt("intValue", 12345678) // 测试传 int 值
                         .withString("stringIntValue", "12345678")// 测试用 string 传 int 值
                         .withString("str_123_Value", "测试传中文字符串")// 测试 string
@@ -248,7 +248,7 @@ public class NavigatorTestActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 StringBuilder stringBuilder = new StringBuilder();
-                stringBuilder.append(HomePathIndex.HOME)
+                stringBuilder.append(HomePathIndex.HOME + "?urlParams=abcd")
                         .append("?")
                         .append("intValue=12345678")
                         .append("&")

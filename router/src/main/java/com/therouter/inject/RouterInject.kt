@@ -4,6 +4,7 @@ import a.asm
 import a.trojan
 import android.content.Context
 import androidx.annotation.Keep
+import com.therouter.TheRouter
 import com.therouter.debug
 import com.therouter.execute
 import com.therouter.history.ServiceProviderHistory

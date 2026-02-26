@@ -18,6 +18,7 @@ package com.therouter.router
 import androidx.collection.SimpleArrayMap
 import androidx.fragment.app.Fragment
 import java.lang.reflect.InvocationTargetException
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Interface used to control the instantiation of [Fragment] instances.
@@ -68,7 +69,7 @@ internal fun instantiate(className: String): Fragment {
     }
 }
 
-private val sClassCacheMap = SimpleArrayMap<ClassLoader, SimpleArrayMap<String, Class<*>>>()
+private val sClassCacheMap = ConcurrentHashMap<ClassLoader, ConcurrentHashMap<String, Class<*>>>()
 
 /**
  * Determine if the given fragment name is a support library fragment class.
@@ -84,7 +85,7 @@ internal fun loadClass(
     val classLoader = Fragment::class.java.classLoader
     var classMap = sClassCacheMap[classLoader]
     if (classMap == null) {
-        classMap = SimpleArrayMap()
+        classMap = ConcurrentHashMap()
         sClassCacheMap.put(classLoader, classMap)
     }
     var clazz = classMap[className]

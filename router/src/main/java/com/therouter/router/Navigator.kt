@@ -28,7 +28,7 @@ import java.util.*
 import kotlin.collections.HashMap
 
 private val disposableQueue = LinkedList<PendingNavigator>()
-internal val arguments = HashMap<String, SoftReference<Any>>()
+val arguments = HashMap<String, SoftReference<Any>>()
 
 /**
  * 路由导航器。与RouterItem作用类似，允许互转。
@@ -66,6 +66,8 @@ open class Navigator(var url: String?, val intent: Intent?) {
     private var intentIdentifier: String? = null
     private var intentData: Uri? = null
     private var intentClipData: ClipData? = null
+
+    var exContext: Context? = null
 
     val simpleUrl: String
         get() {

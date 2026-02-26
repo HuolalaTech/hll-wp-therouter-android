@@ -285,6 +285,7 @@ public class TheRouterTransform extends Transform {
         flowTaskDependMap.keySet().each {
             TheRouterPluginUtils.fillTodoList(flowTaskDependMap, it)
         }
+        TheRouterPluginUtils.freeTodoList()
 
         if (theRouterExtension.showFlowDepend) {
             flowTaskDependMap.keySet().each {
