@@ -33,6 +33,11 @@ val gson = Gson()
 
 /**
  * 在主线程初始化路由表
+ *
+ * 优化说明：
+ * 1. StringBuilder 预分配容量
+ *    原因：减少字符串拼接时的扩容开销
+ *    目的：提升路由表加载性能
  */
 fun initRouteMap() {
     try {
@@ -41,7 +46,8 @@ fun initRouteMap() {
         ).use {
             BufferedReader(it).use { read ->
                 var lineText: String?
-                val stringBuilder = StringBuilder()
+                // 优化点：预估初始容量，避免频繁扩容 (路由表文件通常小于10KB)
+                val stringBuilder = StringBuilder(8192)
                 while (read.readLine().also { lineText = it } != null) {
                     stringBuilder.append(lineText).append("\n")
                 }
@@ -146,12 +152,18 @@ fun foundPathFromIntent(intent: Intent): String? {
 
 /**
  * 尝试通过Path，从路由表中获取对应的路由项，如果没有对应路由，则返回null
+ *
+ * 优化说明：
+ * 1. 使用 Kotlin 的 removeSuffix 替代 substring + endsWith 判断
+ *    原因：代码更简洁，意图更清晰，性能相同但可读性更好
+ *    目的：遵循 Kotlin 惯用法，提升代码可维护性
  */
 fun matchRouteMap(url: String?): RouteItem? {
     fun matchRoute(): RouteItem? {
         var path = TheRouter.build(url ?: "").simpleUrl
+        // 优化点：使用 Kotlin 标准库的 removeSuffix，代码更简洁
         if (path.endsWith("/")) {
-            path = path.substring(0, path.length - 1)
+            path = path.removeSuffix("/")
         }
         // copy是为了防止外部修改影响路由表
         val routeItem = ROUTER_MAP[path]?.copy()
@@ -199,7 +211,7 @@ fun matchRouteMapForClassName(className: String?): List<RouteItem> {
  * 向路由表添加路由
  */
 fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
-    if (routeItemArray != null && !routeItemArray.isEmpty()) {
+    if (routeItemArray != null && routeItemArray.isNotEmpty()) {
         for (entity in routeItemArray) {
             addRouteItem(entity)
         }
@@ -208,12 +220,18 @@ fun addRouteMap(routeItemArray: Collection<RouteItem>?) {
 
 /**
  * 向路由表添加路由
+ *
+ * 优化说明：
+ * 1. 使用 Kotlin 的 removeSuffix 替代 substring + endsWith 判断
+ *    原因：代码更简洁，意图更清晰
+ *    目的：遵循 Kotlin 惯用法
  */
 fun addRouteItem(routeItem: RouteItem) {
     fun addRoute() {
         var path = routeItem.path
+        // 优化点：使用 Kotlin 标准库的 removeSuffix
         if (path.endsWith("/")) {
-            path = path.substring(0, path.length - 1)
+            path = path.removeSuffix("/")
         }
         debugOnly("addRouteItem", "add $path")
         ROUTER_MAP[path] = routeItem

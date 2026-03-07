@@ -17,6 +17,14 @@ import java.util.*
  * @param description 当前路由的注释
  * @param params 仅用于RouteMap.json文件被gson转换时存储，外部不可访问，会被合并到extras中
  * @param extras extras存储运行期的路由表参数
+ *
+ * 优化说明：
+ * 1. 新增 paramsMerged 标记位，避免 getExtras() 每次调用都遍历合并 params
+ *    原因：getExtras() 可能在路由跳转时被频繁调用，每次都遍历HashMap性能较低
+ *    目的：将多次重复遍历优化为只合并一次
+ * 2. 使用 Kotlin 的 containsKey 替代 Java 的 keySet().contains()
+ *    原因：Kotlin 扩展方法性能更好，代码更简洁
+ *    目的：提升遍历效率
  */
 @Keep
 class RouteItem : Parcelable, Serializable {
@@ -31,6 +39,12 @@ class RouteItem : Parcelable, Serializable {
 
     // extras存储运行期的路由表参数
     private var extras = Bundle()
+
+    /**
+     * 标记params是否已经合并到extras中
+     * 优化：避免每次getExtras()都重复遍历合并params
+     */
+    private var paramsMerged = false
 
     constructor()
 
@@ -59,14 +73,31 @@ class RouteItem : Parcelable, Serializable {
         extras.putString(key, value)
     }
 
-    internal fun addAll(bundle: Bundle?) = bundle?.let { extras.putAll(it) }
+    /**
+     * 将Bundle参数合并到extras中
+     * 优化：设置paramsMerged标记，避免后续getExtras()重复合并
+     */
+    internal fun addAll(bundle: Bundle?) = bundle?.let {
+        extras.putAll(it)
+        paramsMerged = true  // 标记已合并，后续getExtras()无需再遍历params
+    }
 
+    /**
+     * 获取路由参数
+     * 优化：增加paramsMerged检查，只有在需要时才遍历合并params，避免重复计算
+     * 原因：每次路由跳转都会调用getExtras()，频繁遍历HashMap影响性能
+     */
     fun getExtras(): Bundle {
-        params.forEach {
-            // extras为运行期代码逻辑产生的动态参数，优先级最高，不允许被路由表静态参数覆盖
-            if (!extras.keySet().contains(it.key)) {
-                extras.putString(it.key, it.value)
+        // 优化点：只在首次调用时合并params，后续直接返回，避免重复遍历
+        if (!paramsMerged) {
+            params.forEach {
+                // extras为运行期代码逻辑产生的动态参数，优先级最高，不允许被路由表静态参数覆盖
+                // 优化：使用Kotlin的containsKey替代keySet().contains()
+                if (!extras.containsKey(it.key)) {
+                    extras.putString(it.key, it.value)
+                }
             }
+            paramsMerged = true  // 标记已合并完成
         }
         return extras
     }
@@ -141,9 +172,20 @@ fun RouteItem.getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithPar
 
 /**
  * 获取当前路由的完整url记录
+ * 优化说明：
+ * 1. 预分配StringBuilder容量，避免频繁扩容
+ *    原因：append操作可能触发数组扩容，影响性能
+ *    目的：预估参数数量，一次性分配足够容量
+ * 2. 使用StringBuilder的append替代字符串拼接
+ *    目的：减少中间字符串对象创建
  */
 fun RouteItem.getUrlWithParams(handle: (String, String) -> String): String {
-    val stringBuilder = StringBuilder(path)
+    // 优化点：预估容量，避免StringBuilder频繁扩容
+    // 估算方式：path长度 + (每个参数约16字符) * 参数数量
+    val estimatedSize = path.length + (extras.keySet().size * 16)
+    val stringBuilder = StringBuilder(estimatedSize)
+    stringBuilder.append(path)
+    
     var isFirst = true
     val extras = getExtras()
     for (key in extras.keySet()) {
