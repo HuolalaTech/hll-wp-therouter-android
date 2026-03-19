@@ -17,6 +17,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskProvider
 
+import java.security.MessageDigest
+
 public class TheRouterPlugin implements Plugin<Project> {
     public static final String WARNING = "warning";
     public static final String ERROR = "error";
@@ -94,6 +96,7 @@ public class TheRouterPlugin implements Plugin<Project> {
                         @Override
                         public Unit invoke(TextParameters textParameters) {
                             textParameters.getTheRouterBuildFolder().set(therouterBuildFolder);
+                            textParameters.getCacheContentHash().set(computeCacheHash(therouterBuildFolder));
                             return null;
                         }
                     });
@@ -134,6 +137,21 @@ public class TheRouterPlugin implements Plugin<Project> {
                 }
             }
         });
+    }
+
+    private static String computeCacheHash(File therouterBuildFolder) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("MD5")
+            ["serviceProvide.therouter", "autowired.therouter", "route.therouter"].each { name ->
+                File f = new File(therouterBuildFolder, name)
+                if (f.exists()) {
+                    md.update(f.bytes)
+                }
+            }
+            return md.digest().encodeHex().toString()
+        } catch (Exception e) {
+            return "empty"
+        }
     }
 
     def getGradleProperties(Project project) {

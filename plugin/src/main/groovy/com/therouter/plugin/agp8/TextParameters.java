@@ -10,4 +10,7 @@ import java.io.File;
 public interface TextParameters extends InstrumentationParameters {
     @Input
     Property<File> getTheRouterBuildFolder();
+
+    @Input
+    Property<String> getCacheContentHash();
 }
