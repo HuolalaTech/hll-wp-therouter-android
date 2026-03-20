@@ -109,19 +109,20 @@ private class BufferExecutor : ExecutorService, Executor {
 
     @Synchronized
     override fun execute(r: Runnable) {
-        taskQueue.offer(Task(
-            r, if (TheRouter.isDebug) {
-                checkTask()
-                getTrace(Thread.currentThread().stackTrace)
-            } else {
-                ""
-            }
-        ) {
-            if (TheRouter.isDebug) {
-                flightTaskMap.remove(r.hashCode())
-            }
-            scheduleNext()
-        })
+        taskQueue.offer(
+            Task(
+                r, if (TheRouter.isDebug) {
+                    checkTask()
+                    getTrace(Thread.currentThread().stackTrace)
+                } else {
+                    ""
+                }
+            ) {
+                if (TheRouter.isDebug) {
+                    flightTaskMap.remove(r.hashCode())
+                }
+                scheduleNext()
+            })
         //activeTask 不为空，表示一级队列已经满了，此刻任务应该被停留到二级队列等待调度
         if (activeTask == null) {
             scheduleNext()
@@ -134,7 +135,7 @@ private class BufferExecutor : ExecutorService, Executor {
     private fun checkTask() {
         flightTaskMap.values.forEach { v ->
             require(
-                System.nanoTime() - v.createTime < KEEP_ALIVE_SECONDS * 1000L,
+                ((System.nanoTime() - v.createTime) / 1000L / 1_000_000L) < (KEEP_ALIVE_SECONDS),
                 "ThreadPool",
                 "执行该任务耗时过久，有可能是此任务耗时，或者当前线程池中其他任务都很耗时，请优化逻辑\n" +
                         "当前任务被创建时间为${v.createTime}此时时间为${System.nanoTime()}\n${v.trace}"

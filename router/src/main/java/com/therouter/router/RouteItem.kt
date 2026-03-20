@@ -144,6 +144,51 @@ class RouteItem : Parcelable, Serializable {
         extras = source.readBundle(this::class.java.classLoader) ?: Bundle()
     }
 
+    /**
+     * 将当前路由转换为导航器
+     */
+    fun toNavigator() = Navigator(getUrlWithParams(), null)
+
+    /**
+     * 获取当前路由的完整url记录
+     */
+    fun getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
+
+    /**
+     * 获取当前路由的完整url记录
+     */
+    fun getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
+
+    /**
+     * 获取当前路由的完整url记录
+     * 优化说明：
+     * 1. 预分配StringBuilder容量，避免频繁扩容
+     *    原因：append操作可能触发数组扩容，影响性能
+     *    目的：预估参数数量，一次性分配足够容量
+     * 2. 使用StringBuilder的append替代字符串拼接
+     *    目的：减少中间字符串对象创建
+     */
+    fun getUrlWithParams(handle: (String, String) -> String): String {
+        // 优化点：预估容量，避免StringBuilder频繁扩容
+        // 估算方式：path长度 + (每个参数约16字符) * 参数数量
+        val estimatedSize = path.length + (extras.keySet().size * 16)
+        val stringBuilder = StringBuilder(estimatedSize)
+        stringBuilder.append(path)
+
+        var isFirst = true
+        val extras = getExtras()
+        for (key in extras.keySet()) {
+            if (isFirst) {
+                stringBuilder.append("?")
+                isFirst = false
+            } else {
+                stringBuilder.append("&")
+            }
+            stringBuilder.append(handle(key, extras.get(key)?.toString() ?: ""))
+        }
+        return stringBuilder.toString()
+    }
+
     companion object CREATOR : Parcelable.Creator<RouteItem> {
         override fun createFromParcel(parcel: Parcel): RouteItem {
             return RouteItem(parcel)
@@ -153,49 +198,4 @@ class RouteItem : Parcelable, Serializable {
             return arrayOfNulls(size)
         }
     }
-}
-
-/**
- * 将当前路由转换为导航器
- */
-fun RouteItem.toNavigator() = Navigator(getUrlWithParams(), null)
-
-/**
- * 获取当前路由的完整url记录
- */
-fun RouteItem.getUrlWithParams() = getUrlWithParams { k, v -> "$k=$v" }
-
-/**
- * 获取当前路由的完整url记录
- */
-fun RouteItem.getUrlWithParams(handle: NavigatorParamsFixHandle) = getUrlWithParams(handle::fix)
-
-/**
- * 获取当前路由的完整url记录
- * 优化说明：
- * 1. 预分配StringBuilder容量，避免频繁扩容
- *    原因：append操作可能触发数组扩容，影响性能
- *    目的：预估参数数量，一次性分配足够容量
- * 2. 使用StringBuilder的append替代字符串拼接
- *    目的：减少中间字符串对象创建
- */
-fun RouteItem.getUrlWithParams(handle: (String, String) -> String): String {
-    // 优化点：预估容量，避免StringBuilder频繁扩容
-    // 估算方式：path长度 + (每个参数约16字符) * 参数数量
-    val estimatedSize = path.length + (extras.keySet().size * 16)
-    val stringBuilder = StringBuilder(estimatedSize)
-    stringBuilder.append(path)
-    
-    var isFirst = true
-    val extras = getExtras()
-    for (key in extras.keySet()) {
-        if (isFirst) {
-            stringBuilder.append("?")
-            isFirst = false
-        } else {
-            stringBuilder.append("&")
-        }
-        stringBuilder.append(handle(key, extras.get(key)?.toString() ?: ""))
-    }
-    return stringBuilder.toString()
 }

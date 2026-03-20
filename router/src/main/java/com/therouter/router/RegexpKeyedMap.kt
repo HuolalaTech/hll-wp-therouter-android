@@ -56,15 +56,15 @@ class RegexpKeyedMap<V> : HashMap<String?, V?>() {
             }
             // 优化点：从缓存获取预编译的Pattern，而不是每次都调用Pattern.compile()
             val pattern = getCompiledPattern(regex)
-            var m = pattern.matcher(key)
-            if (m.find()) {
+            var m = pattern?.matcher(key)
+            if (m?.find() == true) {
                 result = super.get(regex)
                 break
             }
             if (keyPath != null) {
                 // 复用同一个matcher对象，避免重复创建
-                m = pattern.matcher(keyPath)
-                if (m.find()) {
+                m = pattern?.matcher(keyPath)
+                if (m?.find() == true) {
                     result = super.get(regex)
                     break
                 }
