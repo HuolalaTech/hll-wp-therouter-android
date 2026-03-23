@@ -36,7 +36,8 @@ public class AddCodeVisitor extends ClassVisitor {
     @Override
     public FieldVisitor visitField(int access, String name, String descriptor, String signature, Object value) {
         if ("asm".equals(name) && "Z".equals(descriptor)) {
-            return super.visitField(access, name, descriptor, signature, true);
+            boolean hasData = !serviceProvideList.isEmpty() || !autowiredList.isEmpty() || !routeList.isEmpty();
+            return super.visitField(access, name, descriptor, signature, hasData);
         }
         return super.visitField(access, name, descriptor, signature, value);
     }
