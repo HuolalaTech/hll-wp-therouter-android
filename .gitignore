@@ -91,6 +91,7 @@ hs_err_pid*
 *.iws
 .idea/
 .vscode/
+.kotlin/
 
 ###Eclipse###
 
