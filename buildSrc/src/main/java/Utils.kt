@@ -64,6 +64,12 @@ fun Project.source(type: String, group: String, artifactid: String, version: Str
 
     if (artifactid == "router" && this.name == "compose") {
         depVersion = this.version.toString()
+        if (depVersion == "unspecified") {
+            depVersion = getLocalProperty("version")
+            if (depVersion.isEmpty()) {
+                depVersion = version
+            }
+        }
     }
 
     if (includeModule.contains(artifactid)) {
