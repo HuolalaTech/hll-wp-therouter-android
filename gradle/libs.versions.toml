@@ -1,0 +1,47 @@
+[versions]
+agp = "9.1.0"
+coreKtx = "1.18.0"
+lifecycleRuntimeKtx = "2.10.0"
+activityCompose = "1.13.0"
+savedstate = "1.2.1"
+kotlin = "2.2.10"
+composeBom = "2024.09.00"
+appcompat = "1.7.1"
+material = "1.10.0"
+gson = "2.9.1"
+ksp = "2.3.6"
+google-auto-service = "1.0"
+zacsweers-auto-service = "0.5.2"
+therouter = "1.3.2"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-savedstate = { group = "androidx.savedstate", name = "savedstate", version.ref = "savedstate" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8", version.ref = "kotlin" }
+gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+ksp = { group = "com.google.devtools.ksp", name = "symbol-processing-api", version.ref = "ksp" }
+zacsweers-auto-service = { group = "dev.zacsweers.autoservice", name = "auto-service-ksp", version.ref = "zacsweers-auto-service" }
+google-auto-service = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "google-auto-service" }
+therouter-router = { group = "cn.therouter", name = "router", version.ref = "therouter" }
+therouter-apt = { group = "cn.therouter", name = "apt", version.ref = "therouter" }
+therouter-compose = { group = "cn.therouter", name = "compose", version.ref = "therouter" }
+
+[plugins]
+android-application = { id = "com.android.application" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+android-library = { id = "com.android.library" }
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+therouter-plugin = { id = "cn.therouter", version.ref = "therouter" }
+
