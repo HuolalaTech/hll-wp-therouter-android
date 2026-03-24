@@ -60,6 +60,12 @@ fun Project.source(type: String, group: String, artifactid: String, version: Str
         .map { it.name }
         .toSet()
 
+    var depVersion = version
+
+    if (artifactid == "router" && this.name == "compose") {
+        depVersion = this.version.toString()
+    }
+
     if (includeModule.contains(artifactid)) {
         println("${project.name} $type project(\":$artifactid\")")
         configureClosure?.let {
@@ -68,11 +74,11 @@ fun Project.source(type: String, group: String, artifactid: String, version: Str
             dependencies.add(type, project(":$artifactid"))
         }
     } else {
-        println("${project.name} $type $group:$artifactid:$version")
+        println("${project.name} $type $group:$artifactid:$depVersion")
         configureClosure?.let {
-            dependencies.add(type, "$group:$artifactid:$version", configureClosure)
+            dependencies.add(type, "$group:$artifactid:$depVersion", configureClosure)
         } ?: let {
-            dependencies.add(type, "$group:$artifactid:$version")
+            dependencies.add(type, "$group:$artifactid:$depVersion")
         }
     }
 }
