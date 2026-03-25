@@ -14,7 +14,7 @@ android {
     defaultConfig {
         minSdk = 17
 
-        buildConfigField("String", "VERSION", "\"version\"")
+        buildConfigField("String", "VERSION", "\"source code\"")
         consumerProguardFiles("consumer-rules.pro")
     }
 
@@ -23,6 +23,9 @@ android {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
+    }
+    buildFeatures{
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
