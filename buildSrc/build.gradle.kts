@@ -3,6 +3,7 @@ plugins {
     kotlin("jvm") version "2.2.10"
     `java-gradle-plugin`
     `maven-publish`
+    signing
 }
 java {
     sourceCompatibility = JavaVersion.VERSION_17

@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.library)
     `maven-publish`
+    signing
 }
 
 android {
