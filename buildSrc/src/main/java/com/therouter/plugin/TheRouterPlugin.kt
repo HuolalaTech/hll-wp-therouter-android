@@ -48,7 +48,7 @@ class TheRouterPlugin : Plugin<Project> {
                 isShow = true
                 println()
                 println("----------------------TheRouter Environment------------------------------")
-                // 注释掉的警告
+//                println(LogUI.C_ERROR.getValue() + "⚠️警告:你的接入方式已经废弃，请将根目录 build.gradle 中【cn.therouter.agp8】替换为【cn.therouter】" + LogUI.E_NORMAL.getValue());
                 println("TheRouter plugin agp9：" + LogUI.C_BLACK_GREEN.getValue() + "cn.therouter:" + BuildConfig.NAME + ":" + BuildConfig.VERSION + LogUI.E_NORMAL.getValue())
                 println("JDK Version::" + System.getProperty("java.version"))
                 println("Gradle Version::" + project.getGradle().getGradleVersion())
