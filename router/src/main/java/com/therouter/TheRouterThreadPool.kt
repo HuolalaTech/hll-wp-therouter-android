@@ -22,8 +22,11 @@ var MAX_QUEUE_SIZE = 10
 
 private const val THREAD_NAME = "TheRouterLibThread"
 
-var executor: ExecutorService = BufferExecutor()
-private val main = Handler(Looper.getMainLooper())
+private var _executor: ExecutorService? = null
+var executor: ExecutorService
+    get() = _executor ?: BufferExecutor().also { _executor = it }
+    set(value) { _executor = value }
+private val main: Handler by lazy { Handler(Looper.getMainLooper()) }
 
 fun setThreadPoolExecutor(e: ExecutorService?) = e?.let {
     executor = it
@@ -55,13 +58,15 @@ fun executeInMainThread(command: Runnable): Boolean =
         main.post(command)
     }
 
-private var threadPoolExecutor = ThreadPoolExecutor(
-    CORE_POOL_SIZE,
-    MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS,
-    TimeUnit.SECONDS, LinkedBlockingDeque(MAX_QUEUE_SIZE),
-    newThreadFactory(THREAD_NAME)
-).apply {
-    allowCoreThreadTimeOut(true)
+private val threadPoolExecutor: ThreadPoolExecutor by lazy {
+    ThreadPoolExecutor(
+        CORE_POOL_SIZE,
+        MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS,
+        TimeUnit.SECONDS, LinkedBlockingDeque(MAX_QUEUE_SIZE),
+        newThreadFactory(THREAD_NAME)
+    ).apply {
+        allowCoreThreadTimeOut(true)
+    }
 }
 
 fun newThreadFactory(threadName: String): ThreadFactory {
