@@ -35,12 +35,9 @@ fun Navigator.compose(context: Context?) {
 
         priorityList.sortBy { a -> a.priority }
         if (priorityList.isNotEmpty()) {
-            priorityList.forEach { provider ->
-                val t = provider.make?.invoke(this)
-                if (t != null) {
-                    this.withObject(fieldName, t)
-                    return@forEach
-                }
+            priorityList.firstNotNullOfOrNull { provider -> provider.make?.invoke(this) }
+                ?.let { fieldValue ->
+                    this.withObject(fieldName, fieldValue)
             }
         }
     }
