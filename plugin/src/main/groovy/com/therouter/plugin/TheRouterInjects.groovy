@@ -261,7 +261,7 @@ public class TheRouterInjects {
                 ClassReader cr = new ClassReader(inputStream)
                 ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES)
                 AddCodeVisitor cv = new AddCodeVisitor(cw, serviceProvideMap, autowiredSet, routeSet, false)
-                cr.accept(cv, ClassReader.SKIP_DEBUG)
+                cr.accept(cv, ClassReader.SKIP_DEBUG | ClassReader.EXPAND_FRAMES)
                 bytes = cw.toByteArray()
             } else {
                 bytes = inputStream.getBytes()

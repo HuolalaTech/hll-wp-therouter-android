@@ -74,7 +74,7 @@ public abstract class TheRouterTask extends TheRouterGetAllTask {
                     TheRouterInjects.autowiredSet,
                     TheRouterInjects.routeSet,
                     false);
-            cr.accept(cv, ClassReader.SKIP_DEBUG);
+            cr.accept(cv, ClassReader.SKIP_DEBUG | ClassReader.EXPAND_FRAMES);
             byte[] bytes = cw.toByteArray();
             jarOutput.write(bytes);
             jarOutput.closeEntry();
